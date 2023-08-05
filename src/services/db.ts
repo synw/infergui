@@ -1,6 +1,7 @@
 import localForage from "localforage";
 import { templates as templatesData } from "@/const/templates";
-import { LmPrompt, LmTemplate } from "@/interfaces";
+import { InferParams, LmPrompt, LmTemplate } from "@/interfaces";
+import { defaultInferenceParams } from "@/const/params";
 
 const useDb = () => {
   const prompts = localForage.createInstance({
@@ -11,16 +12,27 @@ const useDb = () => {
     driver: localForage.INDEXEDDB,
     storeName: 'templates',
   });
+  const presets = localForage.createInstance({
+    driver: localForage.INDEXEDDB,
+    storeName: 'presets',
+  });
 
   const init = async () => {
+    await prompts.ready();
     if (await prompts.length() == 0) {
       console.log("The prompts db is empty")
     }
+    await templates.ready();
     if (await templates.length() == 0) {
       console.log("The templates db is empty, loading it with prebuilt templates");
       Object.values(templatesData).forEach((t) => {
         setTemplate(t.name, t.content)
       });
+    }
+    await presets.ready();
+    if ((await presets.length()) <= 1) {
+      console.log("The presets db is empty, loading default");
+      setPreset("Default", defaultInferenceParams)
     }
   }
 
@@ -83,6 +95,34 @@ const useDb = () => {
     return _t
   }
 
+  const setPreset = async (k: string, v: InferParams) => {
+    await presets.ready();
+    await presets.setItem(k, v);
+  };
+
+  const delPreset = async (k: string) => {
+    await presets.ready();
+    await presets.removeItem(k);
+  };
+
+  const listPresetsNames = async (): Promise<Array<string>> => {
+    await presets.ready();
+    const _t = new Array<string>();
+    await presets.iterate((v, k, i) => {
+      _t.push(k)
+    });
+    return _t
+  }
+
+  const loadPreset = async (k: string): Promise<InferParams> => {
+    await presets.ready();
+    const v = await presets.getItem<InferParams>(k);
+    if (!v) {
+      throw new Error(`Key ${v} not found`)
+    }
+    return v
+  };
+
   return {
     init,
     setPrompt,
@@ -91,8 +131,12 @@ const useDb = () => {
     setTemplate,
     delTemplate,
     loadTemplate,
+    setPreset,
+    delPreset,
+    loadPreset,
     listTemplatesNames,
     listPromptsNames,
+    listPresetsNames,
   }
 }
 

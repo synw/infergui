@@ -8,7 +8,7 @@
     </div>
     <div class="flex-grow flex-shrink-0 p-3 pt-8 min-w-72">
       <infer-params></infer-params>
-      <infer-stats class=""></infer-stats>
+      <infer-stats class="mt-5"></infer-stats>
       <infer-result class="mt-3"></infer-result>
     </div>
   </div>

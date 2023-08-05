@@ -19,12 +19,14 @@
           @click="preset(2048)">2048</chip-text>
         <chip-text class="cursor-pointer" :class="ctx == 4096 ? 'success' : 'lighter'"
           @click="preset(4096)">4096</chip-text>
+        <chip-text class="cursor-pointer" :class="ctx == 8192 ? 'success' : 'lighter'"
+          @click="preset(8192)">8192</chip-text>
       </div>
       <div>
         <InputText :v-model.number="ctx" class="w-full" />
       </div>
       <div>
-        <Slider v-model="ctx" class="w-full" :min="32" :max="4096" :step="64" />
+        <Slider v-model="ctx" class="w-full" :min="32" :max="8192" :step="64" />
       </div>
       <div>
         <button class="w-full mt-3 btn success" @click="post()">Load model</button>

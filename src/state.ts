@@ -5,7 +5,7 @@ import { User } from "@snowind/state";
 import llamaTokenizer from 'llama-tokenizer-js';
 import { defaultInferenceParams } from '@/const/params';
 import { templates as _templates } from '@/const/templates';
-import { FormatMode, LmTemplate, Task, TemporaryInferResult } from '@/interfaces';
+import { FormatMode, InferParams, LmTemplate, Task, TemporaryInferResult } from '@/interfaces';
 import { useWs } from "@/services/ws";
 import { loadModels, loadTasks as _loadTasks, selectModel } from "@/services/api";
 import { msg } from "./services/notify";
@@ -31,6 +31,7 @@ const models = reactive<Array<string>>([]);
 const prompts = reactive<Array<string>>([]);
 const templates = reactive<Array<string>>([]);
 const tasks = reactive<Array<Record<string, any>>>([]);
+const presets = reactive<Array<string>>([]);
 const formatMode = useStorage<FormatMode>("formatMode", "Text");
 
 const template = reactive<LmTemplate>(_templates.alpaca);
@@ -107,6 +108,7 @@ async function initState() {
   db.init().then(async () => {
     loadPrompts();
     loadTemplates();
+    loadPresets();
   });
   loadTasks();
   useWs(
@@ -146,6 +148,18 @@ function mutateModel(_model: string, _ctx: number) {
   clearInferResults();
 }
 
+function mutateInferParams(_params: InferParams) {
+  inferParams.freqPenalty = _params.freqPenalty;
+  inferParams.presPenalty = _params.presPenalty;
+  inferParams.stop = _params.stop;
+  inferParams.temp = _params.temp;
+  inferParams.tfs = _params.tfs;
+  inferParams.threads = _params.threads;
+  inferParams.tokens = _params.tokens;
+  inferParams.topK = _params.topK;
+  inferParams.topP = _params.topP;
+}
+
 async function loadPrompts() {
   const p = await db.listPromptsNames();
   prompts.splice(0, prompts.length, ...p);
@@ -161,6 +175,11 @@ async function loadTasks() {
   tasks.splice(0, tasks.length, ...t);
 }
 
+async function loadPresets() {
+  const p = await db.listPresetsNames();
+  presets.splice(0, presets.length, ...p);
+}
+
 export {
   user,
   api,
@@ -171,6 +190,7 @@ export {
   prompts,
   templates,
   tasks,
+  presets,
   template,
   prompt,
   inferParams,
@@ -187,9 +207,11 @@ export {
   countTemplateTokens,
   initState,
   mutateModel,
+  mutateInferParams,
   loadPrompts,
   loadTemplates,
   clearInferResults,
   loadTasks,
   loadTask,
+  loadPresets,
 }

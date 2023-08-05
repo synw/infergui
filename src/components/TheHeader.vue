@@ -50,12 +50,19 @@
     </template>
     <template #menu>
       <div class="flex flex-row items-center justify-end w-full h-full space-x-3">
-        <button v-show="lmState.isRunning == true || lmState.isStreaming == true"
+        <button v-if="lmState.isRunning == true || lmState.isStreaming == true"
           class="flex flex-row items-center justify-center w-48 mr-2 btn bord-light txt-light block-lighter"
           @click="abort()">
           <i-icomoon-free:stop class="mr-2"></i-icomoon-free:stop>
           <div>Stop</div>
         </button>
+        <button v-else class="flex flex-row items-center justify-center mr-2 border-0 btn bord-light txt-semilight"
+          @click="togglePresetsCollapse($event)">
+          <i-eva:options-2-outline class="text-2xl"></i-eva:options-2-outline>
+        </button>
+        <OverlayPanel ref="presetsCollapse">
+          <presets-picker @close="togglePresetsCollapse"></presets-picker>
+        </OverlayPanel>
         <div class="pr-5 text-lg cursor-pointer txt-lighter dark:txt-light" @click="user.toggleDarkMode()">
           <i-fa-solid:moon v-if="!user.isDarkMode.value"></i-fa-solid:moon>
           <i-fa-solid:sun v-else></i-fa-solid:sun>
@@ -87,18 +94,23 @@ import { user, lmState } from "@/state";
 import { useRouter } from 'vue-router';
 import OverlayPanel from 'primevue/overlaypanel';
 import ModelsPicker from '@/components/ModelsPicker.vue';
+import PresetsPicker from "@/components/PresetsPicker.vue";
 import { abort } from "@/services/api";
 
 const router = useRouter()
 const topBar = useTopbar(router);
 const modelCollapse = ref();
 const taskCollapse = ref();
+const presetsCollapse = ref();
 
 const toggleModelCollapse = (event) => {
   modelCollapse.value.toggle(event);
 }
 const toggleTaskCollapse = (event) => {
   taskCollapse.value.toggle(event);
+}
+const togglePresetsCollapse = (event) => {
+  presetsCollapse.value.toggle(event);
 }
 
 const isHome = computed<boolean>(() => router.currentRoute.value.path == "/");

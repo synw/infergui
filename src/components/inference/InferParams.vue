@@ -52,7 +52,7 @@
         </span>
       </div>
     </div>
-    <div class="mt-5">
+    <!-- div class="mt-5">
       <div class="p-float-label">
         <InputText inputId="tokens" class="hidden w-full" />
         <label for="tokens">Tokens</label>
@@ -67,7 +67,7 @@
         </div>
         <div class="p-3 txt-semilight">{{ lmState.ctx }}</div>
       </div>
-    </div>
+    </div -->
   </div>
 </template>
 
