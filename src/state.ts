@@ -105,19 +105,7 @@ function checkMaxTokens(ctx: number) {
 }
 
 async function initState() {
-  db.init().then(async () => {
-    loadPrompts();
-    loadTemplates();
-    loadPresets();
-  });
-  loadTasks();
-  useWs(
-    (data) => {
-      stream.value = stream.value + data;
-      ++inferResults.totalTokens
-    },
-    () => lmState.isStreaming = true,
-  );
+  api.addHeader("Authorization", `Bearer ${import.meta.env.VITE_API_KEY}`);
   api.onResponse(async <T>(res: ApiResponse<T>): Promise<ApiResponse<T>> => {
     if (!res.ok) {
       if ([401, 403].includes(res.status)) {
@@ -136,6 +124,19 @@ async function initState() {
     }
     return res
   });
+  db.init().then(async () => {
+    loadPrompts();
+    loadTemplates();
+    loadPresets();
+  });
+  loadTasks();
+  useWs(
+    (data) => {
+      stream.value = stream.value + data;
+      ++inferResults.totalTokens
+    },
+    () => lmState.isStreaming = true,
+  );
   await loadModels();
 }
 
