@@ -10,11 +10,10 @@ import { useWs } from "@/services/ws";
 import { loadModels, loadTasks as _loadTasks, selectModel } from "@/services/api";
 import { msg } from "./services/notify";
 import { useDb } from "./services/db";
+import { getServerUrl } from "./conf";
 
 const user = new User();
-const api = useApi({
-  "serverUrl": "http://localhost:5143"
-});
+const api = useApi({ "serverUrl": getServerUrl() });
 const db = useDb();
 //const currentModel = useStorage<string>("model", {} as LMContract);
 //const currentTask = useStorage("task", {} as TaskContract);
@@ -105,7 +104,12 @@ function checkMaxTokens(ctx: number) {
 }
 
 async function initState() {
-  api.addHeader("Authorization", `Bearer ${import.meta.env.VITE_API_KEY}`);
+  //console.log("SERVER URL", import.meta.env.VITE_SERVER_URL);
+  //console.log("API KEY", import.meta.env.VITE_API_KEY);
+  const apiKey = import.meta.env.VITE_API_KEY;
+  if (apiKey) {
+    api.addHeader("Authorization", `Bearer ${apiKey}`);
+  }
   api.onResponse(async <T>(res: ApiResponse<T>): Promise<ApiResponse<T>> => {
     if (!res.ok) {
       if ([401, 403].includes(res.status)) {

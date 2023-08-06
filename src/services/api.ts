@@ -11,9 +11,6 @@ async function infer(_prompt: string, _template: string, _params: InferParams): 
     "template": _template,
     ..._params,
   });
-  if (res.ok) {
-    console.log("RES", res)
-  }
   lmState.isRunning = false;
   lmState.isStreaming = false;
   return res.data
