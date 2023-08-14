@@ -27,15 +27,17 @@ interface TemporaryInferResult {
 }
 
 interface InferParams {
+  stream: boolean;
   threads: number;
-  tokens: number;
-  topK: number;
-  topP: number;
-  temp: number;
-  freqPenalty: number;
-  presPenalty: number;
-  tfs: number;
-  stop: string;
+  n_predict: number;
+  top_k: number;
+  top_p: number;
+  temperature: number;
+  frequency_penalty: number;
+  presence_penalty: number;
+  repeat_penalty: number;
+  tfs_z: number;
+  stop: Array<string>;
 }
 
 interface Task {
@@ -45,14 +47,15 @@ interface Task {
   modelConf?: { ctx: number }
   inferParams?: {
     threads?: number;
-    tokens?: number;
-    topK?: number;
-    topP?: number;
-    temp?: number;
-    freqPenalty?: number;
-    presPenalty?: number;
-    tfs?: number;
-    stop?: string;
+    n_predict?: number;
+    top_k?: number;
+    top_p?: number;
+    temperature?: number;
+    frequency_penalty?: number;
+    presence_penalty?: number;
+    repeat_penalty?: number;
+    tfs_z?: number;
+    stop?: Array<string>;
   }
 }
 
@@ -69,6 +72,19 @@ interface LmPrompt {
 
 type FormatMode = "Html" | "Text" | "Markdown" | "Json";
 
+enum MsgType {
+  TokenMsgType = "token",
+  SystemMsgType = "system",
+  ErrorMsgType = "error",
+}
+
+interface StreamedMessage {
+  content: string;
+  num: number;
+  type: MsgType;
+  data?: { [key: string]: any };
+}
+
 export {
   ModelStateContract,
   InferResultContract,
@@ -78,4 +94,5 @@ export {
   LmPrompt,
   Task,
   FormatMode,
+  StreamedMessage,
 }

@@ -6,7 +6,6 @@ import llamaTokenizer from 'llama-tokenizer-js';
 import { defaultInferenceParams } from '@/const/params';
 import { templates as _templates } from '@/const/templates';
 import { FormatMode, InferParams, LmTemplate, Task, TemporaryInferResult } from '@/interfaces';
-import { useWs } from "@/services/ws";
 import { loadModels, loadTasks as _loadTasks, selectModel } from "@/services/api";
 import { msg } from "./services/notify";
 import { useDb } from "./services/db";
@@ -24,6 +23,7 @@ const lmState = reactive({
   isModelLoaded: false,
   model: "",
   ctx: 1024,
+  abortController: new AbortController(),
 });
 const stream = ref("");
 const models = reactive<Array<string>>([]);
@@ -49,7 +49,7 @@ const freeCtx = computed(() => {
 });
 
 function setMaxTokens() {
-  inferParams.tokens = freeCtx.value;
+  inferParams.n_predict = freeCtx.value;
 }
 
 function countPromptTokens() {
@@ -98,14 +98,12 @@ async function loadTask(t: Task) {
 }
 
 function checkMaxTokens(ctx: number) {
-  if (inferParams.tokens > ctx) {
-    inferParams.tokens = ctx - 64;
+  if (inferParams.n_predict > ctx) {
+    inferParams.n_predict = ctx - 64;
   }
 }
 
 async function initState() {
-  //console.log("SERVER URL", import.meta.env.VITE_SERVER_URL);
-  //console.log("API KEY", import.meta.env.VITE_API_KEY);
   const apiKey = import.meta.env.VITE_API_KEY;
   if (apiKey) {
     api.addHeader("Authorization", `Bearer ${apiKey}`);
@@ -134,13 +132,6 @@ async function initState() {
     loadPresets();
   });
   loadTasks();
-  useWs(
-    (data) => {
-      stream.value = stream.value + data;
-      ++inferResults.totalTokens
-    },
-    () => lmState.isStreaming = true,
-  );
   await loadModels();
 }
 
@@ -154,15 +145,16 @@ function mutateModel(_model: string, _ctx: number) {
 }
 
 function mutateInferParams(_params: InferParams) {
-  inferParams.freqPenalty = _params.freqPenalty;
-  inferParams.presPenalty = _params.presPenalty;
+  inferParams.frequency_penalty = _params.frequency_penalty;
+  inferParams.presence_penalty = _params.presence_penalty;
+  inferParams.repeat_penalty = _params.repeat_penalty;
   inferParams.stop = _params.stop;
-  inferParams.temp = _params.temp;
-  inferParams.tfs = _params.tfs;
+  inferParams.temperature = _params.temperature;
+  inferParams.tfs_z = _params.tfs_z;
   inferParams.threads = _params.threads;
-  inferParams.tokens = _params.tokens;
-  inferParams.topK = _params.topK;
-  inferParams.topP = _params.topP;
+  inferParams.n_predict = _params.n_predict;
+  inferParams.top_k = _params.top_k;
+  inferParams.top_p = _params.top_p;
 }
 
 async function loadPrompts() {

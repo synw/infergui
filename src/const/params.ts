@@ -1,15 +1,17 @@
 import { InferParams } from "../interfaces";
 
 const defaultInferenceParams: InferParams = {
+  stream: true,
   threads: 4,
-  tokens: 512,
-  topK: 40,
-  topP: 0.95,
-  temp: 0.2,
-  freqPenalty: 0.0,
-  presPenalty: 0.0,
-  tfs: 1.0,
-  stop: "",
+  n_predict: 512,
+  top_k: 40,
+  top_p: 0.95,
+  temperature: 0.2,
+  frequency_penalty: 0.0,
+  presence_penalty: 0.0,
+  repeat_penalty: 1.0,
+  tfs_z: 1.0,
+  stop: [],
 };
 
 export { defaultInferenceParams }

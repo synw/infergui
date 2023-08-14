@@ -52,7 +52,7 @@
       <div class="flex flex-row items-center justify-end w-full h-full space-x-3">
         <button v-if="lmState.isRunning == true || lmState.isStreaming == true"
           class="flex flex-row items-center justify-center w-48 mr-2 btn bord-light txt-light block-lighter"
-          @click="abort()">
+          @click="lmState.abortController.abort(); abort()">
           <i-icomoon-free:stop class="mr-2"></i-icomoon-free:stop>
           <div>Stop</div>
         </button>

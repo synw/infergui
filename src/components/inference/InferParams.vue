@@ -3,46 +3,55 @@
     <div id="pform" class="grid w-full grid-cols-2 3xl:grid-cols-3 gap-x-3 gap-y-8">
       <div>
         <span class="p-float-label">
-          <InputNumber class="w-8" v-model="inferParams.temp" inputId="temp" :min="0" :max="2" :step="0.1" showButtons />
+          <InputNumber class="w-8" v-model="inferParams.temperature" inputId="temp" :min="0" :max="2" :step="0.1"
+            showButtons />
           <label for="temp">Temp</label>
         </span>
       </div>
       <div>
         <span class="p-float-label">
-          <InputNumber class="w-8" v-model="inferParams.tfs" inputId="tfs" :min="0" :max="2" :step="0.1" showButtons />
+          <InputNumber class="w-8" v-model="inferParams.tfs_z" inputId="tfs" :min="0" :max="2" :step="0.1" showButtons />
           <label for="tfs">Tfs</label>
         </span>
       </div>
       <div>
         <span class="p-float-label">
-          <InputNumber class="w-8" v-model="inferParams.topK" inputId="topK" :min="0" :max="100" showButtons />
+          <InputNumber class="w-8" v-model="inferParams.top_k" inputId="topK" :min="0" :max="100" showButtons />
           <label for="topK">TopK</label>
         </span>
       </div>
       <div>
         <span class="p-float-label">
-          <InputNumber class="w-8" v-model="inferParams.topP" inputId="topP" :min="0" :max="1" :step="0.05" showButtons />
+          <InputNumber class="w-8" v-model="inferParams.top_p" inputId="topP" :min="0" :max="1" :step="0.05"
+            showButtons />
           <label for="topP">TopP</label>
         </span>
       </div>
       <div>
         <span class="p-float-label">
-          <InputNumber class="w-8" v-model="inferParams.freqPenalty" inputId="freqPenalty" :min="0" :max="2" :step="0.1"
-            showButtons />
+          <InputNumber class="w-8" v-model="inferParams.frequency_penalty" inputId="freqPenalty" :min="0" :max="2"
+            :step="0.1" showButtons />
           <label for="freqPenalty">Freq Penalty</label>
         </span>
       </div>
       <div>
         <span class="p-float-label">
-          <InputNumber class="w-8" v-model="inferParams.presPenalty" inputId="presPenalty" :min="0" :max="2" :step="0.1"
-            showButtons />
+          <InputNumber class="w-8" v-model="inferParams.presence_penalty" inputId="presPenalty" :min="0" :max="2"
+            :step="0.1" showButtons />
           <label for="presPenalty">Pres Penalty</label>
+        </span>
+      </div>
+      <div>
+        <span class="p-float-label">
+          <InputNumber class="w-8" v-model="inferParams.repeat_penalty" inputId="repeatPenalty" :min="0" :max="2"
+            :step="0.1" showButtons />
+          <label for="repeatPenalty">Repeat Penalty</label>
         </span>
       </div>
     </div>
     <div class="flex flex-row mt-8 mr-8 space-x-3">
       <div class="p-float-label">
-        <InputText inputId="stop" v-model="inferParams.stop" class="w-full max-w-[8rem] 3xl:max-w-[16rem]" />
+        <InputText inputId="stop" v-model="_stop" class="w-full max-w-[8rem] 3xl:max-w-[16rem]" />
         <label for="stop">Stop words</label>
       </div>
       <div>
@@ -77,6 +86,15 @@ import InputText from 'primevue/inputtext';
 import Slider from 'primevue/slider';
 import { lmState } from '@/state';
 import { inferParams } from '@/state';
+import { onMounted, ref, watchEffect } from 'vue';
+
+const _stop = ref("");
+
+onMounted(() => {
+  watchEffect(() => {
+    inferParams.stop = _stop.value.split(",")
+  })
+})
 </script>
 
 <style lang="sass">

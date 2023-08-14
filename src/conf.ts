@@ -12,11 +12,8 @@ function getServerUrl(): string {
   const urlConf = import.meta.env.VITE_SERVER_URL;
   if (urlConf) {
     url = urlConf
-  } else {
-    if (import.meta.env.DEV) {
-      url = "http://localhost:5173";
-    }
   }
+  console.log("Server url:", url)
   return url
 }
 
