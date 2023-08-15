@@ -6,11 +6,12 @@ import llamaTokenizer from 'llama-tokenizer-js';
 import { defaultInferenceParams } from '@/const/params';
 import { templates as _templates } from '@/const/templates';
 import { FormatMode, InferParams, LmTemplate, Task, TemporaryInferResult } from '@/interfaces';
-import { loadModels, loadTasks as _loadTasks, selectModel } from "@/services/api";
+import { loadModels, loadTasks as _loadTasks, selectModel, infer, abort } from "@/services/api";
 import { msg } from "./services/notify";
 import { useDb } from "./services/db";
 import { getServerUrl } from "./conf";
 
+let timer: ReturnType<typeof setInterval>;
 const user = new User();
 const api = useApi({ "serverUrl": getServerUrl() });
 const db = useDb();
@@ -69,6 +70,27 @@ function clearInferResults() {
   inferResults.totalTimeFormat = "";
   inferResults.tokensPerSecond = 0;
   secondsCount.value = 0;
+}
+
+async function processInfer() {
+  clearInferResults();
+  const id = setInterval(() => {
+    secondsCount.value++;
+    const tps = parseFloat((inferResults.totalTokens / secondsCount.value).toFixed(1));
+    inferResults.tokensPerSecond = tps;
+  }, 1000);
+  timer = id;
+  const res = await infer(prompt.value, template.content, inferParams);
+  clearInterval(id);
+  inferResults.thinkingTimeFormat = res.thinkingTimeFormat;
+  inferResults.emitTimeFormat = res.emitTimeFormat;
+  inferResults.totalTimeFormat = res.totalTimeFormat;
+}
+
+async function stopInfer() {
+  lmState.abortController.abort();
+  await abort();
+  clearInterval(timer);
 }
 
 async function loadTemplate(name: string) {
@@ -211,4 +233,6 @@ export {
   loadTasks,
   loadTask,
   loadPresets,
+  processInfer,
+  stopInfer,
 }

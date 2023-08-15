@@ -69,32 +69,17 @@ import OverlayPanel from 'primevue/overlaypanel';
 import Textarea from 'primevue/textarea';
 import { RenderMd } from '@docdundee/vue';
 import { clearInferResults, lmState, stream, formatMode } from '@/state';
-import { infer } from "@/services/api";
 import LoadingSpinner from '@/widgets/LoadingSpinner.vue';
 import SavePromptDialog from './SavePromptDialog.vue';
 import SaveTemplateDialog from './SaveTemplateDialog.vue';
 import SaveTaskDialog from './SaveTaskDialog.vue';
 import FormatBar from './FormatBar.vue';
-import { template, prompt, inferParams, inferResults, secondsCount, countPromptTokens, countTemplateTokens } from '@/state';
+import { template, prompt, countPromptTokens, countTemplateTokens, processInfer } from '@/state';
 import { hljs } from "@/conf";
 
 const savePromptCollapse = ref();
 const saveTemplateCollapse = ref();
 const saveTaskCollapse = ref();
-
-async function processInfer() {
-  clearInferResults();
-  const id = setInterval(() => {
-    secondsCount.value++;
-    const tps = parseFloat((inferResults.totalTokens / secondsCount.value).toFixed(1));
-    inferResults.tokensPerSecond = tps;
-  }, 1000);
-  const res = await infer(prompt.value, template.content, inferParams);
-  clearInterval(id);
-  inferResults.thinkingTimeFormat = res.thinkingTimeFormat;
-  inferResults.emitTimeFormat = res.emitTimeFormat;
-  inferResults.totalTimeFormat = res.totalTimeFormat;
-}
 
 function toggleSavePrompt(evt) {
   savePromptCollapse.value.toggle(evt);
@@ -109,7 +94,7 @@ function toggleSaveTask(evt) {
 }
 
 function selectFormatMode(evt) {
-  console.log("F", evt)
+  //console.log("F", evt)
 }
 
 onMounted(() => {

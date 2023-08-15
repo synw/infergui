@@ -52,7 +52,7 @@
       <div class="flex flex-row items-center justify-end w-full h-full space-x-3">
         <button v-if="lmState.isRunning == true || lmState.isStreaming == true"
           class="flex flex-row items-center justify-center w-48 mr-2 btn bord-light txt-light block-lighter"
-          @click="lmState.abortController.abort(); abort()">
+          @click="stopInfer()">
           <i-icomoon-free:stop class="mr-2"></i-icomoon-free:stop>
           <div>Stop</div>
         </button>
@@ -90,12 +90,11 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { SwTopbar, useTopbar } from "@snowind/header";
-import { user, lmState } from "@/state";
+import { user, lmState, stopInfer } from "@/state";
 import { useRouter } from 'vue-router';
 import OverlayPanel from 'primevue/overlaypanel';
 import ModelsPicker from '@/components/ModelsPicker.vue';
 import PresetsPicker from "@/components/PresetsPicker.vue";
-import { abort } from "@/services/api";
 
 const router = useRouter()
 const topBar = useTopbar(router);

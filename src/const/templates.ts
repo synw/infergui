@@ -20,15 +20,13 @@ You are an AI assistant that follows instruction extremely well. Help as much as
 
 ### Response:`;
 
-const orca2context = `### System:
-You are an AI assistant that follows instruction extremely well. Help as much as you can.
+const llama2 = `<s>[INST] <<SYS>>
+You are a helpful, respectful and honest assistant. Always answer as helpfully as possible
 
-### User:
-{prompt}
+If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information.
+<</SYS>>
 
-### Input: {context}
-
-### Response:`;
+{prompt} [/INST]`;
 
 const templates: Record<string, LmTemplate> = {
   alpaca: {
@@ -47,11 +45,10 @@ const templates: Record<string, LmTemplate> = {
     name: "Orca2",
     content: orca2,
   },
-  orca2context: {
-    name: "Orca2 context",
-    content: orca2context,
-    vars: ["context"]
-  },
+  llama2: {
+    name: "llama2",
+    content: llama2,
+  }
 }
 
 export {
