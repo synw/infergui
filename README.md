@@ -1,6 +1,9 @@
 # Infer gui
 
-A graphical user interface for local language models
+A graphical user interface for local language models. Works with the
+[Goinfer](https://github.com/synw/goinfer) api server
+
+![Screenshot](/docs/screenshot.png)
 
 ## Install
 
