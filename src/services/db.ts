@@ -1,6 +1,6 @@
 import localForage from "localforage";
 import { templates as templatesData } from "@/const/templates";
-import { InferParams, LmPrompt, LmTemplate } from "@/interfaces";
+import { InferParams, LmTemplate } from "@/interfaces";
 import { defaultInferenceParams } from "@/const/params";
 
 const useDb = () => {

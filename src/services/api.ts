@@ -2,6 +2,7 @@ import { api, models, mutateModel, stream, lmState, inferResults } from "@/state
 import type { InferParams, InferResultContract, StreamedMessage, Task } from "@/interfaces";
 import { ModelStateContract } from "@/interfaces";
 
+
 async function infer(_prompt: string, _template: string, _params: InferParams): Promise<InferResultContract> {
   stream.value = "";
   lmState.isRunning = true;
@@ -45,10 +46,11 @@ async function infer(_prompt: string, _template: string, _params: InferParams): 
     while (true) {
       const result = await reader.read();
       if (result.done) {
-        break;
+        break
       }
       const text = decoder.decode(result.value);
-      const payload = JSON.parse(text.replace(/\n/g, ""));
+      const rawText = text.replace(/data: |[\r\n]/g, '');
+      const payload = JSON.parse(rawText);
       const msg: StreamedMessage = {
         num: payload["num"],
         type: payload["msg_type"],

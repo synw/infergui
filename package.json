@@ -11,7 +11,6 @@
     "@docdundee/vue": "^0.0.21",
     "@snowind/header": "^0.0.11",
     "@snowind/plugin": "^0.5.0",
-    "@snowind/sidebar": "^0.0.3",
     "@snowind/state": "^0.1.0",
     "@vueuse/core": "^10.2.1",
     "highlight.js": "^11.8.0",
