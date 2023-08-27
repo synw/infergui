@@ -1,7 +1,6 @@
 import { api, models, mutateModel, stream, lmState, inferResults } from "@/state";
-import type { InferParams, InferResultContract, StreamedMessage, Task } from "@/interfaces";
+import type { InferParams, InferResultContract, ModelConf, StreamedMessage, Task } from "@/interfaces";
 import { ModelStateContract } from "@/interfaces";
-
 
 async function infer(_prompt: string, _template: string, _params: InferParams): Promise<InferResultContract> {
   stream.value = "";
@@ -13,20 +12,7 @@ async function infer(_prompt: string, _template: string, _params: InferParams): 
     ..._params,
   };
   const completionParams = { ...paramDefaults, _prompt };
-  const headers = {
-    'Connection': 'keep-alive',
-    'Content-Type': 'application/json',
-    'Accept': 'text/event-stream',
-  }
-  if (import.meta.env.VITE_API_KEY) {
-    headers['Authorization'] = `Bearer ${import.meta.env.VITE_API_KEY}`
-  }
-  const response = await fetch("http://localhost:5143/completion", {
-    method: 'POST',
-    body: JSON.stringify(completionParams),
-    headers: headers,
-    signal: lmState.abortController.signal,
-  });
+  const resEl = document.getElementById("infer-block") as HTMLElement;
   let respData: InferResultContract = {
     text: "",
     thinkingTime: 0,
@@ -39,44 +25,39 @@ async function infer(_prompt: string, _template: string, _params: InferParams): 
     tokensPerSecond: 0,
     totalTokens: 0,
   };
-  if (response.body) {
-    const resEl = document.getElementById("infer-block") as HTMLElement;
-    const reader = response.body.getReader();  // @ts-ignore
-    const decoder = new TextDecoder();
-    while (true) {
-      const result = await reader.read();
-      if (result.done) {
-        break
-      }
-      const text = decoder.decode(result.value);
-      const rawText = text.replace(/data: |[\r\n]/g, '');
-      const payload = JSON.parse(rawText);
-      const msg: StreamedMessage = {
-        num: payload["num"],
-        type: payload["msg_type"],
-        content: payload["content"],
-        data: payload["data"] ?? {},
-      }
-      if (msg.type == "token") {
-        stream.value = stream.value + msg.content;
-        resEl.scrollTop = resEl.scrollHeight;
-        ++inferResults.totalTokens
-      } else {
-        if (msg.type == "system") {
-          //console.log("SYSTEM", msg)
-          if (msg.content == "start_emitting") {
-            lmState.isStreaming = true;
-          } else if (msg.content == "result") {
-            respData = msg.data as InferResultContract;
-          }
-        } else if (msg.type == "error") {
-          console.error("ERROR", msg)
+
+  const onChunk = (payload: Record<string, any>) => {
+    const msg: StreamedMessage = {
+      num: payload["num"],
+      type: payload["msg_type"],
+      content: payload["content"],
+      data: payload["data"] ?? {},
+    }
+    if (msg.type == "token") {
+      stream.value = stream.value + msg.content;
+      resEl.scrollTop = resEl.scrollHeight;
+      ++inferResults.totalTokens
+    } else {
+      if (msg.type == "system") {
+        //console.log("SYSTEM", msg)
+        if (msg.content == "start_emitting") {
+          lmState.isStreaming = true;
+        } else if (msg.content == "result") {
+          respData = msg.data as InferResultContract;
         }
+      } else if (msg.type == "error") {
+        console.error("ERROR", msg)
       }
     }
-  } else {
-    throw new Error("Empty response")
   }
+
+  await api.postSse<Record<string, any>>(
+    "/completion",
+    completionParams,
+    onChunk,
+    lmState.abortController,
+  )
+
   lmState.isStreaming = false;
   lmState.isRunning = false;
   return respData
@@ -116,19 +97,16 @@ async function loadTask(path: string) {
   }
   let task: Task = {
     name: "",
-    model: "",
     template: "",
+    modelConf: {} as ModelConf,
   };
   const res = await api.post<Record<string, any>>("/task/read", payload);
   if (res.ok) {
     //console.log("DATA", JSON.stringify(res.data, null, "  "));
     task = {
-      name: res.data.name,
-      model: res.data.model,
+      name: res.data.model,
       template: res.data.template,
-    }
-    if ("modelConf" in res.data) {
-      task.modelConf = res.data.modelConf;
+      modelConf: res.data.modelConf
     }
     if ("inferParams" in res.data) {
       task.inferParams = res.data.inferParams;

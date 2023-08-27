@@ -40,11 +40,17 @@ interface InferParams {
   stop: Array<string>;
 }
 
+interface ModelConf {
+  name: string,
+  ctx: number,
+  rope_freq_scale?: number,
+  rope_freq_base?: number,
+}
+
 interface Task {
   name: string;
-  model: string;
   template: string;
-  modelConf?: { ctx: number }
+  modelConf: ModelConf;
   inferParams?: {
     threads?: number;
     n_predict?: number;
@@ -95,4 +101,5 @@ export {
   Task,
   FormatMode,
   StreamedMessage,
+  ModelConf,
 }

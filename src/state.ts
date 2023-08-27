@@ -108,8 +108,8 @@ async function loadPrompt(name: string) {
 
 async function loadTask(t: Task) {
   let ctx = t?.modelConf?.ctx ?? lmState.ctx;
-  if (t.model != lmState.model) {
-    await selectModel(t.model, ctx);
+  if (t?.modelConf?.name != lmState.model) {
+    await selectModel(t?.modelConf?.name ?? "", ctx);
   }
   template.content = t.template;
   countTemplateTokens();

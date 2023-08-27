@@ -1,11 +1,14 @@
 <template>
-  <div>
-    <div class="text-sm flex flex-row w-full 3xl:max-w-[28rem] items-center pr-4">
+  <div class="w-full 3xl:max-w-[28rem]">
+    <div class="flex flex-row items-center w-full pr-4 text-sm">
       <div class="text-center danger" :style="`width:${templatePercent}%`">{{ templateTokensCount }}</div>
       <div class="text-center warning" :style="`width:${promptPercent}%`">{{ promptTokensCount }}</div>
       <div class="flex-grow text-center success">{{ freeCtx }}</div>
     </div>
-    <div class="h-1 primary" :style="`width:${currentPercent}%`"></div>
+    <div class="flex flex-row w-full h-1 pr-4">
+      <div class="primary" :style="`width:${currentPercent}%`"></div>
+      <div class="lighter" :style="`width:${remainingPercent}%`"></div>
+    </div>
   </div>
 </template>
 
@@ -25,5 +28,6 @@ const basePercent = computed(() => {
 const currentPercent = computed(() => {
   const tokensPercent = Math.round((inferResults.totalTokens * 100) / lmState.ctx)
   return basePercent.value + tokensPercent
-})
+});
+const remainingPercent = computed(() => lmState.ctx - currentPercent.value);
 </script>
