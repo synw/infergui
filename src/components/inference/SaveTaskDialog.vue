@@ -15,15 +15,18 @@ import { ref } from 'vue';
 import InputText from 'primevue/inputtext';
 import { api, inferParams, lmState, template } from '@/state';
 import { loadTasks } from '@/services/api';
+import { Task } from '@/interfaces';
 
 const emit = defineEmits(["save"]);
 const tname = ref("");
 
 async function save() {
-  const payload = {
+  const payload: Task = {
     name: tname.value,
-    model: lmState.model,
-    ctx: lmState.ctx,
+    model: {
+      name: lmState.model,
+      ctx: lmState.ctx,
+    },
     template: template.content,
     inferParams: inferParams,
   }

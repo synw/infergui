@@ -50,7 +50,7 @@ interface ModelConf {
 interface Task {
   name: string;
   template: string;
-  modelConf: ModelConf;
+  model: ModelConf;
   inferParams?: {
     threads?: number;
     n_predict?: number;
