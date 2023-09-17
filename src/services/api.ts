@@ -1,4 +1,4 @@
-import { api, models, mutateModel, stream, lmState, inferResults } from "@/state";
+import { api, mutateModel, stream, lmState, inferResults, updateModels } from "@/state";
 import type { InferParams, InferResultContract, ModelConf, StreamedMessage, Task } from "@/interfaces";
 import { ModelStateContract } from "@/interfaces";
 
@@ -75,9 +75,12 @@ async function loadModels() {
   const res = await api.get<ModelStateContract>("/model/state");
   //console.log(JSON.stringify(res.data, null, "  "))
   if (res.ok) {
-    models.splice(0, models.length, ...res.data.models);
+    // update state
+    updateModels(res.data.models)
     if (res.data.isModelLoaded) {
-      mutateModel(res.data.loadedModel, res.data.ctx);
+      if (lmState.model != res.data.loadedModel) {
+        mutateModel(res.data.loadedModel, res.data.ctx);
+      }
     }
   }
 }

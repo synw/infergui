@@ -1,12 +1,12 @@
 <template>
   <div>
-    <overlay-list v-if="!selectCtx" :elems="models" @pick="pickModel($event)"></overlay-list>
-    <!-- div class="flex flex-col" v-if="!selectCtx">
-      <div v-for="(model, i) in models" class="px-8 py-4 cursor-pointer bord-lighter"
-        :class="i == (models.length - 1) ? '' : 'border-b'" @click="pick(model)">
+    <!-- overlay-list v-if="!selectCtx" :elems="models" @pick="pickModel($event)"></overlay-list -->
+    <div class="flex flex-col" v-if="!selectCtx">
+      <div v-for="(model, i) in Object.keys(models)" class="px-8 py-4 cursor-pointer bord-lighter"
+        :class="i == Object.keys(models).length - 1 ? '' : 'border-b'" @click="pickModel(model, models[model])">
         {{ model }}
       </div>
-    </div -->
+    </div>
     <div v-else class="flex flex-col p-3 space-y-3">
       <div class="text-xl">Context window size</div>
       <div class="flex flex-row items-center space-x-2 text-xs">
@@ -42,7 +42,7 @@ import Slider from 'primevue/slider';
 import ChipText from "@/widgets/ChipText.vue";
 import { selectModel } from '@/services/api';
 import { models } from '@/state';
-import OverlayList from '@/widgets/OverlayList.vue';
+import { TemplateInfo } from '@/interfaces';
 
 const emit = defineEmits(["close"]);
 
@@ -54,9 +54,10 @@ function preset(n: number) {
   ctx.value = n;
 }
 
-function pickModel(m: string) {
+function pickModel(m: string, t: TemplateInfo) {
   selectedModel.value = m;
   selectCtx.value = true;
+  console.log(m, t.name, t.ctx)
 }
 
 async function post() {

@@ -5,7 +5,7 @@ import { User } from "@snowind/state";
 import llamaTokenizer from 'llama-tokenizer-js';
 import { defaultInferenceParams } from '@/const/params';
 import { templates as _templates } from '@/const/templates';
-import { FormatMode, InferParams, LmTemplate, Task, TemporaryInferResult } from '@/interfaces';
+import { FormatMode, InferParams, LmTemplate, Task, TemplateInfo, TemporaryInferResult } from '@/interfaces';
 import { loadModels, loadTasks as _loadTasks, selectModel, infer, abort } from "@/services/api";
 import { msg } from "./services/notify";
 import { useDb } from "./services/db";
@@ -27,7 +27,7 @@ const lmState = reactive({
   abortController: new AbortController(),
 });
 const stream = ref("");
-const models = reactive<Array<string>>([]);
+const models = reactive<Record<string, TemplateInfo>>({});
 const prompts = reactive<Array<string>>([]);
 const templates = reactive<Array<string>>([]);
 const tasks = reactive<Array<Record<string, any>>>([]);
@@ -117,6 +117,15 @@ async function loadTask(t: Task) {
   Object.keys(ip).forEach((p) => {
     inferParams[p] = ip[p]
   });
+}
+
+function updateModels(_models: Record<string, TemplateInfo>) {
+  for (const m in models) {
+    delete models[m]
+  }
+  for (const [k, v] of Object.entries(_models)) {
+    models[k] = v
+  }
 }
 
 function checkMaxTokens(ctx: number) {
@@ -235,4 +244,5 @@ export {
   loadPresets,
   processInfer,
   stopInfer,
+  updateModels,
 }

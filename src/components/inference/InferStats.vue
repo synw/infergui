@@ -29,5 +29,5 @@ const currentPercent = computed(() => {
   const tokensPercent = Math.round((inferResults.totalTokens * 100) / lmState.ctx)
   return basePercent.value + tokensPercent
 });
-const remainingPercent = computed(() => lmState.ctx - currentPercent.value);
+const remainingPercent = computed(() => 100 - currentPercent.value);
 </script>

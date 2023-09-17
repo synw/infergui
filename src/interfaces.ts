@@ -1,5 +1,10 @@
+interface TemplateInfo {
+  name: string;
+  ctx: number;
+}
+
 interface ModelStateContract {
-  models: Array<string>;
+  models: Record<string, TemplateInfo>;
   isModelLoaded: boolean;
   loadedModel: string;
   ctx: number;
@@ -50,7 +55,7 @@ interface ModelConf {
 interface Task {
   name: string;
   template: string;
-  model: ModelConf;
+  modelConf: ModelConf;
   inferParams?: {
     threads?: number;
     n_predict?: number;
@@ -102,4 +107,5 @@ export {
   FormatMode,
   StreamedMessage,
   ModelConf,
+  TemplateInfo,
 }
