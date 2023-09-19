@@ -37,6 +37,9 @@ onMounted(() => initNotifyService())
   @apply dark:bord-lighter border
 .h-main
   height: calc( 100% -  4rem)
+.prosed:not(.not-prose)
+  @apply prose dark:prose-invert max-w-none prose-h1:txt-light prose-h2:txt-light prose-h3:txt-light prose-h2:mt-3
+  @apply max-w-[100%] xl:min-w-[52rem]
 </style>
 
 

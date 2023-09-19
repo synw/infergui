@@ -10,7 +10,8 @@ module.exports = {
   plugins: [
     require('@tailwindcss/forms'),
     require('@snowind/plugin'),
-    require('tailwindcss-semantic-colors')
+    require('tailwindcss-semantic-colors'),
+    require('@tailwindcss/typography'),
   ],
   theme: {
     extend: {

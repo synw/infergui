@@ -24,9 +24,9 @@ import { loadTask as loadTaskState } from "@/state";
 const selectedKey = ref();
 
 const onNodeSelect = async (node) => {
-  console.log("Select", node.path)
+  //console.log("Select", node.path)
   const task = await loadTask(node.path);
-  console.log("TASK", JSON.stringify(task, null, "  "));
+  //console.log("TASK", JSON.stringify(task, null, "  "));
   loadTaskState(task);
 };
 

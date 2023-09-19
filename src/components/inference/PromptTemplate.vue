@@ -67,7 +67,7 @@
           v-html="stream.replaceAll('\n', '<br />').replaceAll('\t', '&nbsp;&nbsp;')">
         </div>
         <pre class="mx-3" v-else-if="formatMode == 'Text'">{{ stream }}</pre>
-        <div class="mx-3 mt-8" v-else-if="formatMode == 'Markdown'">
+        <div class="mx-3 mt-8 prose prosed" v-else-if="formatMode == 'Markdown'">
           <render-md :hljs="hljs" :source="stream"></render-md>
         </div>
       </div>
