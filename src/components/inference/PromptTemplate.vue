@@ -1,11 +1,24 @@
 <template>
   <div id="infer-block" class="px-3 mb-12 overflow-y-auto form h-main">
-    <div class="flex flex-col">
-      <div class="pt-3">
-        <Textarea v-model="template.content" class="w-full h-48" />
+    <div class="flex flex-col w-full">
+      <div class="flex flex-row justify-end">
+        <button class="flex flex-row space-x-2 text-sm btn" @click="mainCollapse = !mainCollapse">
+          <div v-if="mainCollapse">Expand</div>
+          <div v-else>Collapse</div>
+          <div><i-ep:d-caret></i-ep:d-caret></div>
+        </button>
       </div>
-      <div class="pt-2">
-        <Textarea v-model="prompt" rows="1" class="w-full" autoResize />
+      <div :class="{
+        'slide-y': true,
+        'slideup': mainCollapse === true,
+        'slidedown': mainCollapse === false,
+      }">
+        <div>
+          <Textarea v-model="template.content" class="w-full h-48" />
+        </div>
+        <div class="pt-2">
+          <Textarea v-model="prompt" rows="1" class="w-full" autoResize />
+        </div>
       </div>
       <div class="flex flex-row items-center justify-end pt-3 space-x-2 h-1/3" v-if="lmState.isModelLoaded">
         <div class="flex flex-row items-center flex-grow txt-semilight">
@@ -80,6 +93,7 @@ import { hljs } from "@/conf";
 const savePromptCollapse = ref();
 const saveTemplateCollapse = ref();
 const saveTaskCollapse = ref();
+const mainCollapse = ref(false);
 
 function toggleSavePrompt(evt) {
   savePromptCollapse.value.toggle(evt);

@@ -41,7 +41,8 @@ import InputText from 'primevue/inputtext';
 import Slider from 'primevue/slider';
 import ChipText from "@/widgets/ChipText.vue";
 import { selectModel } from '@/services/api';
-import { models } from '@/state';
+import { templates as _genericTemplates, ModTemplate } from "modprompt";
+import { loadGenericTemplate, models, settings } from '@/state';
 import { TemplateInfo } from '@/interfaces';
 
 const emit = defineEmits(["close"]);
@@ -54,14 +55,25 @@ function preset(n: number) {
   ctx.value = n;
 }
 
-function pickModel(m: string, t: TemplateInfo) {
+async function pickModel(m: string, t: TemplateInfo) {
+  console.log("Pick", m, t);
   selectedModel.value = m;
-  selectCtx.value = true;
-  console.log(m, t.name, t.ctx)
+  if (t.name != "unknown") {
+    // the model has a generic template
+    if (settings.autoLoadTemplates) {
+      const tpl = new ModTemplate(t.name)
+      loadGenericTemplate(tpl);
+      ctx.value = t.ctx;
+      await post();
+    }
+  } else {
+    selectCtx.value = true;
+  }
 }
 
 async function post() {
   emit("close")
+  //console.log("Load", selectedModel.value, ctx.value);
   await selectModel(selectedModel.value, ctx.value);
   console.log("Model loaded");
   selectCtx.value = false;

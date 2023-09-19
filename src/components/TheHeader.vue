@@ -56,12 +56,19 @@
           <i-icomoon-free:stop class="mr-2"></i-icomoon-free:stop>
           <div>Stop</div>
         </button>
-        <button v-else class="flex flex-row items-center justify-center mr-2 border-0 btn bord-light txt-semilight"
+        <button v-else class="flex flex-row items-center justify-center border-0 btn bord-light txt-semilight"
           @click="togglePresetsCollapse($event)">
           <i-eva:options-2-outline class="text-2xl"></i-eva:options-2-outline>
         </button>
         <OverlayPanel ref="presetsCollapse">
           <presets-picker @close="togglePresetsCollapse"></presets-picker>
+        </OverlayPanel>
+        <button class="flex flex-row items-center justify-center mr-2 border-0 btn bord-light txt-semilight"
+          @click="toggleSettingsCollapse($event)">
+          <i-fluent:settings-32-regular class="text-2xl"></i-fluent:settings-32-regular>
+        </button>
+        <OverlayPanel ref="settingsCollapse">
+          <SettingsPopin></SettingsPopin>
         </OverlayPanel>
         <div class="pr-5 text-lg cursor-pointer txt-lighter dark:txt-light" @click="user.toggleDarkMode()">
           <i-fa-solid:moon v-if="!user.isDarkMode.value"></i-fa-solid:moon>
@@ -95,12 +102,14 @@ import { useRouter } from 'vue-router';
 import OverlayPanel from 'primevue/overlaypanel';
 import ModelsPicker from '@/components/ModelsPicker.vue';
 import PresetsPicker from "@/components/PresetsPicker.vue";
+import SettingsPopin from './SettingsPopin.vue';
 
 const router = useRouter()
 const topBar = useTopbar(router);
 const modelCollapse = ref();
 const taskCollapse = ref();
 const presetsCollapse = ref();
+const settingsCollapse = ref();
 
 const toggleModelCollapse = (event) => {
   modelCollapse.value.toggle(event);
@@ -110,6 +119,9 @@ const toggleTaskCollapse = (event) => {
 }
 const togglePresetsCollapse = (event) => {
   presetsCollapse.value.toggle(event);
+}
+const toggleSettingsCollapse = (event) => {
+  settingsCollapse.value.toggle(event);
 }
 
 const isHome = computed<boolean>(() => router.currentRoute.value.path == "/");

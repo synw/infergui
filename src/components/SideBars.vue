@@ -10,7 +10,7 @@
     </div>
     <div class="h-full overflow-y-auto">
       <prompts-bar class="mt-3" v-if="activeBar == 'prompts'"></prompts-bar>
-      <templates-bar class="mt-3" v-else-if="activeBar == 'templates'"></templates-bar>
+      <templates-bar v-else-if="activeBar == 'templates'"></templates-bar>
       <tasks-bar v-else></tasks-bar>
     </div>
   </div>

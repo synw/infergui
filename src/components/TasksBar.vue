@@ -3,7 +3,7 @@
     <Tree v-model:selectionKeys="selectedKey" :value="tasks" class="w-full" @nodeSelect="onNodeSelect"
       @nodeUnselect="onNodeUnselect">
       <template #default="slotProps">
-        <template v-if="slotProps.node.label.endsWith('.yml')">
+        <template v-if="slotProps.node.path.endsWith('.yml')">
           <button class="p-0 btn" @click="onNodeSelect(slotProps.node)">{{ slotProps.node.label }}</button>
         </template>
         <template v-else>

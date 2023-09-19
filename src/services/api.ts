@@ -120,8 +120,9 @@ async function loadTask(path: string) {
 
 async function selectModel(name: string, ctx: number) {
   lmState.isLoadingModel = true;
-  const res = await api.post("/model/load", { model: name, ctx: ctx });
+  const res = await api.post("/model/load", { name: name, ctx: ctx });
   if (res.ok) {
+    console.log("MODEL", res.data);
     mutateModel(name, ctx);
   }
   lmState.isLoadingModel = false;

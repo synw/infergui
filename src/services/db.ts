@@ -1,6 +1,6 @@
 import localForage from "localforage";
 import { templates as templatesData } from "@/const/templates";
-import { InferParams, LmTemplate } from "@/interfaces";
+import { InferParams, BaseTemplate } from "@/interfaces";
 import { defaultInferenceParams } from "@/const/params";
 
 const useDb = () => {
@@ -74,7 +74,7 @@ const useDb = () => {
     await templates.removeItem(k);
   };
 
-  const loadTemplate = async (k: string): Promise<LmTemplate> => {
+  const loadTemplate = async (k: string): Promise<BaseTemplate> => {
     await templates.ready();
     const v = await templates.getItem<string>(k);
     if (!v) {

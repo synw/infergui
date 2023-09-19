@@ -70,10 +70,9 @@ interface Task {
   }
 }
 
-interface LmTemplate {
+interface BaseTemplate {
   name: string;
   content: string;
-  vars?: Array<string>;
 }
 
 interface LmPrompt {
@@ -101,7 +100,7 @@ export {
   InferResultContract,
   InferParams,
   TemporaryInferResult,
-  LmTemplate,
+  BaseTemplate,
   LmPrompt,
   Task,
   FormatMode,

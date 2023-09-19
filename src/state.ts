@@ -5,11 +5,12 @@ import { User } from "@snowind/state";
 import llamaTokenizer from 'llama-tokenizer-js';
 import { defaultInferenceParams } from '@/const/params';
 import { templates as _templates } from '@/const/templates';
-import { FormatMode, InferParams, LmTemplate, Task, TemplateInfo, TemporaryInferResult } from '@/interfaces';
+import { FormatMode, InferParams, BaseTemplate, Task, TemplateInfo, TemporaryInferResult } from '@/interfaces';
 import { loadModels, loadTasks as _loadTasks, selectModel, infer, abort } from "@/services/api";
 import { msg } from "./services/notify";
 import { useDb } from "./services/db";
 import { getServerUrl } from "./conf";
+import { ModTemplate } from "modprompt";
 
 let timer: ReturnType<typeof setInterval>;
 const user = new User();
@@ -33,8 +34,11 @@ const templates = reactive<Array<string>>([]);
 const tasks = reactive<Array<Record<string, any>>>([]);
 const presets = reactive<Array<string>>([]);
 const formatMode = useStorage<FormatMode>("formatMode", "Text");
+const settings = reactive({
+  autoLoadTemplates: true
+});
 
-const template = reactive<LmTemplate>(_templates.alpaca);
+const template = reactive<BaseTemplate>(_templates.alpaca);
 const prompt = ref("");
 const inferParams = reactive(defaultInferenceParams);
 const inferResults = reactive<TemporaryInferResult>({
@@ -93,13 +97,19 @@ async function stopInfer() {
   clearInterval(timer);
 }
 
-async function loadTemplate(name: string) {
+async function loadCustomTemplate(name: string) {
   const t = await db.loadTemplate(name);
   template.name = t.name;
   template.content = t.content;
-  template.vars = t.vars;
   countTemplateTokens();
 }
+
+async function loadGenericTemplate(t: ModTemplate) {
+  template.name = t.name;
+  template.content = t.render();
+  countTemplateTokens();
+}
+
 
 async function loadPrompt(name: string) {
   prompt.value = await db.loadPrompt(name);
@@ -228,7 +238,9 @@ export {
   templateTokensCount,
   freeCtx,
   formatMode,
-  loadTemplate,
+  settings,
+  loadCustomTemplate,
+  loadGenericTemplate,
   loadPrompt,
   checkMaxTokens,
   countPromptTokens,
