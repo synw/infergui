@@ -2,7 +2,7 @@
   <div class="flex flex-col">
     <div class="flex flex-col">
       <button class="flex flex-row space-x-2 text-sm border-b shadow-sm btn bord-lighter"
-        @click="collapseGen = !collapseGen">
+        :class="collapseGen ? 'txt-lighter' : 'txt-light'" @click="collapseGen = !collapseGen">
         <div class="flex-grow">Generic templates</div>
         <div><i-ep:d-caret></i-ep:d-caret></div>
       </button>
@@ -23,7 +23,7 @@
     </div>
     <div class="flex flex-col">
       <button class="flex flex-row space-x-2 text-sm border-b shadow-sm btn bord-lighter"
-        @click="collapseCustom = !collapseCustom">
+        :class="collapseCustom ? 'txt-lighter' : 'txt-light'" @click="collapseCustom = !collapseCustom">
         <div class="flex-grow">Custom templates</div>
         <div><i-ep:d-caret></i-ep:d-caret></div>
       </button>
@@ -53,7 +53,6 @@ import { onBeforeMount, ref } from 'vue';
 import { templates as _genericTemplates, ModTemplate } from "modprompt";
 import ConfirmDelete from '@/widgets/ConfirmDelete.vue';
 import { db, loadTemplates, templates, loadCustomTemplate, loadGenericTemplate } from '@/state';
-import { BaseTemplate } from "@/interfaces";
 
 const collapseGen = ref(false);
 const collapseCustom = ref(false);

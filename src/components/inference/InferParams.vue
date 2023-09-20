@@ -56,7 +56,7 @@
       </div>
       <div>
         <span class="p-float-label">
-          <InputNumber class="w-8" v-model="inferParams.threads" inputId="threads" showButtons />
+          <InputNumber class="w-8 txt-lighter" v-model="inferParams.threads" inputId="threads" showButtons />
           <label for="threads">threads</label>
         </span>
       </div>
@@ -112,4 +112,8 @@ onMounted(() => {
     @apply light
   .p-slider-handle
     @apply border bord-primary
+.dark
+  #params
+    .p-inputnumber-button
+      background-color: #525252 !important
 </style>
