@@ -17,7 +17,7 @@
     "highlight.js": "^11.8.0",
     "llama-tokenizer-js": "^1.1.1",
     "localforage": "^1.10.0",
-    "modprompt": "^0.0.6",
+    "modprompt": "^0.0.9",
     "primeicons": "^6.0.1",
     "primevue": "^3.27.0",
     "restmix": "^0.2.0",

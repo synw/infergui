@@ -46,7 +46,6 @@ declare module '@vue/runtime-core' {
     SideBars: typeof import('./src/components/SideBars.vue')['default']
     TasksBar: typeof import('./src/components/TasksBar.vue')['default']
     TemplatesBar: typeof import('./src/components/TemplatesBar.vue')['default']
-    TemplatesPicker: typeof import('./src/components/TemplatesPicker.vue')['default']
     TheHeader: typeof import('./src/components/TheHeader.vue')['default']
   }
 }

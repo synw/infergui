@@ -41,7 +41,7 @@ import InputText from 'primevue/inputtext';
 import Slider from 'primevue/slider';
 import ChipText from "@/widgets/ChipText.vue";
 import { selectModel } from '@/services/api';
-import { templates as _genericTemplates, ModTemplate } from "modprompt";
+import { templates as _genericTemplates, PromptTemplate } from "modprompt";
 import { loadGenericTemplate, models, settings } from '@/state';
 import { TemplateInfo } from '@/interfaces';
 
@@ -61,7 +61,7 @@ async function pickModel(m: string, t: TemplateInfo) {
   if (t.name != "unknown") {
     // the model has a generic template
     if (settings.autoLoadTemplates) {
-      const tpl = new ModTemplate(t.name)
+      const tpl = new PromptTemplate(t.name)
       loadGenericTemplate(tpl);
       ctx.value = t.ctx;
       await post();

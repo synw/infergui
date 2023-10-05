@@ -17,7 +17,7 @@
           <Textarea v-model="template.content" class="w-full h-48" />
         </div>
         <div class="pt-2">
-          <Textarea v-model="prompt" rows="1" class="w-full" autoResize />
+          <Textarea v-model="prompt" class="w-full h-24" />
         </div>
       </div>
       <div class="flex flex-row items-center justify-end pt-3 space-x-2 h-1/3" v-if="lmState.isModelLoaded">
@@ -26,19 +26,19 @@
             <i-carbon:task-star class="text-2xl"></i-carbon:task-star>
           </button>
           <OverlayPanel ref="saveTaskCollapse">
-            <save-task-dialog class="p-3 mt-3" @save="toggleSaveTask($event)"></save-task-dialog>
+            <save-task-dialog class="p-3" @save="toggleSaveTask($event)"></save-task-dialog>
           </OverlayPanel>
           <button class="px-2 btn" v-show="template.content.length > 0" @click="toggleSaveTemplate($event)">
             <i-bi:menu-up class="text-xl"></i-bi:menu-up>
           </button>
           <OverlayPanel ref="saveTemplateCollapse">
-            <save-template-dialog class="p-3 mt-3" @pick="toggleSaveTemplate($event)"></save-template-dialog>
+            <save-template-dialog class="p-3" @pick="toggleSaveTemplate($event)"></save-template-dialog>
           </OverlayPanel>
           <button class="px-2 btn" v-show="prompt.length > 0" @click="toggleSavePrompt($event)">
             <i-tabler:prompt class="text-3xl"></i-tabler:prompt>
           </button>
           <OverlayPanel ref="savePromptCollapse">
-            <save-prompt-dialog class="p-3 mt-3" @pick="toggleSavePrompt($event)"></save-prompt-dialog>
+            <save-prompt-dialog class="p-3" @pick="toggleSavePrompt($event)"></save-prompt-dialog>
           </OverlayPanel>
         </div>
         <format-bar v-if="stream.length > 0" @select="selectFormatMode($event)"></format-bar>
