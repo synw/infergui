@@ -1,11 +1,12 @@
 <template>
   <div class="flex flex-col">
+    <div class="mb-8 text-xl">Save prompt</div>
     <div class="p-float-label">
       <InputText inputId="promptname" v-model="promptname" class="" v-focus @keyup.enter="save" />
       <label for="promptname">Name</label>
     </div>
     <div class="mt-3">
-      <button class="btn success" :disabled="promptname.length == 0" @click="save">Save prompt</button>
+      <button class="btn success" :disabled="promptname.length == 0" @click="save">Save</button>
     </div>
   </div>
 </template>

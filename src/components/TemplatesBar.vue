@@ -50,17 +50,17 @@
 
 <script setup lang="ts">
 import { onBeforeMount, ref } from 'vue';
-import { templates as _genericTemplates, ModTemplate } from "modprompt";
+import { templates as _genericTemplates, PromptTemplate } from "modprompt";
 import ConfirmDelete from '@/widgets/ConfirmDelete.vue';
 import { db, loadTemplates, templates, loadCustomTemplate, loadGenericTemplate } from '@/state';
 
 const collapseGen = ref(false);
 const collapseCustom = ref(false);
 
-function _genTemplates(): Array<ModTemplate> {
-  const tpls = new Array<ModTemplate>();
+function _genTemplates(): Array<PromptTemplate> {
+  const tpls = new Array<PromptTemplate>();
   for (const name of Object.keys(_genericTemplates)) {
-    const _tpl = new ModTemplate(name);
+    const _tpl = new PromptTemplate(name);
     tpls.push(_tpl)
   }
   return tpls

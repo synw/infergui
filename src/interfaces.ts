@@ -1,3 +1,6 @@
+import { TurnBlock } from "./packages/modprompt/main";
+
+
 interface TemplateInfo {
   name: string;
   ctx: number;
@@ -45,6 +48,19 @@ interface InferParams {
   stop: Array<string>;
 }
 
+interface OptionalInferParams {
+  threads?: number;
+  n_predict?: number;
+  top_k?: number;
+  top_p?: number;
+  temperature?: number;
+  frequency_penalty?: number;
+  presence_penalty?: number;
+  repeat_penalty?: number;
+  tfs_z?: number;
+  stop?: Array<string>;
+}
+
 interface ModelConf {
   name: string,
   ctx: number,
@@ -56,17 +72,16 @@ interface Task {
   name: string;
   template: string;
   modelConf: ModelConf;
-  inferParams?: {
-    threads?: number;
-    n_predict?: number;
-    top_k?: number;
-    top_p?: number;
-    temperature?: number;
-    frequency_penalty?: number;
-    presence_penalty?: number;
-    repeat_penalty?: number;
-    tfs_z?: number;
-    stop?: Array<string>;
+  inferParams?: OptionalInferParams
+}
+
+interface TaskPrototype {
+  name: string;
+  prompt: string;
+  inferParams?: OptionalInferParams;
+  template: {
+    shots?: Array<TurnBlock>;
+    system?: string;
   }
 }
 
