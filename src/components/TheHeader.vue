@@ -1,16 +1,17 @@
 <template>
-  <sw-topbar :topbar="topBar" class="z-10 flex items-center w-full h-16" breakpoint="lg">
+  <sw-topbar :topbar="topBar" class="z-10 flex h-16 w-full items-center" breakpoint="lg">
     <template #mobile-back>
-      <i-ion-arrow-back-outline class="inline-flex ml-2 text-3xl" v-if="!isHome"></i-ion-arrow-back-outline>
+      <i-ion-arrow-back-outline class="ml-2 inline-flex text-3xl" v-if="!isHome"></i-ion-arrow-back-outline>
     </template>
     <template #mobile-branding>
-      <div class="inline-flex flex-row items-center h-full pt-1 ml-2 text-2xl truncate">
-        <div class="text-lg"> <button class="mr-5 border-none btn" @click="toggleModelCollapse">
+      <div class="ml-2 inline-flex h-full flex-row items-center truncate pt-1 text-2xl">
+        <div class="text-lg">
+          <button class="btn mr-5 border-none" @click="toggleModelCollapse">
             <template v-if="lmState.isLoadingModel">
               Loading model ..
             </template>
             <template v-else-if="lmState.isModelLoaded">
-              {{ lmState.model }} ctx: {{ lmState.ctx }}
+              {{ lmState.model.name }} ctx: {{ lmState.model.ctx }}
             </template>
             <template v-else>
               Pick a model&nbsp;<i-carbon:network-4></i-carbon:network-4>
@@ -23,16 +24,16 @@
       </div>
     </template>
     <template #branding>
-      <div class="flex flex-row items-center h-full ml-3 cursor-pointer">
+      <div class="ml-3 flex h-full cursor-pointer flex-row items-center">
         <div class="text-lg">
-          <button class="mr-5 border-none btn" @click="toggleModelCollapse">
+          <button class="btn mr-5 border-none" @click="toggleModelCollapse">
             <template v-if="lmState.isLoadingModel">
               Loading model ..
             </template>
             <template v-else-if="lmState.isModelLoaded">
               <div class="flex flex-row items-center space-x-2">
                 <div><i-iconoir:network-alt class="text-xl"></i-iconoir:network-alt></div>
-                <div>{{ lmState.model }} <span class="txt-light"> ctx: {{ lmState.ctx }}</span></div>
+                <div>{{ lmState.model.name }} <span class="txt-light"> ctx: {{ lmState.model.ctx }}</span></div>
               </div>
             </template>
             <template v-else>
@@ -49,39 +50,39 @@
       </div>
     </template>
     <template #menu>
-      <div class="flex flex-row items-center justify-end w-full h-full space-x-3">
+      <div class="flex h-full w-full flex-row items-center justify-end space-x-3">
         <button v-if="lmState.isRunning == true || lmState.isStreaming == true"
-          class="flex flex-row items-center justify-center w-48 mr-2 btn bord-light txt-light block-lighter"
+          class="btn mr-2 flex w-48 flex-row items-center justify-center txt-light bord-light block-lighter"
           @click="stopInfer()">
           <i-icomoon-free:stop class="mr-2"></i-icomoon-free:stop>
           <div>Stop</div>
         </button>
-        <button v-else class="flex flex-row items-center justify-center border-0 btn bord-light txt-semilight"
+        <button v-else class="btn flex flex-row items-center justify-center border-0 bord-light txt-semilight"
           @click="togglePresetsCollapse($event)">
           <i-eva:options-2-outline class="text-2xl"></i-eva:options-2-outline>
         </button>
         <OverlayPanel ref="presetsCollapse">
           <presets-picker @close="togglePresetsCollapse"></presets-picker>
         </OverlayPanel>
-        <button class="flex flex-row items-center justify-center mr-2 border-0 btn bord-light txt-semilight"
+        <button class="btn mr-2 flex flex-row items-center justify-center border-0 bord-light txt-semilight"
           @click="toggleSettingsCollapse($event)">
           <i-fluent:settings-32-regular class="text-2xl"></i-fluent:settings-32-regular>
         </button>
         <OverlayPanel ref="settingsCollapse">
           <SettingsPopin></SettingsPopin>
         </OverlayPanel>
-        <div class="pr-5 text-lg cursor-pointer txt-lighter dark:txt-light" @click="user.toggleDarkMode()">
+        <div class="cursor-pointer pr-5 text-lg txt-lighter dark:txt-light" @click="user.toggleDarkMode()">
           <i-fa-solid:moon v-if="!user.isDarkMode.value"></i-fa-solid:moon>
           <i-fa-solid:sun v-else></i-fa-solid:sun>
         </div>
       </div>
     </template>
     <template #mobile-menu>
-      <div class="flex flex-col p-3 pb-5 space-y-3 lighter border-y-2 bord-primary">
+      <div class="flex flex-col space-y-3 border-y-2 p-3 pb-5 bord-primary lighter">
         <div>
-          <button class="border-none btn" @click="$router.push('/page'); topBar.closeMenu()">Page 1</button>
+          <button class="btn border-none" @click="$router.push('/page'); topBar.closeMenu()">Page 1</button>
         </div>
-        <div class="text-lg cursor-pointer" @click=" user.toggleDarkMode(); topBar.closeMenu()">
+        <div class="cursor-pointer text-lg" @click=" user.toggleDarkMode(); topBar.closeMenu()">
           <template v-if="!user.isDarkMode.value">
             <i-fa-solid:moon></i-fa-solid:moon>&nbsp;Dark mode
           </template>
@@ -97,7 +98,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { SwTopbar, useTopbar } from "@snowind/header";
-import { user, lmState, stopInfer } from "@/state";
+import { user, stopInfer, lmState } from "@/state";
 import { useRouter } from 'vue-router';
 import OverlayPanel from 'primevue/overlaypanel';
 import ModelsPicker from '@/components/ModelsPicker.vue';

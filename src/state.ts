@@ -1,34 +1,37 @@
 import { reactive, ref, computed } from "vue";
 import { useStorage } from '@vueuse/core';
-import { ApiResponse, useApi } from "restmix";
+import { ApiResponse } from "restmix";
 import { User } from "@snowind/state";
+import { useGoinfer } from "@goinfer/api";
+import { PromptTemplate } from "modprompt";
 import llamaTokenizer from 'llama-tokenizer-js';
 import { defaultInferenceParams } from '@/const/params';
 import { templates as _templates } from '@/const/templates';
-import { FormatMode, InferParams, BaseTemplate, Task, TemplateInfo, TemporaryInferResult } from '@/interfaces';
+import { FormatMode, BaseTemplate, TemporaryInferResult } from '@/interfaces';
+import { InferParams, Task, ModelTemplate, ModelConf } from '@goinfer/types';
 import { loadModels, loadTasks as _loadTasks, selectModel, infer, abort } from "@/services/api";
 import { msg } from "./services/notify";
 import { useDb } from "./services/db";
 import { getServerUrl } from "./conf";
-import { ModTemplate } from "modprompt";
 
 let timer: ReturnType<typeof setInterval>;
 const user = new User();
-const api = useApi({ "serverUrl": getServerUrl() });
+const api = useGoinfer({
+  serverUrl: getServerUrl(),
+  apiKey: import.meta.env.VITE_API_KEY,
+});
 const db = useDb();
 //const currentModel = useStorage<string>("model", {} as LMContract);
 //const currentTask = useStorage("task", {} as TaskContract);
 const lmState = reactive({
   isRunning: false,
   isStreaming: false,
-  isLoadingModel: false,
   isModelLoaded: false,
-  model: "",
-  ctx: 1024,
-  abortController: new AbortController(),
+  isLoadingModel: false,
+  model: { name: "", ctx: 2048 } as ModelConf,
 });
 const stream = ref("");
-const models = reactive<Record<string, TemplateInfo>>({});
+const models = reactive<Record<string, ModelTemplate>>({});
 const prompts = reactive<Array<string>>([]);
 const templates = reactive<Array<string>>([]);
 const tasks = reactive<Array<Record<string, any>>>([]);
@@ -50,7 +53,7 @@ const promptTokensCount = ref(0);
 const templateTokensCount = ref(0);
 
 const freeCtx = computed(() => {
-  return Math.round(lmState.ctx - (promptTokensCount.value + templateTokensCount.value))
+  return Math.round(api.model.ctx - (promptTokensCount.value + templateTokensCount.value))
 });
 
 function setMaxTokens() {
@@ -92,9 +95,10 @@ async function processInfer() {
 }
 
 async function stopInfer() {
-  lmState.abortController.abort();
   await abort();
   clearInterval(timer);
+  lmState.isRunning = false;
+  lmState.isStreaming = false;
 }
 
 async function loadCustomTemplate(name: string) {
@@ -104,7 +108,7 @@ async function loadCustomTemplate(name: string) {
   countTemplateTokens();
 }
 
-async function loadGenericTemplate(t: ModTemplate) {
+async function loadGenericTemplate(t: PromptTemplate) {
   template.name = t.name;
   template.content = t.render();
   countTemplateTokens();
@@ -117,8 +121,8 @@ async function loadPrompt(name: string) {
 }
 
 async function loadTask(t: Task) {
-  let ctx = t?.modelConf?.ctx ?? lmState.ctx;
-  if (t?.modelConf?.name != lmState.model) {
+  let ctx = t?.modelConf?.ctx ?? api.model.ctx;
+  if (t?.modelConf?.name != api.model.name) {
     await selectModel(t?.modelConf?.name ?? "", ctx);
   }
   template.content = t.template;
@@ -129,7 +133,7 @@ async function loadTask(t: Task) {
   });
 }
 
-function updateModels(_models: Record<string, TemplateInfo>) {
+function updateModels(_models: Record<string, ModelTemplate>) {
   for (const m in models) {
     delete models[m]
   }
@@ -139,17 +143,13 @@ function updateModels(_models: Record<string, TemplateInfo>) {
 }
 
 function checkMaxTokens(ctx: number) {
-  if (inferParams.n_predict > ctx) {
+  if ((inferParams.n_predict ?? 0) > ctx) {
     inferParams.n_predict = ctx - 64;
   }
 }
 
 async function initState() {
-  const apiKey = import.meta.env.VITE_API_KEY;
-  if (apiKey) {
-    api.addHeader("Authorization", `Bearer ${apiKey}`);
-  }
-  api.onResponse(async <T>(res: ApiResponse<T>): Promise<ApiResponse<T>> => {
+  api.api.onResponse(async <T>(res: ApiResponse<T>): Promise<ApiResponse<T>> => {
     if (!res.ok) {
       if ([401, 403].includes(res.status)) {
         const err = `${res.status} from ${res.url}`;
@@ -176,11 +176,27 @@ async function initState() {
   await loadModels();
 }
 
-function mutateModel(_model: string, _ctx: number) {
-  lmState.model = _model;
-  lmState.ctx = _ctx;
+function mutateModel(model: ModelConf) {
+  lmState.model = model;
   lmState.isModelLoaded = true;
-  checkMaxTokens(lmState.ctx);
+  if (model.name in models) {
+    const modelTemplate = models[model.name];
+    if (modelTemplate.name != "unknown") {
+      // the model has a generic template
+      if (settings.autoLoadTemplates) {
+        const tpl = new PromptTemplate(modelTemplate.name);
+        loadGenericTemplate(tpl);
+      }
+    } if (modelTemplate.name != "unknown") {
+      // the model has a generic template
+      if (settings.autoLoadTemplates) {
+        const tpl = new PromptTemplate(modelTemplate.name);
+        loadGenericTemplate(tpl);
+      }
+    }
+  }
+
+  checkMaxTokens(api.model.ctx);
   setMaxTokens();
   clearInferResults();
 }

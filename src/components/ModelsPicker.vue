@@ -2,12 +2,12 @@
   <div>
     <!-- overlay-list v-if="!selectCtx" :elems="models" @pick="pickModel($event)"></overlay-list -->
     <div class="flex flex-col" v-if="!selectCtx">
-      <div v-for="(model, i) in Object.keys(models)" class="px-8 py-4 cursor-pointer bord-lighter"
+      <div v-for="(model, i) in Object.keys(models)" class="cursor-pointer px-8 py-4 bord-lighter"
         :class="i == Object.keys(models).length - 1 ? '' : 'border-b'" @click="pickModel(model, models[model])">
         {{ model }}
       </div>
     </div>
-    <div v-else class="flex flex-col p-3 space-y-3">
+    <div v-else class="flex flex-col space-y-3 p-3">
       <div class="text-xl">Context window size</div>
       <div class="flex flex-row items-center space-x-2 text-xs">
         <div>Presets:</div>
@@ -29,7 +29,7 @@
         <Slider v-model="ctx" class="w-full" :min="32" :max="8192" :step="64" />
       </div>
       <div>
-        <button class="w-full mt-3 btn success" @click="post()">Load model</button>
+        <button class="btn mt-3 w-full success" @click="post()">Load model</button>
       </div>
     </div>
   </div>
@@ -43,26 +43,26 @@ import ChipText from "@/widgets/ChipText.vue";
 import { selectModel } from '@/services/api';
 import { templates as _genericTemplates, PromptTemplate } from "modprompt";
 import { loadGenericTemplate, models, settings } from '@/state';
-import { TemplateInfo } from '@/interfaces';
+import { ModelTemplate } from '@goinfer/types';
 
 const emit = defineEmits(["close"]);
 
 const selectCtx = ref(false);
 const selectedModel = ref("");
-const ctx = ref<number>(1024);
+const ctx = ref<number>(2048);
 
 function preset(n: number) {
   ctx.value = n;
 }
 
-async function pickModel(m: string, t: TemplateInfo) {
-  console.log("Pick", m, t);
+async function pickModel(m: string, t: ModelTemplate) {
+  //console.log("Pick", m, t);
   selectedModel.value = m;
   if (t.name != "unknown") {
     // the model has a generic template
     if (settings.autoLoadTemplates) {
-      const tpl = new PromptTemplate(t.name)
-      loadGenericTemplate(tpl);
+      //const tpl = new PromptTemplate(t.name)
+      //loadGenericTemplate(tpl);
       ctx.value = t.ctx;
       await post();
     }
@@ -75,7 +75,7 @@ async function post() {
   emit("close")
   //console.log("Load", selectedModel.value, ctx.value);
   await selectModel(selectedModel.value, ctx.value);
-  console.log("Model loaded");
+  //console.log("Model loaded");
   selectCtx.value = false;
 }
 </script>

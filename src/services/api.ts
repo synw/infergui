@@ -1,11 +1,9 @@
-import { api, mutateModel, stream, lmState, inferResults, updateModels } from "@/state";
-import type { InferParams, InferResultContract, ModelConf, StreamedMessage, Task } from "@/interfaces";
-import { ModelStateContract } from "@/interfaces";
+import { api, mutateModel, stream, inferResults, updateModels, lmState } from "@/state";
+import type { Task, InferParams, InferResult, TempInferStats } from "@goinfer/types";
 
-async function infer(_prompt: string, _template: string, _params: InferParams): Promise<InferResultContract> {
+async function infer(_prompt: string, _template: string, _params: InferParams): Promise<InferResult> {
   stream.value = "";
   lmState.isRunning = true;
-  lmState.abortController = new AbortController();
   const paramDefaults = {
     prompt: _prompt,
     template: _template,
@@ -13,7 +11,7 @@ async function infer(_prompt: string, _template: string, _params: InferParams): 
   };
   const completionParams = { ...paramDefaults, _prompt };
   const resEl = document.getElementById("infer-block") as HTMLElement;
-  let respData: InferResultContract = {
+  let respData: InferResult = {
     text: "",
     thinkingTime: 0,
     thinkingTimeFormat: "",
@@ -26,7 +24,25 @@ async function infer(_prompt: string, _template: string, _params: InferParams): 
     totalTokens: 0,
   };
 
-  const onChunk = (payload: Record<string, any>) => {
+  api.onToken = (token: string) => {
+    //console.log("T", token);
+    stream.value = stream.value + token;
+    resEl.scrollTop = resEl.scrollHeight;
+    ++inferResults.totalTokens
+  }
+  api.onStartEmit = (s: TempInferStats) => {
+    //console.log("Start emit", s);
+    lmState.isStreaming = true;
+  };
+  api.onError = (msg: string) => {
+    console.error("ERROR", msg)
+  };
+
+  console.log
+
+  respData = await api.infer(_prompt, _template, completionParams)
+
+  /*const onChunk = (payload: Record<string, any>) => {
     const msg: StreamedMessage = {
       num: payload["num"],
       type: payload["msg_type"],
@@ -56,46 +72,35 @@ async function infer(_prompt: string, _template: string, _params: InferParams): 
     completionParams,
     onChunk,
     lmState.abortController,
-  )
-
-  lmState.isStreaming = false;
+  )*/
   lmState.isRunning = false;
+  lmState.isStreaming = false;
   return respData
 }
 
 async function abort() {
-  const res = await api.get("/completion/abort");
-  if (res.ok) {
-    lmState.isRunning = false;
-    lmState.isStreaming = false;
-  }
+  await api.abort();
 }
 
 async function loadModels() {
-  const res = await api.get<ModelStateContract>("/model/state");
+  const res = await api.modelsState();
   //console.log(JSON.stringify(res.data, null, "  "))
-  if (res.ok) {
-    // update state
-    updateModels(res.data.models)
-    if (res.data.isModelLoaded) {
-      if (lmState.model != res.data.loadedModel) {
-        mutateModel(res.data.loadedModel, res.data.ctx);
-      }
+  // update state
+  updateModels(res.models);
+  if (res.isModelLoaded) {
+    if (lmState.model.name != res.loadedModel) {
+      mutateModel({ name: res.loadedModel, ctx: res.ctx });
     }
   }
 }
 
 async function loadTasks(): Promise<Array<Record<string, any>>> {
-  const res = await api.get<Array<Record<string, any>>>("/task/tree");
-  //console.log(JSON.stringify(res.data, null, "  "));
-  if (res.ok) {
-    return res.data
-  }
-  throw new Error("Error loading tasks")
+  return await api.loadTasks();
 }
 
-async function loadTask(path: string) {
-  const payload = {
+async function loadTask(path: string): Promise<Task> {
+  return await api.loadTask(path)
+  /*const payload = {
     path: path
   }
   let task: Task = {
@@ -115,16 +120,13 @@ async function loadTask(path: string) {
       task.inferParams = res.data.inferParams;
     }
   }
-  return task
+  return task*/
 }
 
 async function selectModel(name: string, ctx: number) {
   lmState.isLoadingModel = true;
-  const res = await api.post("/model/load", { name: name, ctx: ctx });
-  if (res.ok) {
-    console.log("MODEL", res.data);
-    mutateModel(name, ctx);
-  }
+  await api.loadModel({ name: name, ctx: ctx });
+  mutateModel({ name: name, ctx: ctx });
   lmState.isLoadingModel = false;
 }
 

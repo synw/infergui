@@ -1,4 +1,4 @@
-import { InferParams } from "../interfaces";
+import { InferParams } from "@goinfer/types"
 
 const defaultInferenceParams: InferParams = {
   stream: true,

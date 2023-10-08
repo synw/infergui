@@ -1,6 +1,6 @@
 <template>
   <div id="params" class="flex flex-col w-full 3xl:max-w-[28rem]">
-    <div id="pform" class="grid w-full grid-cols-2 3xl:grid-cols-3 gap-x-3 gap-y-8">
+    <div id="pform" class="grid w-full grid-cols-2 gap-x-3 gap-y-8 3xl:grid-cols-3">
       <div>
         <span class="p-float-label">
           <InputNumber class="w-8" v-model="inferParams.temperature" inputId="temp" :min="0" :max="2" :step="0.1"
@@ -49,7 +49,7 @@
         </span>
       </div>
     </div>
-    <div class="flex flex-row mt-8 mr-8 space-x-3">
+    <div class="mr-8 mt-8 flex flex-row space-x-3">
       <div class="p-float-label">
         <InputText inputId="stop" v-model="_stop" class="w-full max-w-[8rem] 3xl:max-w-[16rem]" />
         <label for="stop">Stop words</label>
@@ -66,12 +66,12 @@
         <InputText inputId="tokens" class="hidden w-full" />
         <label for="tokens">Tokens</label>
       </div>
-      <div class="mt-5 mr-8">
+      <div class="mr-8 mt-5">
         <Slider v-model="inferParams.tokens" class="w-full" :min="64" :max="lmState.ctx" />
       </div>
       <div class="flex flex-row">
         <div class="p-3 txt-semilight">64</div>
-        <div class="flex justify-center flex-grow p-3">
+        <div class="flex flex-grow justify-center p-3">
           {{ inferParams.tokens }}
         </div>
         <div class="p-3 txt-semilight">{{ lmState.ctx }}</div>
@@ -83,8 +83,6 @@
 <script setup lang="ts">
 import InputNumber from 'primevue/inputnumber';
 import InputText from 'primevue/inputtext';
-import Slider from 'primevue/slider';
-import { lmState } from '@/state';
 import { inferParams } from '@/state';
 import { onMounted, ref, watchEffect } from 'vue';
 

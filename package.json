@@ -5,10 +5,11 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview --port 5173"
   },
   "dependencies": {
     "@docdundee/vue": "^0.0.21",
+    "@goinfer/api": "^0.3.0",
     "@snowind/header": "^0.0.11",
     "@snowind/plugin": "^0.5.0",
     "@snowind/state": "^0.1.0",
@@ -20,11 +21,12 @@
     "modprompt": "^0.0.9",
     "primeicons": "^6.0.1",
     "primevue": "^3.27.0",
-    "restmix": "^0.2.0",
+    "restmix": "^0.3.0",
     "vue": "^3.2.47",
     "vue-router": "4.1.6"
   },
   "devDependencies": {
+    "@goinfer/types": "^0.1.0",
     "@iconify/json": "^2.2.57",
     "@tailwindcss/forms": "^0.5.3",
     "@tailwindcss/typography": "^0.5.10",
@@ -34,7 +36,7 @@
     "autoprefixer": "^10.4.14",
     "path": "^0.12.7",
     "postcss": "^8.4.23",
-    "sass": "^1.62.1",
+    "sass": "^1.69.0",
     "tailwindcss": "^3.3.2",
     "tailwindcss-semantic-colors": "^0.2.0",
     "tslib": "^2.5.0",

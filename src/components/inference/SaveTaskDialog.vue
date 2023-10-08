@@ -14,9 +14,9 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import InputText from 'primevue/inputtext';
-import { api, inferParams, lmState, template } from '@/state';
+import { api, inferParams, template } from '@/state';
 import { loadTasks } from '@/services/api';
-import { Task } from '@/interfaces';
+import { Task } from '@goinfer/types';
 
 const emit = defineEmits(["save"]);
 const tname = ref("");
@@ -24,15 +24,12 @@ const tname = ref("");
 async function save() {
   const payload: Task = {
     name: tname.value,
-    modelConf: {
-      name: lmState.model,
-      ctx: lmState.ctx,
-    },
+    modelConf: api.model,
     template: template.content,
     inferParams: inferParams,
   }
   emit("save", payload)
-  const res = await api.post("/task/save", payload);
+  const res = await api.api.post("/task/save", payload);
   if (res.ok) {
     console.log("Task saved")
   }

@@ -1,18 +1,3 @@
-import { TurnBlock } from "./packages/modprompt/main";
-
-
-interface TemplateInfo {
-  name: string;
-  ctx: number;
-}
-
-interface ModelStateContract {
-  models: Record<string, TemplateInfo>;
-  isModelLoaded: boolean;
-  loadedModel: string;
-  ctx: number;
-}
-
 interface InferResultContract {
   text: string;
   thinkingTime: number;
@@ -75,16 +60,6 @@ interface Task {
   inferParams?: OptionalInferParams
 }
 
-interface TaskPrototype {
-  name: string;
-  prompt: string;
-  inferParams?: OptionalInferParams;
-  template: {
-    shots?: Array<TurnBlock>;
-    system?: string;
-  }
-}
-
 interface BaseTemplate {
   name: string;
   content: string;
@@ -111,8 +86,10 @@ interface StreamedMessage {
 }
 
 export {
-  ModelStateContract,
-  InferResultContract,
+  FormatMode,
+  BaseTemplate,
+  TemporaryInferResult,
+  /*InferResultContract,
   InferParams,
   TemporaryInferResult,
   BaseTemplate,
@@ -120,6 +97,5 @@ export {
   Task,
   FormatMode,
   StreamedMessage,
-  ModelConf,
-  TemplateInfo,
+  ModelConf,*/
 }
