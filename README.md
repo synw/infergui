@@ -10,17 +10,17 @@ A graphical user interface for local language models. Works with the
 Clone and install the dependencies:
 
 ```
-yarn
+npm i
 ```
 
 ## Run
 
 ```
-yarn dev
+npm run dev
 ```
 
 ## Build
 
 ```
-yarn build
+npm build
 ```
