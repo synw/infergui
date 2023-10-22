@@ -2,7 +2,8 @@ import { InferParams } from "@goinfer/types"
 
 const defaultInferenceParams: InferParams = {
   stream: true,
-  threads: 4,
+  threads: 3,
+  gpu_layers: 0,
   n_predict: 512,
   top_k: 40,
   top_p: 0.95,

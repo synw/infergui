@@ -2,13 +2,13 @@ import { reactive, ref, computed } from "vue";
 import { useStorage } from '@vueuse/core';
 import { ApiResponse } from "restmix";
 import { User } from "@snowind/state";
-import { useGoinfer } from "@goinfer/api";
+import { Lm, ModelTemplate } from "@locallm/api";
 import { PromptTemplate } from "modprompt";
 import llamaTokenizer from 'llama-tokenizer-js';
 import { defaultInferenceParams } from '@/const/params';
 import { templates as _templates } from '@/const/templates';
-import { FormatMode, BaseTemplate, TemporaryInferResult } from '@/interfaces';
-import { InferParams, Task, ModelTemplate, ModelConf } from '@goinfer/types';
+import { FormatMode, BaseTemplate, TemporaryInferResult, ApiState } from '@/interfaces';
+import { InferenceParams, ModelConf } from '@locallm/types';
 import { loadModels, loadTasks as _loadTasks, selectModel, infer, abort } from "@/services/api";
 import { msg } from "./services/notify";
 import { useDb } from "./services/db";
@@ -16,20 +16,22 @@ import { getServerUrl } from "./conf";
 
 let timer: ReturnType<typeof setInterval>;
 const user = new User();
-const api = useGoinfer({
+const lm = new Lm({
+  providerType: "goinfer",
   serverUrl: getServerUrl(),
   apiKey: import.meta.env.VITE_API_KEY,
+  onToken: (t) => stream.value += t,
 });
-const db = useDb();
-//const currentModel = useStorage<string>("model", {} as LMContract);
-//const currentTask = useStorage("task", {} as TaskContract);
-const lmState = reactive({
+const lmState = reactive<ApiState>({
   isRunning: false,
   isStreaming: false,
   isModelLoaded: false,
   isLoadingModel: false,
-  model: { name: "", ctx: 2048 } as ModelConf,
+  model: { name: "", ctx: 2048, template: "unknown", gpu_layers: 0 },
 });
+const db = useDb();
+//const currentModel = useStorage<string>("model", {} as LMContract);
+//const currentTask = useStorage("task", {} as TaskContract);
 const stream = ref("");
 const models = reactive<Record<string, ModelTemplate>>({});
 const prompts = reactive<Array<string>>([]);
@@ -38,12 +40,12 @@ const tasks = reactive<Array<Record<string, any>>>([]);
 const presets = reactive<Array<string>>([]);
 const formatMode = useStorage<FormatMode>("formatMode", "Text");
 const settings = reactive({
-  autoLoadTemplates: true
+  autoMaxContext: true
 });
 
 const template = reactive<BaseTemplate>(_templates.alpaca);
 const prompt = ref("");
-const inferParams = reactive(defaultInferenceParams);
+const inferParams = reactive<InferenceParams>(defaultInferenceParams);
 const inferResults = reactive<TemporaryInferResult>({
   tokensPerSecond: 0,
   totalTokens: 0,
@@ -51,13 +53,26 @@ const inferResults = reactive<TemporaryInferResult>({
 const secondsCount = ref(0);
 const promptTokensCount = ref(0);
 const templateTokensCount = ref(0);
+const freeContext = ref(0);
+const totalContext = ref(0);
 
-const freeCtx = computed(() => {
-  return Math.round(api.model.ctx - (promptTokensCount.value + templateTokensCount.value))
-});
+function setFreeContext(forceAuto = false) {
+  const baseContext = promptTokensCount.value + templateTokensCount.value;
+  if (settings.autoMaxContext || forceAuto) {
+    freeContext.value = Math.round(lmState.model.ctx - baseContext);
+    totalContext.value = lmState.model.ctx;
+  } else {
+    if (inferParams.n_predict) {
+      freeContext.value = inferParams.n_predict;
+      totalContext.value = baseContext + inferParams.n_predict;
+    } else {
+      throw new Error("Missing n_predict inference param to set context")
+    }
+  }
+}
 
 function setMaxTokens() {
-  inferParams.n_predict = freeCtx.value;
+  inferParams.n_predict = freeContext.value;
 }
 
 function countPromptTokens() {
@@ -68,6 +83,10 @@ function countPromptTokens() {
 function countTemplateTokens() {
   templateTokensCount.value = llamaTokenizer.encode(template.content).length;
   setMaxTokens();
+}
+
+function setSetting(k: string, v: any) {
+  settings[k] = v
 }
 
 function clearInferResults() {
@@ -89,9 +108,9 @@ async function processInfer() {
   timer = id;
   const res = await infer(prompt.value, template.content, inferParams);
   clearInterval(id);
-  inferResults.thinkingTimeFormat = res.thinkingTimeFormat;
-  inferResults.emitTimeFormat = res.emitTimeFormat;
-  inferResults.totalTimeFormat = res.totalTimeFormat;
+  inferResults.thinkingTimeFormat = res?.stats?.thinkingTimeFormat;
+  inferResults.emitTimeFormat = res?.stats?.emitTimeFormat;
+  inferResults.totalTimeFormat = res?.stats?.totalTimeFormat;
 }
 
 async function stopInfer() {
@@ -120,10 +139,11 @@ async function loadPrompt(name: string) {
   countPromptTokens();
 }
 
-async function loadTask(t: Task) {
-  let ctx = t?.modelConf?.ctx ?? api.model.ctx;
-  if (t?.modelConf?.name != api.model.name) {
-    await selectModel(t?.modelConf?.name ?? "", ctx);
+async function loadTask(t: Record<string, any>) {
+  let ctx = t?.modelConf?.ctx ?? lmState.model.ctx;
+  //let gpu_layers = t?.modelConf.gpu_layers ?? lmState.model.gpu_layers;
+  if (t?.modelConf?.name != lmState.model.name) {
+    await selectModel(t?.modelConf?.name ?? "", ctx, 0, true);
   }
   template.content = t.template;
   countTemplateTokens();
@@ -149,7 +169,8 @@ function checkMaxTokens(ctx: number) {
 }
 
 async function initState() {
-  api.api.onResponse(async <T>(res: ApiResponse<T>): Promise<ApiResponse<T>> => {
+  //console.log("KEY", import.meta.env.VITE_API_KEY);
+  lm.api.onResponse(async <T>(res: ApiResponse<T>): Promise<ApiResponse<T>> => {
     if (!res.ok) {
       if ([401, 403].includes(res.status)) {
         const err = `${res.status} from ${res.url}`;
@@ -176,32 +197,36 @@ async function initState() {
   await loadModels();
 }
 
-function mutateModel(model: ModelConf) {
-  lmState.model = model;
-  lmState.isModelLoaded = true;
+function mutateModel(model: ModelConf, loadTemplate: boolean) {
+  lmState.isLoadingModel = true;
+  //console.log("Mutate model", model);
   if (model.name in models) {
     const modelTemplate = models[model.name];
     if (modelTemplate.name != "unknown") {
       // the model has a generic template
-      if (settings.autoLoadTemplates) {
-        const tpl = new PromptTemplate(modelTemplate.name);
-        loadGenericTemplate(tpl);
-      }
-    } if (modelTemplate.name != "unknown") {
-      // the model has a generic template
-      if (settings.autoLoadTemplates) {
+      if (loadTemplate) {
         const tpl = new PromptTemplate(modelTemplate.name);
         loadGenericTemplate(tpl);
       }
     }
   }
-
-  checkMaxTokens(api.model.ctx);
-  setMaxTokens();
+  lmState.model = {
+    name: model.name,
+    ctx: model.ctx ?? 2048,
+    template: model.template ?? "unknown",
+    gpu_layers: model.gpu_layers,
+  }
+  lmState.isModelLoaded = true;
+  lmState.isLoadingModel = false;
+  checkMaxTokens(lmState.model.ctx);
+  if (settings.autoMaxContext) {
+    setMaxTokens();
+  }
+  setFreeContext(true);
   clearInferResults();
 }
 
-function mutateInferParams(_params: InferParams) {
+function mutateInferParams(_params: InferenceParams) {
   inferParams.frequency_penalty = _params.frequency_penalty;
   inferParams.presence_penalty = _params.presence_penalty;
   inferParams.repeat_penalty = _params.repeat_penalty;
@@ -236,7 +261,7 @@ async function loadPresets() {
 
 export {
   user,
-  api,
+  lm,
   lmState,
   stream,
   models,
@@ -252,9 +277,12 @@ export {
   secondsCount,
   promptTokensCount,
   templateTokensCount,
-  freeCtx,
   formatMode,
+  freeContext,
+  totalContext,
   settings,
+  setSetting,
+  setFreeContext,
   loadCustomTemplate,
   loadGenericTemplate,
   loadPrompt,

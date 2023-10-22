@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "@docdundee/vue": "^0.0.21",
-    "@goinfer/api": "^0.3.0",
+    "@locallm/api": "^0.0.5",
     "@snowind/header": "^0.0.11",
     "@snowind/plugin": "^0.5.0",
     "@snowind/state": "^0.1.0",
@@ -26,8 +26,8 @@
     "vue-router": "4.1.6"
   },
   "devDependencies": {
-    "@goinfer/types": "^0.1.0",
     "@iconify/json": "^2.2.57",
+    "@locallm/types": "^0.0.5",
     "@tailwindcss/forms": "^0.5.3",
     "@tailwindcss/typography": "^0.5.10",
     "@types/node": "^20.4.8",

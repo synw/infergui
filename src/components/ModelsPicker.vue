@@ -23,33 +23,50 @@
           @click="preset(8192)">8192</chip-text>
       </div>
       <div>
-        <InputText :v-model.number="ctx" class="w-full" />
+        <InputNumber v-model="ctx" class="w-64" :useGrouping="false" suffix=" tokens" />
       </div>
       <div>
         <Slider v-model="ctx" class="w-full" :min="32" :max="8192" :step="64" />
+      </div>
+      <div class="text-xl">GPU layers</div>
+      <div class="flex flex-row items-center">
+        <InputNumber v-model="gpuLayers" class="w-64" :useGrouping="false" suffix=" layers" />
+      </div>
+      <div class="text-xl">Template</div>
+      <div class="flex flex-row items-center">
+        <sw-switch v-model:value="loadTemplate" class="switch-success">
+          <div class="ml-2" :class="loadTemplate ? '' : 'txt-light'">
+            Load the {{ templateName }} template
+          </div>
+        </sw-switch>
       </div>
       <div>
         <button class="btn mt-3 w-full success" @click="post()">Load model</button>
       </div>
     </div>
+
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import InputText from 'primevue/inputtext';
+import SwSwitch from "@snowind/switch";
+import InputNumber from 'primevue/inputnumber';
 import Slider from 'primevue/slider';
 import ChipText from "@/widgets/ChipText.vue";
 import { selectModel } from '@/services/api';
-import { templates as _genericTemplates, PromptTemplate } from "modprompt";
-import { loadGenericTemplate, models, settings } from '@/state';
-import { ModelTemplate } from '@goinfer/types';
+import { templates as _genericTemplates } from "modprompt";
+import { models } from '@/state';
+import { ModelTemplate } from '@locallm/api';
 
 const emit = defineEmits(["close"]);
 
 const selectCtx = ref(false);
 const selectedModel = ref("");
 const ctx = ref<number>(2048);
+const templateName = ref("");
+const loadTemplate = ref(true);
+const gpuLayers = ref(0);
 
 function preset(n: number) {
   ctx.value = n;
@@ -59,23 +76,24 @@ async function pickModel(m: string, t: ModelTemplate) {
   //console.log("Pick", m, t);
   selectedModel.value = m;
   if (t.name != "unknown") {
+    ctx.value = t.ctx;
+    templateName.value = t.name;
     // the model has a generic template
-    if (settings.autoLoadTemplates) {
+    /*if (settings.autoLoadTemplates) {
       //const tpl = new PromptTemplate(t.name)
       //loadGenericTemplate(tpl);
       ctx.value = t.ctx;
       await post();
-    }
-  } else {
-    selectCtx.value = true;
+    }*/
   }
+  selectCtx.value = true;
 }
 
 async function post() {
-  emit("close")
-  //console.log("Load", selectedModel.value, ctx.value);
-  await selectModel(selectedModel.value, ctx.value);
-  //console.log("Model loaded");
+  emit("close");
   selectCtx.value = false;
+  //console.log("Load", selectedModel.value, ctx.value);
+  await selectModel(selectedModel.value, ctx.value, gpuLayers.value, loadTemplate.value);
+  //console.log("Model loaded");
 }
 </script>

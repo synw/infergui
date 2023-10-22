@@ -1,25 +1,19 @@
 <template>
-  <div class="flex flex-col space-y-1 overflow-y-auto min-w-[22rem]">
+  <div class="flex min-w-[20rem] flex-col space-y-1 overflow-y-auto">
     <div class="flex flex-row">
-      <sw-switch label="Switch" v-model:value="autoLoadTemplates" class="switch-primary"
-        @update:value="setAutoLoadTemplate()">
+      <sw-switch label="Switch" v-model:value="settings.autoMaxContext" class="switch-primary"
+        @update:value="$emit('close')">
         <div class="ml-2">
-          Auto load templates
+          Auto max context
         </div>
       </sw-switch>
-
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
 import { settings } from "@/state";
 import SwSwitch from "@snowind/switch";
 
-const autoLoadTemplates = ref(false);
-
-function setAutoLoadTemplate() {
-  settings.autoLoadTemplates = autoLoadTemplates.value
-}
+const emit = defineEmits(["close"]);
 </script>

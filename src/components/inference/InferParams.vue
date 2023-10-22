@@ -1,5 +1,5 @@
 <template>
-  <div id="params" class="flex flex-col w-full 3xl:max-w-[28rem]">
+  <div id="params" class="flex w-full flex-col 3xl:max-w-[28rem]">
     <div id="pform" class="grid w-full grid-cols-2 gap-x-3 gap-y-8 3xl:grid-cols-3">
       <div>
         <span class="p-float-label">
@@ -48,45 +48,52 @@
           <label for="repeatPenalty">Repeat Penalty</label>
         </span>
       </div>
-    </div>
-    <div class="mr-8 mt-8 flex flex-row space-x-3">
-      <div class="p-float-label">
-        <InputText inputId="stop" v-model="_stop" class="w-full max-w-[8rem] 3xl:max-w-[16rem]" />
-        <label for="stop">Stop words</label>
-      </div>
       <div>
         <span class="p-float-label">
           <InputNumber class="w-8 txt-lighter" v-model="inferParams.threads" inputId="threads" showButtons />
-          <label for="threads">threads</label>
+          <label for="threads">Threads</label>
         </span>
       </div>
     </div>
-    <!-- div class="mt-5">
+    <div class="mr-8 mt-8 flex flex-row space-x-3">
+      <div class="p-float-label">
+        <InputText inputId="stop" v-model="_stop" class="w-full" />
+        <label for="stop">Stop words</label>
+      </div>
+
+    </div>
+    <div class="mt-8" v-if="!settings.autoMaxContext">
       <div class="p-float-label">
         <InputText inputId="tokens" class="hidden w-full" />
-        <label for="tokens">Tokens</label>
+        <label for="tokens">Max tokens</label>
       </div>
       <div class="mr-8 mt-5">
-        <Slider v-model="inferParams.tokens" class="w-full" :min="64" :max="lmState.ctx" />
+        <Slider v-model="inferParams.n_predict" class="w-full" :min="64" :max="lmState.model.ctx"
+          @slideend="updateCtx($event)" />
       </div>
       <div class="flex flex-row">
         <div class="p-3 txt-semilight">64</div>
         <div class="flex flex-grow justify-center p-3">
-          {{ inferParams.tokens }}
+          {{ inferParams.n_predict }}
         </div>
-        <div class="p-3 txt-semilight">{{ lmState.ctx }}</div>
+        <div class="p-3 txt-semilight">{{ lmState.model.ctx }}</div>
       </div>
-    </div -->
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import InputNumber from 'primevue/inputnumber';
+import Slider from 'primevue/slider';
 import InputText from 'primevue/inputtext';
-import { inferParams } from '@/state';
+import { inferParams, lmState, setFreeContext, settings } from '@/state';
 import { onMounted, ref, watchEffect } from 'vue';
 
 const _stop = ref("");
+
+function updateCtx(evt) {
+  setFreeContext()
+}
 
 onMounted(() => {
   watchEffect(() => {

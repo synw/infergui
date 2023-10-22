@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col space-y-1 overflow-y-auto">
+  <div class="flex flex-col overflow-y-auto">
     <div v-for="prompt in prompts" class="flex flex-row group">
       <div class="justify-start w-2/3 ml-2 truncate">
         <button class="btn" @click="loadPrompt(prompt)">

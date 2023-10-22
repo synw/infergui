@@ -12,7 +12,7 @@
         'slidedown': collapseGen === false,
         'pb-3': collapseGen === false,
       }">
-        <div v-for="t in _genTemplates()" class="flex flex-row items-center space-y-1 group">
+        <div v-for="t in _genTemplates()" class="flex flex-row items-center group">
           <div class="justify-start w-2/3 ml-2 truncate overflow-ellipsis">
             <button class="btn" @click="loadGenericTemplate(t)">
               {{ t.name }}
@@ -32,7 +32,7 @@
         'slideup': collapseCustom === true,
         'slidedown': collapseCustom === false
       }">
-        <div v-for="t in templates" class="flex flex-row items-center space-y-1 group">
+        <div v-for="t in templates" class="flex flex-row items-center group">
           <div class="justify-start w-2/3 ml-2 truncate overflow-ellipsis">
             <button class="btn" @click="loadCustomTemplate(t)">
               {{ t }}

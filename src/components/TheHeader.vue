@@ -11,7 +11,6 @@
               Loading model ..
             </template>
             <template v-else-if="lmState.isModelLoaded">
-              {{ lmState.model.name }} ctx: {{ lmState.model.ctx }}
             </template>
             <template v-else>
               Pick a model&nbsp;<i-carbon:network-4></i-carbon:network-4>
@@ -68,7 +67,7 @@
           @click="toggleSettingsCollapse($event)">
           <i-fluent:settings-32-regular class="text-2xl"></i-fluent:settings-32-regular>
         </button>
-        <OverlayPanel ref="settingsCollapse">
+        <OverlayPanel ref="settingsCollapse" @close="toggleSettingsCollapse">
           <SettingsPopin></SettingsPopin>
         </OverlayPanel>
         <div class="cursor-pointer pr-5 text-lg txt-lighter dark:txt-light" @click="user.toggleDarkMode()">
