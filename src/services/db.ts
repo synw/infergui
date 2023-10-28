@@ -1,8 +1,7 @@
 import localForage from "localforage";
-import { templates as templatesData } from "@/const/templates";
-import { BaseTemplate } from "@/interfaces";
-import type { InferParams } from "@goinfer/types";
+import type { InferenceParams } from "@locallm/types";
 import { defaultInferenceParams } from "@/const/params";
+import { PromptTemplate } from "modprompt";
 
 const useDb = () => {
   const prompts = localForage.createInstance({
@@ -26,9 +25,9 @@ const useDb = () => {
     await templates.ready();
     if (await templates.length() == 0) {
       console.log("The templates db is empty, loading it with prebuilt templates");
-      Object.values(templatesData).forEach((t) => {
+      /*Object.values(templatesData).forEach((t) => {
         setTemplate(t.name, t.content)
-      });
+      });*/
     }
     await presets.ready();
     if ((await presets.length()) <= 1) {
@@ -75,16 +74,13 @@ const useDb = () => {
     await templates.removeItem(k);
   };
 
-  const loadTemplate = async (k: string): Promise<BaseTemplate> => {
+  const loadTemplate = async (k: string): Promise<PromptTemplate> => {
     await templates.ready();
-    const v = await templates.getItem<string>(k);
+    const v = await templates.getItem<PromptTemplate>(k);
     if (!v) {
       throw new Error(`Key ${v} not found`)
     }
-    return {
-      name: k,
-      content: v
-    }
+    return v
   };
 
   const listTemplatesNames = async (): Promise<Array<string>> => {
@@ -96,7 +92,7 @@ const useDb = () => {
     return _t
   }
 
-  const setPreset = async (k: string, v: InferParams) => {
+  const setPreset = async (k: string, v: InferenceParams) => {
     await presets.ready();
     await presets.setItem(k, v);
   };
@@ -115,9 +111,9 @@ const useDb = () => {
     return _t
   }
 
-  const loadPreset = async (k: string): Promise<InferParams> => {
+  const loadPreset = async (k: string): Promise<InferenceParams> => {
     await presets.ready();
-    const v = await presets.getItem<InferParams>(k);
+    const v = await presets.getItem<InferenceParams>(k);
     if (!v) {
       throw new Error(`Key ${v} not found`)
     }

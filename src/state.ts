@@ -1,4 +1,4 @@
-import { reactive, ref, computed } from "vue";
+import { reactive, ref } from "vue";
 import { useStorage } from '@vueuse/core';
 import { ApiResponse } from "restmix";
 import { User } from "@snowind/state";
@@ -6,8 +6,7 @@ import { Lm, ModelTemplate } from "@locallm/api";
 import { PromptTemplate } from "modprompt";
 import llamaTokenizer from 'llama-tokenizer-js';
 import { defaultInferenceParams } from '@/const/params';
-import { templates as _templates } from '@/const/templates';
-import { FormatMode, BaseTemplate, TemporaryInferResult, ApiState } from '@/interfaces';
+import { FormatMode, TemporaryInferResult, ApiState } from '@/interfaces';
 import { InferenceParams, ModelConf } from '@locallm/types';
 import { loadModels, loadTasks as _loadTasks, selectModel, infer, abort } from "@/services/api";
 import { msg } from "./services/notify";
@@ -35,7 +34,7 @@ const db = useDb();
 const stream = ref("");
 const models = reactive<Record<string, ModelTemplate>>({});
 const prompts = reactive<Array<string>>([]);
-const templates = reactive<Array<string>>([]);
+const templates = reactive<Array<PromptTemplate>>([]);
 const tasks = reactive<Array<Record<string, any>>>([]);
 const presets = reactive<Array<string>>([]);
 const formatMode = useStorage<FormatMode>("formatMode", "Text");
@@ -43,7 +42,8 @@ const settings = reactive({
   autoMaxContext: true
 });
 
-const template = reactive<BaseTemplate>(_templates.alpaca);
+const template = ref<PromptTemplate>(new PromptTemplate("none"));
+const renderedTemplate = ref(template.value.render());
 const prompt = ref("");
 const inferParams = reactive<InferenceParams>(defaultInferenceParams);
 const inferResults = reactive<TemporaryInferResult>({
@@ -81,7 +81,7 @@ function countPromptTokens() {
 }
 
 function countTemplateTokens() {
-  templateTokensCount.value = llamaTokenizer.encode(template.content).length;
+  templateTokensCount.value = llamaTokenizer.encode(template.value.render()).length;
   setMaxTokens();
 }
 
@@ -106,7 +106,7 @@ async function processInfer() {
     inferResults.tokensPerSecond = tps;
   }, 1000);
   timer = id;
-  const res = await infer(prompt.value, template.content, inferParams);
+  const res = await infer(prompt.value, template.value.render(), inferParams);
   clearInterval(id);
   inferResults.thinkingTimeFormat = res?.stats?.thinkingTimeFormat;
   inferResults.emitTimeFormat = res?.stats?.emitTimeFormat;
@@ -122,14 +122,14 @@ async function stopInfer() {
 
 async function loadCustomTemplate(name: string) {
   const t = await db.loadTemplate(name);
-  template.name = t.name;
-  template.content = t.content;
-  countTemplateTokens();
+  /*template.value.name = t.name;
+  template.value.content = t.content;
+  countTemplateTokens();*/
 }
 
 async function loadGenericTemplate(t: PromptTemplate) {
-  template.name = t.name;
-  template.content = t.render();
+  template.value = t;
+  renderedTemplate.value = t.render();
   countTemplateTokens();
 }
 
@@ -145,7 +145,7 @@ async function loadTask(t: Record<string, any>) {
   if (t?.modelConf?.name != lmState.model.name) {
     await selectModel(t?.modelConf?.name ?? "", ctx, 0, true);
   }
-  template.content = t.template;
+  template.value = new PromptTemplate(t.template);
   countTemplateTokens();
   const ip = t.inferParams ?? {};
   Object.keys(ip).forEach((p) => {
@@ -193,7 +193,7 @@ async function initState() {
     loadTemplates();
     loadPresets();
   });
-  loadTasks();
+  //loadTasks();
   await loadModels();
 }
 
@@ -245,8 +245,8 @@ async function loadPrompts() {
 }
 
 async function loadTemplates() {
-  const t = await db.listTemplatesNames();
-  templates.splice(0, templates.length, ...t);
+  //const t = await db.listTemplatesNames();
+  //templates.splice(0, templates.length, ...t);
 }
 
 async function loadTasks() {
@@ -271,6 +271,7 @@ export {
   tasks,
   presets,
   template,
+  renderedTemplate,
   prompt,
   inferParams,
   inferResults,

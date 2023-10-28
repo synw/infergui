@@ -1,5 +1,4 @@
 import { lm, mutateModel, stream, inferResults, updateModels, lmState } from "@/state";
-//import type { ModelTemplate, TempInferStats } from "@locallm/api";
 import type { ModelTemplate, TempInferStats } from "@locallm/api";
 import type { InferenceParams, InferenceResult } from "@locallm/types";
 import { msg } from "./notify";

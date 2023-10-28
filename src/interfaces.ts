@@ -28,11 +28,6 @@ interface SafeModelConf {
   inferParams?: OptionalInferParams
 }*/
 
-interface BaseTemplate {
-  name: string;
-  content: string;
-}
-
 /*interface LmPrompt {
   name: string;
   content: string;
@@ -55,7 +50,6 @@ enum MsgType {
 
 export {
   FormatMode,
-  BaseTemplate,
   TemporaryInferResult,
   ApiState,
   /*InferResultContract,

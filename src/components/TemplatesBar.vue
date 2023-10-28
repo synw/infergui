@@ -1,7 +1,7 @@
 <template>
   <div class="flex flex-col">
     <div class="flex flex-col">
-      <button class="flex flex-row space-x-2 text-sm border-b shadow-sm btn bord-lighter"
+      <button class="btn flex flex-row space-x-2 border-b text-sm shadow-sm bord-lighter"
         :class="collapseGen ? 'txt-lighter' : 'txt-light'" @click="collapseGen = !collapseGen">
         <div class="flex-grow">Generic templates</div>
         <div><i-ep:d-caret></i-ep:d-caret></div>
@@ -12,8 +12,8 @@
         'slidedown': collapseGen === false,
         'pb-3': collapseGen === false,
       }">
-        <div v-for="t in _genTemplates()" class="flex flex-row items-center group">
-          <div class="justify-start w-2/3 ml-2 truncate overflow-ellipsis">
+        <div v-for="t in _genTemplates()" class="group flex flex-row items-center">
+          <div class="ml-2 w-2/3 justify-start truncate overflow-ellipsis">
             <button class="btn" @click="loadGenericTemplate(t)">
               {{ t.name }}
             </button>
@@ -22,7 +22,7 @@
       </div>
     </div>
     <div class="flex flex-col">
-      <button class="flex flex-row space-x-2 text-sm border-b shadow-sm btn bord-lighter"
+      <button class="btn flex flex-row space-x-2 border-b text-sm shadow-sm bord-lighter"
         :class="collapseCustom ? 'txt-lighter' : 'txt-light'" @click="collapseCustom = !collapseCustom">
         <div class="flex-grow">Custom templates</div>
         <div><i-ep:d-caret></i-ep:d-caret></div>
@@ -32,15 +32,15 @@
         'slideup': collapseCustom === true,
         'slidedown': collapseCustom === false
       }">
-        <div v-for="t in templates" class="flex flex-row items-center group">
-          <div class="justify-start w-2/3 ml-2 truncate overflow-ellipsis">
-            <button class="btn" @click="loadCustomTemplate(t)">
+        <div v-for="t in templates" class="group flex flex-row items-center">
+          <div class="ml-2 w-2/3 justify-start truncate overflow-ellipsis">
+            <button class="btn" @click="loadCustomTemplate(t.name)">
               {{ t }}
             </button>
           </div>
           <div
-            class="flex flex-row justify-end w-1/3 mr-1 transition-opacity duration-200 opacity-0 group-hover:opacity-100">
-            <confirm-delete @delete="db.delTemplate(t); loadTemplates()"></confirm-delete>
+            class="mr-1 flex w-1/3 flex-row justify-end opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+            <confirm-delete @delete="db.delTemplate(t.name); loadTemplates()"></confirm-delete>
           </div>
         </div>
       </div>

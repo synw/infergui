@@ -1,6 +1,6 @@
-import { InferParams } from "@goinfer/types"
+import { InferenceParams } from "@locallm/types"
 
-const defaultInferenceParams: InferParams = {
+const defaultInferenceParams: InferenceParams = {
   stream: true,
   threads: 3,
   gpu_layers: 0,
@@ -12,7 +12,7 @@ const defaultInferenceParams: InferParams = {
   presence_penalty: 0.0,
   repeat_penalty: 1.0,
   tfs_z: 1.0,
-  stop: [],
+  stop: ["</s>"],
 };
 
 export { defaultInferenceParams }

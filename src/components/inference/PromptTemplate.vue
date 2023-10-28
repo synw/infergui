@@ -14,7 +14,7 @@
         'slidedown': mainCollapse === false,
       }">
         <div>
-          <Textarea v-model="template.content" class="h-48 w-full" />
+          <Textarea v-model="renderedTemplate" class="h-48 w-full" />
         </div>
         <div class="pt-2">
           <Textarea v-model="prompt" class="h-24 w-full" />
@@ -22,13 +22,13 @@
       </div>
       <div class="flex h-1/3 flex-row items-center justify-end space-x-2 pt-3" v-if="lmState.isModelLoaded">
         <div class="flex flex-grow flex-row items-center txt-semilight">
-          <button class="btn px-2" v-show="template.content.length > 0" @click="toggleSaveTask($event)">
+          <button class="btn px-2" v-show="renderedTemplate.length > 0" @click="toggleSaveTask($event)">
             <i-carbon:task-star class="text-2xl"></i-carbon:task-star>
           </button>
           <OverlayPanel ref="saveTaskCollapse">
             <save-task-dialog class="p-3" @save="toggleSaveTask($event)"></save-task-dialog>
           </OverlayPanel>
-          <button class="btn px-2" v-show="template.content.length > 0" @click="toggleSaveTemplate($event)">
+          <button class="btn px-2" v-show="renderedTemplate.length > 0" @click="toggleSaveTemplate($event)">
             <i-bi:menu-up class="text-xl"></i-bi:menu-up>
           </button>
           <OverlayPanel ref="saveTemplateCollapse">
@@ -76,7 +76,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { watchDebounced } from '@vueuse/core';
 import OverlayPanel from 'primevue/overlaypanel';
 import Textarea from 'primevue/textarea';
@@ -87,7 +87,7 @@ import SavePromptDialog from './SavePromptDialog.vue';
 import SaveTemplateDialog from './SaveTemplateDialog.vue';
 import SaveTaskDialog from './SaveTaskDialog.vue';
 import FormatBar from './FormatBar.vue';
-import { template, prompt, countPromptTokens, countTemplateTokens, processInfer } from '@/state';
+import { template, renderedTemplate, prompt, countPromptTokens, countTemplateTokens, processInfer } from '@/state';
 import { hljs } from "@/conf";
 
 const savePromptCollapse = ref();
