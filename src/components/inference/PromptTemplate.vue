@@ -2,7 +2,7 @@
   <div id="infer-block" class="form h-main mb-12 overflow-y-auto px-3">
     <div class="flex w-full flex-col">
       <div class="flex flex-row justify-end">
-        <button class="btn flex flex-row space-x-2 text-sm" @click="mainCollapse = !mainCollapse">
+        <button class="btn flex flex-row space-x-2 text-sm txt-light" @click="mainCollapse = !mainCollapse">
           <div v-if="mainCollapse">Expand</div>
           <div v-else>Collapse</div>
           <div><i-ep:d-caret></i-ep:d-caret></div>
@@ -14,7 +14,7 @@
         'slidedown': mainCollapse === false,
       }">
         <div>
-          <Textarea v-model="renderedTemplate" class="h-48 w-full" />
+          <template-editor :template="(template as PromptTemplate)"></template-editor>
         </div>
         <div class="pt-2">
           <Textarea v-model="prompt" class="h-24 w-full" />
@@ -22,13 +22,13 @@
       </div>
       <div class="flex h-1/3 flex-row items-center justify-end space-x-2 pt-3" v-if="lmState.isModelLoaded">
         <div class="flex flex-grow flex-row items-center txt-semilight">
-          <button class="btn px-2" v-show="renderedTemplate.length > 0" @click="toggleSaveTask($event)">
+          <button class="btn px-2" v-show="template.id != 'none'" @click="toggleSaveTask($event)">
             <i-carbon:task-star class="text-2xl"></i-carbon:task-star>
           </button>
           <OverlayPanel ref="saveTaskCollapse">
             <save-task-dialog class="p-3" @save="toggleSaveTask($event)"></save-task-dialog>
           </OverlayPanel>
-          <button class="btn px-2" v-show="renderedTemplate.length > 0" @click="toggleSaveTemplate($event)">
+          <button class="btn px-2" v-show="template.id != 'none'" @click="toggleSaveTemplate($event)">
             <i-bi:menu-up class="text-xl"></i-bi:menu-up>
           </button>
           <OverlayPanel ref="saveTemplateCollapse">
@@ -76,19 +76,21 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import { watchDebounced } from '@vueuse/core';
 import OverlayPanel from 'primevue/overlaypanel';
 import Textarea from 'primevue/textarea';
 import { RenderMd } from '@docdundee/vue';
-import { clearInferResults, stream, formatMode, lmState } from '@/state';
 import LoadingSpinner from '@/widgets/LoadingSpinner.vue';
 import SavePromptDialog from './SavePromptDialog.vue';
 import SaveTemplateDialog from './SaveTemplateDialog.vue';
 import SaveTaskDialog from './SaveTaskDialog.vue';
 import FormatBar from './FormatBar.vue';
-import { template, renderedTemplate, prompt, countPromptTokens, countTemplateTokens, processInfer } from '@/state';
+import { template, prompt, countPromptTokens, countTemplateTokens, processInfer,clearInferResults, stream, lmState } from '@/state';
 import { hljs } from "@/conf";
+import TemplateEditor from './TemplateEditor.vue';
+import { PromptTemplate } from 'modprompt';
+import { formatMode } from '@/state/settings';
 
 const savePromptCollapse = ref();
 const saveTemplateCollapse = ref();

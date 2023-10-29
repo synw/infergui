@@ -9,9 +9,11 @@ import { defaultInferenceParams } from '@/const/params';
 import { FormatMode, TemporaryInferResult, ApiState } from '@/interfaces';
 import { InferenceParams, ModelConf } from '@locallm/types';
 import { loadModels, loadTasks as _loadTasks, selectModel, infer, abort } from "@/services/api";
-import { msg } from "./services/notify";
-import { useDb } from "./services/db";
-import { getServerUrl } from "./conf";
+import { msg } from "../services/notify";
+import { useDb } from "../services/db";
+import { getServerUrl } from "../conf";
+import { autoMaxContext, selectedPreset } from "./settings";
+import { loadPreset } from "./presets";
 
 let timer: ReturnType<typeof setInterval>;
 const user = new User();
@@ -37,13 +39,9 @@ const prompts = reactive<Array<string>>([]);
 const templates = reactive<Array<PromptTemplate>>([]);
 const tasks = reactive<Array<Record<string, any>>>([]);
 const presets = reactive<Array<string>>([]);
-const formatMode = useStorage<FormatMode>("formatMode", "Text");
-const settings = reactive({
-  autoMaxContext: true
-});
 
 const template = ref<PromptTemplate>(new PromptTemplate("none"));
-const renderedTemplate = ref(template.value.render());
+const stop = ref("");
 const prompt = ref("");
 const inferParams = reactive<InferenceParams>(defaultInferenceParams);
 const inferResults = reactive<TemporaryInferResult>({
@@ -58,7 +56,7 @@ const totalContext = ref(0);
 
 function setFreeContext(forceAuto = false) {
   const baseContext = promptTokensCount.value + templateTokensCount.value;
-  if (settings.autoMaxContext || forceAuto) {
+  if (autoMaxContext.value || forceAuto) {
     freeContext.value = Math.round(lmState.model.ctx - baseContext);
     totalContext.value = lmState.model.ctx;
   } else {
@@ -83,10 +81,6 @@ function countPromptTokens() {
 function countTemplateTokens() {
   templateTokensCount.value = llamaTokenizer.encode(template.value.render()).length;
   setMaxTokens();
-}
-
-function setSetting(k: string, v: any) {
-  settings[k] = v
 }
 
 function clearInferResults() {
@@ -120,16 +114,28 @@ async function stopInfer() {
   lmState.isStreaming = false;
 }
 
+function setStop() {
+  if (inferParams.stop) {
+    stop.value = inferParams.stop.join(",")
+  }
+}
+
 async function loadCustomTemplate(name: string) {
   const t = await db.loadTemplate(name);
+  setStop();
   /*template.value.name = t.name;
   template.value.content = t.content;
   countTemplateTokens();*/
 }
 
-async function loadGenericTemplate(t: PromptTemplate) {
-  template.value = t;
-  renderedTemplate.value = t.render();
+async function loadGenericTemplate(name: string) {
+  template.value = new PromptTemplate(name);
+  if (template.value.stop) {
+    inferParams.stop = template.value.stop
+  } else {
+    inferParams.stop = []
+  }
+  setStop();
   countTemplateTokens();
 }
 
@@ -192,6 +198,7 @@ async function initState() {
     loadPrompts();
     loadTemplates();
     loadPresets();
+    loadPreset(selectedPreset.value);
   });
   //loadTasks();
   await loadModels();
@@ -205,8 +212,7 @@ function mutateModel(model: ModelConf, loadTemplate: boolean) {
     if (modelTemplate.name != "unknown") {
       // the model has a generic template
       if (loadTemplate) {
-        const tpl = new PromptTemplate(modelTemplate.name);
-        loadGenericTemplate(tpl);
+        loadGenericTemplate(modelTemplate.name);
       }
     }
   }
@@ -219,7 +225,7 @@ function mutateModel(model: ModelConf, loadTemplate: boolean) {
   lmState.isModelLoaded = true;
   lmState.isLoadingModel = false;
   checkMaxTokens(lmState.model.ctx);
-  if (settings.autoMaxContext) {
+  if (autoMaxContext.value == true) {
     setMaxTokens();
   }
   setFreeContext(true);
@@ -245,6 +251,7 @@ async function loadPrompts() {
 }
 
 async function loadTemplates() {
+  console.log("LOAD TEMPLATES")
   //const t = await db.listTemplatesNames();
   //templates.splice(0, templates.length, ...t);
 }
@@ -271,18 +278,15 @@ export {
   tasks,
   presets,
   template,
-  renderedTemplate,
+  stop,
   prompt,
   inferParams,
   inferResults,
   secondsCount,
   promptTokensCount,
   templateTokensCount,
-  formatMode,
   freeContext,
   totalContext,
-  settings,
-  setSetting,
   setFreeContext,
   loadCustomTemplate,
   loadGenericTemplate,

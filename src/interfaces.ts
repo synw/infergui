@@ -41,6 +41,8 @@ enum MsgType {
   ErrorMsgType = "error",
 }
 
+type TabType = "prompts" | "templates";
+
 /*interface StreamedMessage {
   content: string;
   num: number;
@@ -52,6 +54,7 @@ export {
   FormatMode,
   TemporaryInferResult,
   ApiState,
+  TabType,
   /*InferResultContract,
   InferParams,
   TemporaryInferResult,

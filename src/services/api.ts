@@ -10,6 +10,11 @@ async function infer(_prompt: string, _template: string, _params: InferenceParam
     ..._params,
   };
   const completionParams: InferenceParams = { ...paramDefaults };
+  if (completionParams.stop) {
+    if (completionParams.stop.length == 0) {
+      delete completionParams.stop;
+    }
+  }
   const resEl = document.getElementById("infer-block") as HTMLElement;
   let respData: InferenceResult = {
     text: "",

@@ -57,12 +57,12 @@
     </div>
     <div class="mr-8 mt-8 flex flex-row space-x-3">
       <div class="p-float-label">
-        <InputText inputId="stop" v-model="_stop" class="w-full" />
+        <InputText inputId="stop" v-model="stop" class="w-full" @focusout="setStopParam()" />
         <label for="stop">Stop words</label>
       </div>
 
     </div>
-    <div class="mt-8" v-if="!settings.autoMaxContext">
+    <div class="mt-8" v-if="!autoMaxContext">
       <div class="p-float-label">
         <InputText inputId="tokens" class="hidden w-full" />
         <label for="tokens">Max tokens</label>
@@ -86,20 +86,17 @@
 import InputNumber from 'primevue/inputnumber';
 import Slider from 'primevue/slider';
 import InputText from 'primevue/inputtext';
-import { inferParams, lmState, setFreeContext, settings } from '@/state';
-import { onMounted, ref, watchEffect } from 'vue';
-
-const _stop = ref("");
+import { inferParams, lmState, setFreeContext, stop } from '@/state';
+import { autoMaxContext } from '@/state/settings';
 
 function updateCtx(evt) {
   setFreeContext()
 }
 
-onMounted(() => {
-  watchEffect(() => {
-    inferParams.stop = _stop.value.split(",")
-  })
-})
+function setStopParam() {
+  inferParams.stop = stop.value.split(",");
+  //console.log("Set stop:", inferParams.stop)
+}
 </script>
 
 <style lang="sass">

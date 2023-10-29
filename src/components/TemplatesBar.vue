@@ -14,7 +14,7 @@
       }">
         <div v-for="t in _genTemplates()" class="group flex flex-row items-center">
           <div class="ml-2 w-2/3 justify-start truncate overflow-ellipsis">
-            <button class="btn" @click="loadGenericTemplate(t)">
+            <button class="btn" @click="loadGenericTemplate(t.id)">
               {{ t.name }}
             </button>
           </div>
