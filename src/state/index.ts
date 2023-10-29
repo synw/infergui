@@ -1,4 +1,4 @@
-import { reactive, ref, computed } from "vue";
+import { reactive, ref } from "vue";
 import { useStorage } from '@vueuse/core';
 import { ApiResponse } from "restmix";
 import { User } from "@snowind/state";
@@ -6,13 +6,14 @@ import { Lm, ModelTemplate } from "@locallm/api";
 import { PromptTemplate } from "modprompt";
 import llamaTokenizer from 'llama-tokenizer-js';
 import { defaultInferenceParams } from '@/const/params';
-import { templates as _templates } from '@/const/templates';
-import { FormatMode, BaseTemplate, TemporaryInferResult, ApiState } from '@/interfaces';
+import { FormatMode, TemporaryInferResult, ApiState } from '@/interfaces';
 import { InferenceParams, ModelConf } from '@locallm/types';
 import { loadModels, loadTasks as _loadTasks, selectModel, infer, abort } from "@/services/api";
-import { msg } from "./services/notify";
-import { useDb } from "./services/db";
-import { getServerUrl } from "./conf";
+import { msg } from "../services/notify";
+import { useDb } from "../services/db";
+import { getServerUrl } from "../conf";
+import { autoMaxContext, selectedPreset } from "./settings";
+import { loadPreset } from "./presets";
 
 let timer: ReturnType<typeof setInterval>;
 const user = new User();
@@ -35,15 +36,12 @@ const db = useDb();
 const stream = ref("");
 const models = reactive<Record<string, ModelTemplate>>({});
 const prompts = reactive<Array<string>>([]);
-const templates = reactive<Array<string>>([]);
+const templates = reactive<Array<PromptTemplate>>([]);
 const tasks = reactive<Array<Record<string, any>>>([]);
 const presets = reactive<Array<string>>([]);
-const formatMode = useStorage<FormatMode>("formatMode", "Text");
-const settings = reactive({
-  autoMaxContext: true
-});
 
-const template = reactive<BaseTemplate>(_templates.alpaca);
+const template = ref<PromptTemplate>(new PromptTemplate("none"));
+const stop = ref("");
 const prompt = ref("");
 const inferParams = reactive<InferenceParams>(defaultInferenceParams);
 const inferResults = reactive<TemporaryInferResult>({
@@ -58,7 +56,7 @@ const totalContext = ref(0);
 
 function setFreeContext(forceAuto = false) {
   const baseContext = promptTokensCount.value + templateTokensCount.value;
-  if (settings.autoMaxContext || forceAuto) {
+  if (autoMaxContext.value || forceAuto) {
     freeContext.value = Math.round(lmState.model.ctx - baseContext);
     totalContext.value = lmState.model.ctx;
   } else {
@@ -81,12 +79,8 @@ function countPromptTokens() {
 }
 
 function countTemplateTokens() {
-  templateTokensCount.value = llamaTokenizer.encode(template.content).length;
+  templateTokensCount.value = llamaTokenizer.encode(template.value.render()).length;
   setMaxTokens();
-}
-
-function setSetting(k: string, v: any) {
-  settings[k] = v
 }
 
 function clearInferResults() {
@@ -106,7 +100,7 @@ async function processInfer() {
     inferResults.tokensPerSecond = tps;
   }, 1000);
   timer = id;
-  const res = await infer(prompt.value, template.content, inferParams);
+  const res = await infer(prompt.value, template.value.render(), inferParams);
   clearInterval(id);
   inferResults.thinkingTimeFormat = res?.stats?.thinkingTimeFormat;
   inferResults.emitTimeFormat = res?.stats?.emitTimeFormat;
@@ -120,16 +114,28 @@ async function stopInfer() {
   lmState.isStreaming = false;
 }
 
-async function loadCustomTemplate(name: string) {
-  const t = await db.loadTemplate(name);
-  template.name = t.name;
-  template.content = t.content;
-  countTemplateTokens();
+function setStop() {
+  if (inferParams.stop) {
+    stop.value = inferParams.stop.join(",")
+  }
 }
 
-async function loadGenericTemplate(t: PromptTemplate) {
-  template.name = t.name;
-  template.content = t.render();
+async function loadCustomTemplate(name: string) {
+  const t = await db.loadTemplate(name);
+  setStop();
+  /*template.value.name = t.name;
+  template.value.content = t.content;
+  countTemplateTokens();*/
+}
+
+async function loadGenericTemplate(name: string) {
+  template.value = new PromptTemplate(name);
+  if (template.value.stop) {
+    inferParams.stop = template.value.stop
+  } else {
+    inferParams.stop = []
+  }
+  setStop();
   countTemplateTokens();
 }
 
@@ -145,7 +151,7 @@ async function loadTask(t: Record<string, any>) {
   if (t?.modelConf?.name != lmState.model.name) {
     await selectModel(t?.modelConf?.name ?? "", ctx, 0, true);
   }
-  template.content = t.template;
+  template.value = new PromptTemplate(t.template);
   countTemplateTokens();
   const ip = t.inferParams ?? {};
   Object.keys(ip).forEach((p) => {
@@ -192,8 +198,9 @@ async function initState() {
     loadPrompts();
     loadTemplates();
     loadPresets();
+    loadPreset(selectedPreset.value);
   });
-  loadTasks();
+  //loadTasks();
   await loadModels();
 }
 
@@ -205,8 +212,7 @@ function mutateModel(model: ModelConf, loadTemplate: boolean) {
     if (modelTemplate.name != "unknown") {
       // the model has a generic template
       if (loadTemplate) {
-        const tpl = new PromptTemplate(modelTemplate.name);
-        loadGenericTemplate(tpl);
+        loadGenericTemplate(modelTemplate.name);
       }
     }
   }
@@ -219,7 +225,7 @@ function mutateModel(model: ModelConf, loadTemplate: boolean) {
   lmState.isModelLoaded = true;
   lmState.isLoadingModel = false;
   checkMaxTokens(lmState.model.ctx);
-  if (settings.autoMaxContext) {
+  if (autoMaxContext.value == true) {
     setMaxTokens();
   }
   setFreeContext(true);
@@ -245,8 +251,9 @@ async function loadPrompts() {
 }
 
 async function loadTemplates() {
-  const t = await db.listTemplatesNames();
-  templates.splice(0, templates.length, ...t);
+  console.log("LOAD TEMPLATES")
+  //const t = await db.listTemplatesNames();
+  //templates.splice(0, templates.length, ...t);
 }
 
 async function loadTasks() {
@@ -271,17 +278,15 @@ export {
   tasks,
   presets,
   template,
+  stop,
   prompt,
   inferParams,
   inferResults,
   secondsCount,
   promptTokensCount,
   templateTokensCount,
-  formatMode,
   freeContext,
   totalContext,
-  settings,
-  setSetting,
   setFreeContext,
   loadCustomTemplate,
   loadGenericTemplate,

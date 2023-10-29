@@ -1,5 +1,4 @@
 import { lm, mutateModel, stream, inferResults, updateModels, lmState } from "@/state";
-//import type { ModelTemplate, TempInferStats } from "@locallm/api";
 import type { ModelTemplate, TempInferStats } from "@locallm/api";
 import type { InferenceParams, InferenceResult } from "@locallm/types";
 import { msg } from "./notify";
@@ -11,6 +10,11 @@ async function infer(_prompt: string, _template: string, _params: InferenceParam
     ..._params,
   };
   const completionParams: InferenceParams = { ...paramDefaults };
+  if (completionParams.stop) {
+    if (completionParams.stop.length == 0) {
+      delete completionParams.stop;
+    }
+  }
   const resEl = document.getElementById("infer-block") as HTMLElement;
   let respData: InferenceResult = {
     text: "",

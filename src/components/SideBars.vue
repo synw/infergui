@@ -17,16 +17,19 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import PromptsBar from './PromptsBar.vue';
 import TemplatesBar from "@/components/TemplatesBar.vue";
 import TasksBar from './TasksBar.vue';
-
-type TabType = "prompts" | "templates";
+import { TabType } from "@/interfaces";
+import { sidebarLeftActiveTab } from "@/state/settings";
 
 const activeBar = ref<TabType>("prompts");
 
 function openTab(t: TabType) {
-  activeBar.value = t
+  activeBar.value = t;
+  sidebarLeftActiveTab.value = t;
 }
+
+onMounted(() => activeBar.value = sidebarLeftActiveTab.value)
 </script>

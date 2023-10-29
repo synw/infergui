@@ -52,7 +52,7 @@
 import { ref } from 'vue';
 import OverlayPanel from 'primevue/overlaypanel';
 import { FormatMode } from "@/interfaces";
-import { formatMode } from "@/state";
+import { formatMode } from "@/state/settings";
 
 const emit = defineEmits(["select"]);
 

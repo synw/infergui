@@ -56,7 +56,7 @@ import Slider from 'primevue/slider';
 import ChipText from "@/widgets/ChipText.vue";
 import { selectModel } from '@/services/api';
 import { templates as _genericTemplates } from "modprompt";
-import { models } from '@/state';
+import { lmState, models } from '@/state';
 import { ModelTemplate } from '@locallm/api';
 
 const emit = defineEmits(["close"]);
@@ -92,8 +92,10 @@ async function pickModel(m: string, t: ModelTemplate) {
 async function post() {
   emit("close");
   selectCtx.value = false;
+  lmState.isLoadingModel = true;
   //console.log("Load", selectedModel.value, ctx.value);
   await selectModel(selectedModel.value, ctx.value, gpuLayers.value, loadTemplate.value);
   //console.log("Model loaded");
+  lmState.isLoadingModel = false;
 }
 </script>

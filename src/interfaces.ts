@@ -28,11 +28,6 @@ interface SafeModelConf {
   inferParams?: OptionalInferParams
 }*/
 
-interface BaseTemplate {
-  name: string;
-  content: string;
-}
-
 /*interface LmPrompt {
   name: string;
   content: string;
@@ -46,6 +41,8 @@ enum MsgType {
   ErrorMsgType = "error",
 }
 
+type TabType = "prompts" | "templates";
+
 /*interface StreamedMessage {
   content: string;
   num: number;
@@ -55,9 +52,9 @@ enum MsgType {
 
 export {
   FormatMode,
-  BaseTemplate,
   TemporaryInferResult,
   ApiState,
+  TabType,
   /*InferResultContract,
   InferParams,
   TemporaryInferResult,
