@@ -12,7 +12,6 @@ declare module '@vue/runtime-core' {
     'IAntDesign:fileMarkdownOutlined': typeof import('~icons/ant-design/file-markdown-outlined')['default']
     'IBi:menuUp': typeof import('~icons/bi/menu-up')['default']
     'ICarbon:network4': typeof import('~icons/carbon/network4')['default']
-    'ICarbon:taskStar': typeof import('~icons/carbon/task-star')['default']
     'ICil:save': typeof import('~icons/cil/save')['default']
     'ICil:text': typeof import('~icons/cil/text')['default']
     'IDashicons:html': typeof import('~icons/dashicons/html')['default']

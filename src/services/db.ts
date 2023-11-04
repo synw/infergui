@@ -1,7 +1,7 @@
 import localForage from "localforage";
 import type { InferenceParams } from "@locallm/types";
 import { defaultInferenceParams } from "@/const/params";
-import { PromptTemplate } from "modprompt";
+import { LmTemplate, PromptTemplate } from "modprompt";
 
 const useDb = () => {
   const prompts = localForage.createInstance({
@@ -23,12 +23,12 @@ const useDb = () => {
       console.log("The prompts db is empty")
     }
     await templates.ready();
-    if (await templates.length() == 0) {
+    /*if (await templates.length() == 0) {
       console.log("The templates db is empty, loading it with prebuilt templates");
-      /*Object.values(templatesData).forEach((t) => {
+      Object.values(templatesData).forEach((t) => {
         setTemplate(t.name, t.content)
-      });*/
-    }
+      });
+    }*/
     await presets.ready();
     if ((await presets.length()) <= 1) {
       console.log("The presets db is empty, loading default");
@@ -64,7 +64,7 @@ const useDb = () => {
     return _p
   };
 
-  const setTemplate = async (k: string, v: string) => {
+  const setTemplate = async (k: string, v: LmTemplate) => {
     await templates.ready();
     await templates.setItem(k, v);
   };
@@ -76,18 +76,18 @@ const useDb = () => {
 
   const loadTemplate = async (k: string): Promise<PromptTemplate> => {
     await templates.ready();
-    const v = await templates.getItem<PromptTemplate>(k);
+    const v = await templates.getItem<LmTemplate>(k);
     if (!v) {
       throw new Error(`Key ${v} not found`)
     }
-    return v
+    return new PromptTemplate(v)
   };
 
-  const listTemplatesNames = async (): Promise<Array<string>> => {
+  const listTemplates = async (): Promise<Array<LmTemplate>> => {
     await templates.ready();
-    const _t = new Array<string>();
+    const _t = new Array<LmTemplate>();
     await templates.iterate((v, k, i) => {
-      _t.push(k)
+      _t.push(v as LmTemplate)
     });
     return _t
   }
@@ -131,7 +131,7 @@ const useDb = () => {
     setPreset,
     delPreset,
     loadPreset,
-    listTemplatesNames,
+    listTemplates,
     listPromptsNames,
     listPresetsNames,
   }

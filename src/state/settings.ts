@@ -7,6 +7,8 @@ const sidebarLeftActiveTab = useStorage<TabType>("sidebarLeftActiveTab", "prompt
 const selectedPreset = useStorage<string>("selectedPreset", "Default");
 const formatMode = useStorage<FormatMode>("formatMode", "Text");
 const cloneTemplateMode = useStorage<boolean>("cloneTemplateMode", false);
+const templateSidebarShowGeneric = useStorage<boolean>("templateSidebarShowGeneric", false);
+const templateSidebarShowCustom = useStorage<boolean>("templateSidebarShowCustom", false);
 
 export {
   autoMaxContext,
@@ -14,4 +16,6 @@ export {
   selectedPreset,
   formatMode,
   cloneTemplateMode,
+  templateSidebarShowCustom,
+  templateSidebarShowGeneric,
 }

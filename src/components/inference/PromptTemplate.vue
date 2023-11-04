@@ -22,16 +22,16 @@
       </div>
       <div class="flex h-1/3 flex-row items-center justify-end space-x-2 pt-3" v-if="lmState.isModelLoaded">
         <div class="flex flex-grow flex-row items-center txt-semilight">
-          <button class="btn px-2" v-show="template.id != 'none'" @click="toggleSaveTask($event)">
+          <!-- button class="btn px-2" v-show="template.id != 'none'" @click="toggleSaveTask($event)">
             <i-carbon:task-star class="text-2xl"></i-carbon:task-star>
           </button>
           <OverlayPanel ref="saveTaskCollapse">
             <save-task-dialog class="p-3" @save="toggleSaveTask($event)"></save-task-dialog>
-          </OverlayPanel>
+          </OverlayPanel -->
           <button class="btn px-2" v-show="template.id != 'none'" @click="toggleSaveTemplate($event)">
             <i-bi:menu-up class="text-xl"></i-bi:menu-up>
           </button>
-          <OverlayPanel ref="saveTemplateCollapse">
+          <OverlayPanel ref="saveTemplateCollapse" @hide="console.log($event)">
             <save-template-dialog class="p-3" @pick="toggleSaveTemplate($event)"></save-template-dialog>
           </OverlayPanel>
           <button class="btn px-2" v-show="prompt.length > 0" @click="toggleSavePrompt($event)">

@@ -10,6 +10,7 @@
   "dependencies": {
     "@docdundee/vue": "^0.0.21",
     "@locallm/api": "^0.0.5",
+    "@ow3/deep-unref-vue": "^0.1.3",
     "@snowind/header": "^0.0.11",
     "@snowind/plugin": "^0.5.0",
     "@snowind/state": "^0.1.0",
@@ -18,9 +19,9 @@
     "highlight.js": "^11.8.0",
     "llama-tokenizer-js": "^1.1.1",
     "localforage": "^1.10.0",
-    "modprompt": "^0.1.1",
+    "modprompt": "^0.1.2",
     "primeicons": "^6.0.1",
-    "primevue": "^3.27.0",
+    "primevue": "^3.39.0",
     "restmix": "^0.3.0",
     "vue": "^3.2.47",
     "vue-router": "4.1.6"

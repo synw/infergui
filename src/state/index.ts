@@ -123,9 +123,8 @@ function setStop() {
 async function loadCustomTemplate(name: string) {
   const t = await db.loadTemplate(name);
   setStop();
-  /*template.value.name = t.name;
-  template.value.content = t.content;
-  countTemplateTokens();*/
+  template.value = t;
+  countTemplateTokens();
 }
 
 async function cloneToGenericTemplate(name: string) {
@@ -262,9 +261,12 @@ async function loadPrompts() {
 }
 
 async function loadTemplates() {
-  console.log("LOAD TEMPLATES")
-  //const t = await db.listTemplatesNames();
-  //templates.splice(0, templates.length, ...t);
+  const t = await db.listTemplates();
+  const tpls = new Array<PromptTemplate>();
+  t.forEach((item) => {
+    tpls.push(new PromptTemplate(item))
+  })
+  templates.splice(0, templates.length, ...tpls);
 }
 
 async function loadTasks() {

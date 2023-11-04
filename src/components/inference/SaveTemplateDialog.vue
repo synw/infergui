@@ -12,7 +12,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, toRaw, unref } from 'vue';
+import { deepUnref } from '@ow3/deep-unref-vue';
 import InputText from 'primevue/inputtext';
 import { db, loadTemplates } from '@/state';
 import { template } from "@/state";
@@ -20,8 +21,24 @@ import { template } from "@/state";
 const emit = defineEmits(["pick"]);
 const tname = ref("");
 
+const slugify = (str: string): string => {
+  return str
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[\W_]+/g, '-')
+    .toLowerCase()
+    .replace(/^-+|-+$/g, '');
+}
+
 async function save() {
-  await db.setTemplate(tname.value, template.content);
+  template.value.name = tname.value;
+  template.value.id = slugify(tname.value);
+  const data = deepUnref(template.value.toJson());
+  if (data.shots) {
+    data.shots = toRaw(data.shots)
+  }
+  //console.log("SAVING DATA", data);
+  await db.setTemplate(template.value.id, data);
   await loadTemplates();
   emit("pick")
 }
