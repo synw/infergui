@@ -14,7 +14,7 @@
         'slidedown': mainCollapse === false,
       }">
         <div>
-          <template-editor :template="(template as PromptTemplate)"></template-editor>
+          <template-editor></template-editor>
         </div>
         <div class="pt-2">
           <Textarea v-model="prompt" class="h-24 w-full" />
@@ -86,7 +86,7 @@ import SavePromptDialog from './SavePromptDialog.vue';
 import SaveTemplateDialog from './SaveTemplateDialog.vue';
 import SaveTaskDialog from './SaveTaskDialog.vue';
 import FormatBar from './FormatBar.vue';
-import { template, prompt, countPromptTokens, countTemplateTokens, processInfer,clearInferResults, stream, lmState } from '@/state';
+import { template, prompt, countPromptTokens, countTemplateTokens, processInfer, clearInferResults, stream, lmState } from '@/state';
 import { hljs } from "@/conf";
 import TemplateEditor from './TemplateEditor.vue';
 import { PromptTemplate } from 'modprompt';

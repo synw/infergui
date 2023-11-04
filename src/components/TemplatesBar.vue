@@ -14,7 +14,7 @@
       }">
         <div v-for="t in _genTemplates()" class="group flex flex-row items-center">
           <div class="ml-2 w-2/3 justify-start truncate overflow-ellipsis">
-            <button class="btn" @click="loadGenericTemplate(t.id)">
+            <button class="btn" @click="_loadGenericTemplate(t.id)">
               {{ t.name }}
             </button>
           </div>
@@ -52,10 +52,19 @@
 import { onBeforeMount, ref } from 'vue';
 import { templates as _genericTemplates, PromptTemplate } from "modprompt";
 import ConfirmDelete from '@/widgets/ConfirmDelete.vue';
-import { db, loadTemplates, templates, loadCustomTemplate, loadGenericTemplate } from '@/state';
+import { db, loadTemplates, templates, loadCustomTemplate, loadGenericTemplate, cloneToGenericTemplate } from '@/state';
+import { cloneTemplateMode } from "@/state/settings";
 
 const collapseGen = ref(false);
 const collapseCustom = ref(false);
+
+function _loadGenericTemplate(name: string) {
+  if (cloneTemplateMode.value === true) {
+    cloneToGenericTemplate(name)
+  } else {
+    loadGenericTemplate(name)
+  }
+}
 
 function _genTemplates(): Array<PromptTemplate> {
   const tpls = new Array<PromptTemplate>();

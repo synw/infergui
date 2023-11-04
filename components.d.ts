@@ -43,6 +43,7 @@ declare module '@vue/runtime-core' {
     SaveTaskDialog: typeof import('./src/components/inference/SaveTaskDialog.vue')['default']
     SaveTemplateDialog: typeof import('./src/components/inference/SaveTemplateDialog.vue')['default']
     SettingsPopin: typeof import('./src/components/SettingsPopin.vue')['default']
+    ShotEditor: typeof import('./src/components/inference/ShotEditor.vue')['default']
     SideBars: typeof import('./src/components/SideBars.vue')['default']
     TasksBar: typeof import('./src/components/TasksBar.vue')['default']
     TemplateEditor: typeof import('./src/components/inference/TemplateEditor.vue')['default']

@@ -47,22 +47,22 @@
           </div>
         </div>
 
-        <div class="mt-2 flex flex-row">
-          <div class="ml-6 w-32">Shots</div>
-          <div class=""></div>
-        </div>
-        <div class="mt-1 flex flex-row">
-          <div class="flex w-32 flex-row items-center justify-center text-sm">User:</div>
-          <div class="w-full">
-            <AutoTextarea class="w-full" :data="template.user" @update="template.user = $event"></AutoTextarea>
+        <div class="mt-2 ml-6 flex flex-row items-center" v-if="showShots">
+          <div class="">Shots:</div>
+          <div class="ml-3 flex flex-row space-x-2">
+            <div v-for="(shot, i) in template.shots" class="rounded-lg lighter px-2 cursor-pointer"
+              @click="startEditShot(i, shot)">
+              # {{ i + 1 }}
+            </div>
           </div>
         </div>
-        <div class="flex flex-row">
-          <div class="flex w-32 flex-row items-center justify-center text-sm">Assistant:</div>
-          <div class="w-full">
-            <AutoTextarea class="w-full" :data="template.assistant" @update="template.assistant = $event" />
-          </div>
-        </div>
+        <template v-if="editShot">
+          <shot-editor class="mt-3" v-if="currentEditedShot.id == -1" @create="saveShot($event);"
+            @cancel="cancelEditShot()"></shot-editor>
+          <shot-editor class="mt-3" :shotId="currentEditedShot.id" :initial="currentEditedShot.block" v-else
+            @update="endEditShot(currentEditedShot.id, $event);" @cancel="cancelEditShot()"
+            @delete="deleteShot(currentEditedShot.id)"></shot-editor>
+        </template>
 
         <template v-if="showParams">
           <div class="mt-2 flex flex-row">
@@ -108,10 +108,10 @@
     <div class="flex flex-row text-sm">
       <div class="ml-6 mt-2 text-base txt-light">Prompt:</div>
       <div class="flex flex-grow flex-row items-center justify-end">
-        <!-- div>
-          <button class="btn text-xs txt-light">
+        <div>
+          <button v-if="tmode == 'edit' && !editShot" class="btn text-xs txt-light" @click="editShot = true">
             Add a shot</button>
-        </div -->
+        </div>
         <div v-if="tmode == 'edit'">
           <button class="btn text-xs txt-light" @click="toggleParams()">
             <span v-if="showParams">Hide</span>
@@ -129,25 +129,32 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watchEffect } from 'vue';
+import { computed, reactive, ref, watchEffect } from 'vue';
 import Textarea from 'primevue/textarea';
 import InputNumber from 'primevue/inputnumber';
-import { PromptTemplate } from 'modprompt';
+import { PromptTemplate, TurnBlock } from 'modprompt';
 import AutoTextarea from '@/widgets/AutoTextarea.vue';
 import { template } from '@/state';
+import ShotEditor from './ShotEditor.vue';
 
-const props = defineProps({
-  template: {
-    type: Object as () => PromptTemplate,
-    required: true,
-  }
-});
 
 const renderedTemplate = ref("{prompt}");
 const tmode = ref<"edit" | "render">("edit");
 const stop = ref("");
 const afterShot = ref("");
 const showParams = ref(false);
+//const shots = new Array<TurnBlock>();
+const editShot = ref(false);
+const currentEditedShot = reactive({
+  id: -1,
+  block: { user: "", assistant: "" } as TurnBlock,
+});
+
+
+function _resetShotsState() {
+  currentEditedShot.id = -1;
+  currentEditedShot.block = { user: "", assistant: "" };
+}
 
 function toggleMode(m: "render" | "edit") {
   tmode.value = m
@@ -157,7 +164,51 @@ function toggleParams() {
   showParams.value = !showParams.value
 }
 
-const showSystemMsg = computed(() => {
+function saveShot(shot: TurnBlock) {
+  template.value.addShot(shot.user, shot.assistant);
+  _resetShotsState();
+  editShot.value = false;
+}
+
+function cancelEditShot() {
+  _resetShotsState();
+  editShot.value = false;
+}
+
+function startEditShot(id: number, shot: TurnBlock) {
+  currentEditedShot.id = id;
+  currentEditedShot.block = shot;
+  editShot.value = true;
+}
+
+function endEditShot(id: number, shot: TurnBlock) {
+  if (!template.value.shots) {
+    throw new Error("No shots in template")
+  }
+  template.value.shots[id] = shot
+  _resetShotsState();
+  editShot.value = false;
+}
+
+function deleteShot(id: number) {
+  template.value.shots?.splice(id, 1);
+  _resetShotsState();
+  editShot.value = false;
+}
+
+const showShots = computed(() => {
+  if (template.value.shots) {
+    if (template.value.shots.length > 0) {
+      return true
+    }
+  }
+  if (editShot.value === true) {
+    return true
+  }
+  return false
+})
+
+/*const showSystemMsg = computed(() => {
   if (template.value.system?.message) {
     return true
   } else {
@@ -166,19 +217,19 @@ const showSystemMsg = computed(() => {
     }
   }
   return false
-})
+})*/
 
 watchEffect(() => {
-  renderedTemplate.value = props.template.render();
+  renderedTemplate.value = template.value.render();
   let hasStop = false;
-  if (props.template?.stop) {
-    if (props.template.stop.length > 0) {
+  if (template.value?.stop) {
+    if (template.value.stop.length > 0) {
       hasStop = true;
-      stop.value = props.template.stop?.join(",")
+      stop.value = template.value.stop?.join(",")
     }
   }
-  if (props.template.afterShot) {
-    afterShot.value = props.template.afterShot.replaceAll("\n", "\\n")
+  if (template.value.afterShot) {
+    afterShot.value = template.value.afterShot.replaceAll("\n", "\\n")
   }
 })
 </script>

@@ -128,6 +128,17 @@ async function loadCustomTemplate(name: string) {
   countTemplateTokens();*/
 }
 
+async function cloneToGenericTemplate(name: string) {
+  template.value = template.value.cloneTo(name);
+  if (template.value.stop) {
+    inferParams.stop = template.value.stop
+  } else {
+    inferParams.stop = []
+  }
+  setStop();
+  countTemplateTokens();
+}
+
 async function loadGenericTemplate(name: string) {
   template.value = new PromptTemplate(name);
   if (template.value.stop) {
@@ -290,6 +301,7 @@ export {
   setFreeContext,
   loadCustomTemplate,
   loadGenericTemplate,
+  cloneToGenericTemplate,
   loadPrompt,
   checkMaxTokens,
   countPromptTokens,
