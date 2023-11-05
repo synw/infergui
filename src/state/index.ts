@@ -1,26 +1,27 @@
 import { reactive, ref } from "vue";
-import { useStorage } from '@vueuse/core';
 import { ApiResponse } from "restmix";
 import { User } from "@snowind/state";
 import { Lm, ModelTemplate } from "@locallm/api";
+//import { Lm } from "@/packages/locallm/api";
+//import { ModelTemplate } from "@/packages/locallm/providers/goinfer/interfaces";
 import { PromptTemplate } from "modprompt";
 import llamaTokenizer from 'llama-tokenizer-js';
 import { defaultInferenceParams } from '@/const/params';
-import { FormatMode, TemporaryInferResult, ApiState } from '@/interfaces';
+import { TemporaryInferResult, ApiState, LmBackend } from '@/interfaces';
 import { InferenceParams, ModelConf } from '@locallm/types';
-import { loadModels, loadTasks as _loadTasks, selectModel, infer, abort } from "@/services/api";
+import { loadModels, loadTasks as _loadTasks, selectModel, infer, abort, probeBackend } from "@/services/api";
 import { msg } from "../services/notify";
 import { useDb } from "../services/db";
-import { getServerUrl } from "../conf";
 import { autoMaxContext, selectedPreset } from "./settings";
 import { loadPreset } from "./presets";
+import { defaultBackends } from "@/const/backends";
 
 let timer: ReturnType<typeof setInterval>;
 const user = new User();
-const lm = new Lm({
-  providerType: "goinfer",
-  serverUrl: getServerUrl(),
-  apiKey: import.meta.env.VITE_API_KEY,
+let lm = new Lm({
+  providerType: defaultBackends[0].providerType,
+  serverUrl: defaultBackends[0].serverUrl,
+  apiKey: defaultBackends[0].apiKey,
   onToken: (t) => stream.value += t,
 });
 const lmState = reactive<ApiState>({
@@ -31,8 +32,8 @@ const lmState = reactive<ApiState>({
   model: { name: "", ctx: 2048, template: "unknown", gpu_layers: 0 },
 });
 const db = useDb();
-//const currentModel = useStorage<string>("model", {} as LMContract);
-//const currentTask = useStorage("task", {} as TaskContract);
+const backends = reactive<Record<string, LmBackend>>({});
+const activeBackend = ref<LmBackend | null>(null);
 const stream = ref("");
 const models = reactive<Record<string, ModelTemplate>>({});
 const prompts = reactive<Array<string>>([]);
@@ -53,6 +54,10 @@ const promptTokensCount = ref(0);
 const templateTokensCount = ref(0);
 const freeContext = ref(0);
 const totalContext = ref(0);
+
+function getLm(): Lm {
+  return lm
+}
 
 function setFreeContext(forceAuto = false) {
   const baseContext = promptTokensCount.value + templateTokensCount.value;
@@ -169,6 +174,20 @@ async function loadTask(t: Record<string, any>) {
   });
 }
 
+async function loadBackends() {
+  const _backends = await db.listBackends();
+  if (_backends.length > 0) {
+    console.log("Setting default local backends");
+    defaultBackends.forEach(async (b) => {
+      await db.setBackend(b.name, b)
+    });
+  }
+  _backends.forEach((b) => {
+    backends[b.name] = b;
+  });
+  //console.log("BACKENDS", backends);
+}
+
 function updateModels(_models: Record<string, ModelTemplate>) {
   for (const m in models) {
     delete models[m]
@@ -182,6 +201,26 @@ function checkMaxTokens(ctx: number) {
   if ((inferParams.n_predict ?? 0) > ctx) {
     inferParams.n_predict = ctx - 64;
   }
+}
+
+async function loadBackend(_lm: Lm, _b: LmBackend) {
+  lm = new Lm({
+    providerType: _lm.providerType,
+    serverUrl: _lm.serverUrl,
+    apiKey: _lm.apiKey,
+    onToken: (t) => stream.value += t,
+  });
+  if (_lm.providerType == "goinfer") {
+    await loadModels();
+  } else if (_lm.providerType == "koboldcpp") {
+    const model: ModelConf = {
+      name: _lm.model.name,
+      ctx: _lm.model.ctx,
+    }
+    mutateModel(model, false);
+  }
+  backends[_b.name].enabled = true;
+  activeBackend.value = _b;
 }
 
 async function initState() {
@@ -205,13 +244,18 @@ async function initState() {
     return res
   });
   db.init().then(async () => {
+    loadBackends().then(async () => {
+      const res = await probeBackend(Object.values(backends));
+      if (res !== null) {
+        loadBackend(res.lm, res.backend)
+      }
+    });
     loadPrompts();
     loadTemplates();
     loadPresets();
     loadPreset(selectedPreset.value);
   });
   //loadTasks();
-  await loadModels();
 }
 
 function mutateModel(model: ModelConf, loadTemplate: boolean) {
@@ -281,7 +325,7 @@ async function loadPresets() {
 
 export {
   user,
-  lm,
+  backends,
   lmState,
   stream,
   models,
@@ -300,6 +344,7 @@ export {
   templateTokensCount,
   freeContext,
   totalContext,
+  activeBackend,
   setFreeContext,
   loadCustomTemplate,
   loadGenericTemplate,
@@ -320,4 +365,6 @@ export {
   processInfer,
   stopInfer,
   updateModels,
+  loadBackend,
+  getLm,
 }

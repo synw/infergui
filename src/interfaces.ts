@@ -21,6 +21,14 @@ interface SafeModelConf {
   gpu_layers?: number;
 }
 
+interface LmBackend {
+  name: string;
+  providerType: LmBackendType;
+  serverUrl: string;
+  apiKey: string;
+  enabled: boolean;
+}
+
 /*interface Task {
   name: string;
   template: string;
@@ -32,6 +40,8 @@ interface SafeModelConf {
   name: string;
   content: string;
 }*/
+
+type LmBackendType = "koboldcpp" | "goinfer";
 
 type FormatMode = "Html" | "Text" | "Markdown" | "Json";
 
@@ -55,6 +65,8 @@ export {
   TemporaryInferResult,
   ApiState,
   TabType,
+  LmBackend,
+  LmBackendType,
   /*InferResultContract,
   InferParams,
   TemporaryInferResult,

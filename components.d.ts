@@ -7,6 +7,7 @@ export {}
 
 declare module '@vue/runtime-core' {
   export interface GlobalComponents {
+    BackendsPopin: typeof import('./src/components/BackendsPopin.vue')['default']
     FormatBar: typeof import('./src/components/inference/FormatBar.vue')['default']
     'IAkarIcons:cross': typeof import('~icons/akar-icons/cross')['default']
     'IAntDesign:fileMarkdownOutlined': typeof import('~icons/ant-design/file-markdown-outlined')['default']
@@ -32,6 +33,7 @@ declare module '@vue/runtime-core' {
     InferResult: typeof import('./src/components/inference/InferResult.vue')['default']
     InferStats: typeof import('./src/components/inference/InferStats.vue')['default']
     'ITabler:prompt': typeof import('~icons/tabler/prompt')['default']
+    'IUil:server': typeof import('~icons/uil/server')['default']
     ModelsPicker: typeof import('./src/components/ModelsPicker.vue')['default']
     PresetsPicker: typeof import('./src/components/PresetsPicker.vue')['default']
     PromptsBar: typeof import('./src/components/PromptsBar.vue')['default']

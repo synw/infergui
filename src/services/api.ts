@@ -1,7 +1,49 @@
-import { lm, mutateModel, stream, inferResults, updateModels, lmState } from "@/state";
-import type { ModelTemplate, TempInferStats } from "@locallm/api";
+import { getLm, mutateModel, stream, inferResults, updateModels, lmState } from "@/state";
+import { Lm, type ModelTemplate, type TempInferStats } from "@locallm/api";
+//import { Lm } from "@/packages/locallm/api";
+//import { type ModelTemplate, type TempInferStats } from "@/packages/locallm/providers/goinfer/interfaces";
 import type { InferenceParams, InferenceResult } from "@locallm/types";
 import { msg } from "./notify";
+import { LmBackend } from "@/interfaces";
+
+async function probeBackend(backends: Array<LmBackend>): Promise<{ lm: Lm, backend: LmBackend } | null> {
+  console.log("Probing backends");
+  for (const [k, v] of Object.entries(backends)) {
+    const _lm = new Lm({
+      providerType: v.providerType,
+      serverUrl: v.serverUrl,
+      apiKey: v.apiKey,
+      onToken: (t) => stream.value += t,
+    });
+    switch (v.providerType) {
+      case "goinfer":
+        try {
+          await _lm.modelsInfo();
+          console.log(`Provider ${v.name} up`);
+          return { lm: _lm, backend: v }
+        } catch (e) {
+          console.log(`Provider ${v.name} down`, e)
+        }
+        break;
+      case "koboldcpp":
+        try {
+          await _lm.loadModel("");
+          if (_lm.model.name.length > 0) {
+            console.log(`Provider ${v.name} up`)
+            return { lm: _lm, backend: v }
+          } else {
+            console.log(`Provider ${v.name} down`)
+          }
+        } catch (e) {
+          console.log(`Provider ${v.name} down`, e)
+        }
+        break;
+      default:
+        throw new Error("Unknown provider type")
+    }
+  }
+  return null
+}
 
 async function infer(_prompt: string, _template: string, _params: InferenceParams): Promise<InferenceResult> {
   stream.value = "";
@@ -31,6 +73,8 @@ async function infer(_prompt: string, _template: string, _params: InferenceParam
     }
   };
 
+  const lm = getLm();
+
   lm.onToken = (token: string) => {
     stream.value = stream.value + token;
     resEl.scrollTop = resEl.scrollHeight;
@@ -53,10 +97,12 @@ async function infer(_prompt: string, _template: string, _params: InferenceParam
 }
 
 async function abort() {
+  const lm = getLm();
   await lm.abort();
 }
 
 async function loadModels() {
+  const lm = getLm();
   await lm.modelsInfo();
   const mt: Record<string, ModelTemplate> = {};
   lm.models.forEach((mc) => {
@@ -106,6 +152,7 @@ async function loadTask(path: string): Promise<void> {
 
 async function selectModel(name: string, ctx: number, gpu_layers?: number, load_template: boolean = true) {
   try {
+    const lm = getLm();
     await lm.loadModel(name, ctx, "", gpu_layers);
   } catch (e) {
     if (e == "Error: the model is already loaded") {
@@ -116,4 +163,4 @@ async function selectModel(name: string, ctx: number, gpu_layers?: number, load_
   mutateModel({ name: name, ctx: ctx, gpu_layers: gpu_layers }, load_template);
 }
 
-export { infer, abort, loadModels, selectModel, loadTasks, loadTask }
+export { infer, abort, loadModels, selectModel, loadTasks, loadTask, probeBackend }

@@ -2,6 +2,7 @@ import localForage from "localforage";
 import type { InferenceParams } from "@locallm/types";
 import { defaultInferenceParams } from "@/const/params";
 import { LmTemplate, PromptTemplate } from "modprompt";
+import { LmBackend } from "@/interfaces";
 
 const useDb = () => {
   const prompts = localForage.createInstance({
@@ -16,6 +17,10 @@ const useDb = () => {
     driver: localForage.INDEXEDDB,
     storeName: 'presets',
   });
+  const backends = localForage.createInstance({
+    driver: localForage.INDEXEDDB,
+    storeName: 'backends',
+  });
 
   const init = async () => {
     await prompts.ready();
@@ -23,13 +28,8 @@ const useDb = () => {
       console.log("The prompts db is empty")
     }
     await templates.ready();
-    /*if (await templates.length() == 0) {
-      console.log("The templates db is empty, loading it with prebuilt templates");
-      Object.values(templatesData).forEach((t) => {
-        setTemplate(t.name, t.content)
-      });
-    }*/
     await presets.ready();
+    await backends.ready();
     if ((await presets.length()) <= 1) {
       console.log("The presets db is empty, loading default");
       setPreset("Default", defaultInferenceParams)
@@ -120,6 +120,20 @@ const useDb = () => {
     return v
   };
 
+  const setBackend = async (k: string, v: LmBackend) => {
+    await backends.ready();
+    await backends.setItem(k, v);
+  };
+
+  const listBackends = async (): Promise<Array<LmBackend>> => {
+    await backends.ready();
+    const _t = new Array<LmBackend>();
+    await backends.iterate((v, k, i) => {
+      _t.push(v as LmBackend)
+    });
+    return _t
+  }
+
   return {
     init,
     setPrompt,
@@ -134,6 +148,8 @@ const useDb = () => {
     listTemplates,
     listPromptsNames,
     listPresetsNames,
+    setBackend,
+    listBackends,
   }
 }
 
