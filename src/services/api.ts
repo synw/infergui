@@ -89,6 +89,7 @@ async function infer(_prompt: string, _template: string, _params: InferenceParam
     lmState.isRunning = true;
     console.error("ERROR", msg)
   };
+  //console.log("PARAMS", JSON.stringify(completionParams, null, "  "));
   lmState.isRunning = true;
   respData = await lm.infer(_prompt, completionParams)
   lmState.isStreaming = false;

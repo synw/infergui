@@ -75,7 +75,7 @@ function setFreeContext(forceAuto = false) {
 }
 
 function setMaxTokens() {
-  inferParams.n_predict = freeContext.value;
+  inferParams.n_predict = freeContext.value - 10;
 }
 
 function countPromptTokens() {
@@ -210,14 +210,15 @@ async function loadBackend(_lm: Lm, _b: LmBackend) {
     apiKey: _lm.apiKey,
     onToken: (t) => stream.value += t,
   });
-  if (_lm.providerType == "goinfer") {
+  if (lm.providerType == "goinfer") {
     await loadModels();
-  } else if (_lm.providerType == "koboldcpp") {
+  } else if (lm.providerType == "koboldcpp") {
     const model: ModelConf = {
       name: _lm.model.name,
       ctx: _lm.model.ctx,
     }
     mutateModel(model, false);
+    lm.model = model;
   }
   backends[_b.name].enabled = true;
   activeBackend.value = _b;
@@ -276,6 +277,7 @@ function mutateModel(model: ModelConf, loadTemplate: boolean) {
     template: model.template ?? "unknown",
     gpu_layers: model.gpu_layers,
   }
+  //console.log("State model", lmState.model);
   lmState.isModelLoaded = true;
   lmState.isLoadingModel = false;
   checkMaxTokens(lmState.model.ctx);

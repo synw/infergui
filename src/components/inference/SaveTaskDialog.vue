@@ -14,7 +14,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import InputText from 'primevue/inputtext';
-import { lmState, inferParams, template, lm } from '@/state';
+import { lmState, inferParams, template } from '@/state';
 import { loadTasks } from '@/services/api';
 //import { Task } from '@goinfer/types';
 
@@ -25,14 +25,14 @@ async function save() {
   const payload = {
     name: tname.value,
     modelConf: lmState.model,
-    template: template.content,
+    template: template.value.render(),
     inferParams: inferParams,
   }
   emit("save", payload)
-  const res = await lm.api.post("/task/save", payload);
+  /*const res = await lm.api.post("/task/save", payload);
   if (res.ok) {
     console.log("Task saved")
   }
-  loadTasks()
+  loadTasks()*/
 }
 </script>

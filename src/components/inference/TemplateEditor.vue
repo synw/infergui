@@ -50,8 +50,8 @@
         <div class="mt-2 ml-6 flex flex-row items-center" v-if="showShots">
           <div class="">Shots:</div>
           <div class="ml-3 flex flex-row space-x-2">
-            <div v-for="(shot, i) in template.shots" class="rounded-lg lighter px-2 cursor-pointer"
-              @click="startEditShot(i, shot)">
+            <div v-for="(shot, i) in template.shots" class="rounded-lg px-2 cursor-pointer"
+              :class="currentEditedShot.id == i ? 'light' : 'lighter'" @click="startEditShot(i, shot)">
               # {{ i + 1 }}
             </div>
           </div>
@@ -136,6 +136,7 @@ import { PromptTemplate, TurnBlock } from 'modprompt';
 import AutoTextarea from '@/widgets/AutoTextarea.vue';
 import { template } from '@/state';
 import ShotEditor from './ShotEditor.vue';
+import { nextTick } from 'process';
 
 
 const renderedTemplate = ref("{prompt}");
@@ -176,9 +177,18 @@ function cancelEditShot() {
 }
 
 function startEditShot(id: number, shot: TurnBlock) {
-  currentEditedShot.id = id;
-  currentEditedShot.block = shot;
-  editShot.value = true;
+  if (id == currentEditedShot.id) {
+    _resetShotsState();
+    editShot.value = false;
+    return
+  }
+  editShot.value = false;
+  nextTick(() => {
+    currentEditedShot.id = id;
+    currentEditedShot.block = shot;
+    editShot.value = true;
+  })
+
 }
 
 function endEditShot(id: number, shot: TurnBlock) {
