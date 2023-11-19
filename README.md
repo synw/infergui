@@ -1,7 +1,9 @@
 # Infer gui
 
-A graphical user interface for local language models. Works with the
-[Goinfer](https://github.com/synw/goinfer) api server
+A graphical user interface for local language models. Supported backends:
+
+- [Koboldcpp](https://github.com/LostRuins/koboldcpp)
+- [Goinfer](https://github.com/synw/goinfer)
 
 ![Screenshot](/docs/screenshot.png)
 
