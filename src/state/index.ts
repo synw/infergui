@@ -80,7 +80,13 @@ function setMaxTokens() {
 }
 
 function countPromptTokens() {
-  promptTokensCount.value = llamaTokenizer.encode(prompt.value).length;
+  let v = prompt.value;
+  if (lmState.isModelMultimodal) {
+    if (inferParams.image_data) {
+      v += inferParams.image_data[0].data;
+    }
+  }
+  promptTokensCount.value = llamaTokenizer.encode(v).length;
   setMaxTokens();
 }
 

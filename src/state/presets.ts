@@ -11,6 +11,7 @@ async function savePreset(name: string) {
 }
 
 async function loadPreset(preset: string) {
+  //console.log("Loading preset", preset);
   const params = await db.loadPreset(preset);
   mutateInferParams(params);
   selectedPreset.value = preset;

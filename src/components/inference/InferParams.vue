@@ -10,7 +10,7 @@
       </div>
       <div>
         <span class="p-float-label">
-          <InputNumber class="w-8" v-model="inferParams.tfs_z" inputId="tfs" :min="0" :max="2" :step="0.1" showButtons />
+          <InputNumber class="w-8" v-model="inferParams.tfs" inputId="tfs" :min="0" :max="2" :step="0.1" showButtons />
           <label for="tfs">Tfs</label>
         </span>
       </div>
@@ -48,7 +48,7 @@
           <label for="repeatPenalty">Repeat Penalty</label>
         </span>
       </div>
-      <div>
+      <div v-if="isGoinfer">
         <span class="p-float-label">
           <InputNumber class="w-8 txt-lighter" v-model="inferParams.threads" inputId="threads" showButtons />
           <label for="threads">Threads</label>
@@ -68,13 +68,13 @@
         <label for="tokens">Max tokens</label>
       </div>
       <div class="mr-8 mt-5">
-        <Slider v-model="inferParams.n_predict" class="w-full" :min="64" :max="lmState.model.ctx"
+        <Slider v-model="inferParams.max_tokens" class="w-full" :min="64" :max="lmState.model.ctx"
           @slideend="updateCtx($event)" />
       </div>
       <div class="flex flex-row">
         <div class="p-3 txt-semilight">64</div>
         <div class="flex flex-grow justify-center p-3">
-          {{ inferParams.n_predict }}
+          {{ inferParams.max_tokens }}
         </div>
         <div class="p-3 txt-semilight">{{ lmState.model.ctx }}</div>
       </div>
@@ -86,8 +86,11 @@
 import InputNumber from 'primevue/inputnumber';
 import Slider from 'primevue/slider';
 import InputText from 'primevue/inputtext';
-import { inferParams, lmState, setFreeContext, stop } from '@/state';
+import { getLm, inferParams, lmState, setFreeContext, stop } from '@/state';
 import { autoMaxContext } from '@/state/settings';
+import { computed } from 'vue';
+
+const isGoinfer = computed(() => getLm().providerType == "goinfer");
 
 function updateCtx(evt) {
   setFreeContext()

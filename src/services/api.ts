@@ -7,7 +7,7 @@ import { msg } from "./notify";
 import { LmBackend } from "@/interfaces";
 
 async function probeBackend(backends: Array<LmBackend>): Promise<{ lm: Lm, backend: LmBackend } | null> {
-  console.log("Probing backends", backends);
+  //console.log("Probing backends", backends);
   for (const [k, v] of Object.entries(backends)) {
     const _lm = new Lm({
       providerType: v.providerType,
@@ -15,7 +15,7 @@ async function probeBackend(backends: Array<LmBackend>): Promise<{ lm: Lm, backe
       apiKey: v.apiKey,
       onToken: (t) => stream.value += t,
     });
-    console.log("Probing", v)
+    //console.log("Probing", v)
     switch (v.providerType) {
       case "llamacpp":
         try {
