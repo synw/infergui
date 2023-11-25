@@ -1,10 +1,10 @@
-import { reactive, ref } from "vue";
+import { computed, reactive, ref } from "vue";
 import { ApiResponse } from "restmix";
 import { User } from "@snowind/state";
 import { Lm } from "@locallm/api";
 //import { Lm } from "@/packages/locallm/api";
 //import { ModelTemplate } from "@/packages/locallm/providers/goinfer/interfaces";
-import { PromptTemplate } from "modprompt";
+import { PromptTemplate, TurnBlock } from "modprompt";
 import llamaTokenizer from 'llama-tokenizer-js';
 import { defaultInferenceParams } from '@/const/params';
 import { TemporaryInferResult, ApiState, LmBackend } from '@/interfaces';
@@ -36,6 +36,7 @@ const db = useDb();
 const backends = reactive<Record<string, LmBackend>>({});
 const activeBackend = ref<LmBackend | null>(null);
 const stream = ref("");
+const history = reactive<Array<TurnBlock>>([]);
 const models = reactive<Record<string, ModelTemplate>>({});
 const prompts = reactive<Array<string>>([]);
 const templates = reactive<Array<PromptTemplate>>([]);
@@ -104,6 +105,10 @@ function clearInferResults() {
   secondsCount.value = 0;
 }
 
+function clearHistory() {
+  history.splice(0, history.length);
+}
+
 async function processInfer() {
   // TODO: improve this quick fix
   if (lm.providerType == "llamacpp") {
@@ -116,7 +121,17 @@ async function processInfer() {
     inferResults.tokensPerSecond = tps;
   }, 1000);
   timer = id;
+  // process history
+  if (history.length > 0) {
+    history.forEach((turn) => {
+      template.value.addShot(turn.user, turn.assistant);
+    });
+  }
   const res = await infer(prompt.value, template.value.render(), inferParams);
+  //console.log("RES", res)
+  history.push({ user: prompt.value, assistant: stream.value.trim() });
+  stream.value = "";
+  prompt.value = "";
   clearInterval(id);
   inferResults.thinkingTimeFormat = res?.stats?.thinkingTimeFormat;
   inferResults.emitTimeFormat = res?.stats?.emitTimeFormat;
@@ -343,11 +358,24 @@ async function loadPresets() {
   presets.splice(0, presets.length, ...p);
 }
 
+const lockTemplate = computed(() => {
+  const hl = history.length;
+  if (hl > 0) {
+    return true
+  } else {
+    if (lmState.isRunning) {
+      return true
+    }
+  }
+  return false
+})
+
 export {
   user,
   backends,
   lmState,
   stream,
+  history,
   models,
   db,
   prompts,
@@ -379,6 +407,7 @@ export {
   loadPrompts,
   loadTemplates,
   clearInferResults,
+  clearHistory,
   loadTasks,
   loadTask,
   loadPresets,
@@ -387,4 +416,5 @@ export {
   updateModels,
   loadBackend,
   getLm,
+  lockTemplate,
 }

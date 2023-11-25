@@ -2,25 +2,62 @@
   <div id="infer-block" class="form h-main mb-12 overflow-y-auto px-3">
     <div class="flex w-full flex-col">
       <div class="flex flex-row justify-end">
-        <button class="btn flex flex-row space-x-2 text-sm txt-light" @click="mainCollapse = !mainCollapse">
-          <div v-if="mainCollapse">Expand</div>
-          <div v-else>Collapse</div>
+        <button class="btn flex flex-row space-x-2 text-sm txt-light" @click="collapseTemplate = !collapseTemplate">
+          <div v-if="collapseTemplate">Expand template</div>
+          <div v-else>Collapse template</div>
           <div><i-ep:d-caret></i-ep:d-caret></div>
         </button>
       </div>
       <div :class="{
         'slide-y': true,
-        'slideup': mainCollapse === true,
-        'slidedown': mainCollapse === false,
+        'slideup': collapseTemplate === true,
+        'slidedown': collapseTemplate === false,
       }">
         <div>
-          <template-editor></template-editor>
-        </div>
-        <div class="pt-2">
-          <Textarea v-model="prompt" class="h-24 w-full" />
+          <template-editor :is-locked="lockTemplate"></template-editor>
         </div>
       </div>
-      <div class="flex h-1/3 flex-row items-center justify-end space-x-2 pt-3" v-if="lmState.isModelLoaded">
+
+      <div v-if="history.length > 0" class="flex flex-col space-y-3 mb-8 mt-5 mx-5">
+        <template v-for="turn in history">
+          <template v-if="formatMode == 'Html'">
+            <div class="text-justify txt-light"
+              v-html="turn.user.replaceAll('\n', '<br />').replaceAll('\t', '&nbsp;&nbsp;')"></div>
+            <div class="text-justify" v-html="turn.assistant.replaceAll('\n', '<br />').replaceAll('\t', '&nbsp;&nbsp;')">
+            </div>
+          </template>
+          <template v-else-if="formatMode == 'Text'">
+            <pre class="txt-light">{{ turn.user }}</pre>
+            <pre>{{ turn.assistant }}</pre>
+          </template>
+          <div class="prosed prose mt-5" v-else-if="formatMode == 'Markdown'">
+            <render-md :hljs="hljs" :source="turn.user"></render-md>
+            <render-md :hljs="hljs" :source="turn.assistant"></render-md>
+          </div>
+        </template>
+      </div>
+
+      <div class="mb-8 mt-5 mx-5">
+        <div v-if="lmState.isRunning == true">{{ prompt }}</div>
+        <div v-if="lmState.isRunning == true && lmState.isStreaming == false" class="txt-lighter">
+          <div class="mt-5">
+            <i-line-md:downloading-loop class="text-lg mr-2"></i-line-md:downloading-loop>Ingesting prompt ...
+          </div>
+        </div>
+        <div v-if="formatMode == 'Html'" class="text-justify"
+          v-html="stream.replaceAll('\n', '<br />').replaceAll('\t', '&nbsp;&nbsp;')">
+        </div>
+        <pre v-else-if="formatMode == 'Text'">{{ stream }}</pre>
+        <div class="prosed prose mt-5" v-else-if="formatMode == 'Markdown'">
+          <render-md :hljs="hljs" :source="stream"></render-md>
+        </div>
+      </div>
+
+      <div class="pt-2">
+        <AutoTextarea v-if="!lmState.isRunning" :data="prompt" class="h-24 w-full" :maxlines="8"
+          @update="prompt = $event" />
+      </div>
+      <div class="flex flex-row items-center justify-end space-x-2 py-3" v-if="lmState.isModelLoaded">
         <div class="flex flex-grow flex-row items-center txt-semilight">
           <!-- button class="btn px-2" v-show="template.id != 'none'" @click="toggleSaveTask($event)">
             <i-carbon:task-star class="text-2xl"></i-carbon:task-star>
@@ -41,14 +78,15 @@
             <save-prompt-dialog class="p-3" @pick="toggleSavePrompt($event)"></save-prompt-dialog>
           </OverlayPanel>
         </div>
-        <format-bar v-if="stream.length > 0" @select="selectFormatMode($event)"></format-bar>
+        <format-bar v-if="stream.length > 0 || history.length > 0" @select="selectFormatMode($event)"></format-bar>
         <button id="clearinfer-btn" class="btn txt-semilight"
-          :disabled="(lmState.isRunning || stream.length == 0) ? true : false" @click="stream = ''; clearInferResults()">
+          :disabled="(lmState.isRunning || (stream.length == 0 && history.length == 0)) ? true : false"
+          @click="stream = ''; clearInferResults(); clearHistory(); collapseTemplate = false">
           <i-grommet-icons:clear class="text-xl"></i-grommet-icons:clear>
         </button>
         <div>
           <button id="runinfer-btn" class="btn flex w-48 flex-row items-center txt-light bord-light block-lighter"
-            @click="processInfer()" :disabled="prompt.length == 0 || lmState.isRunning == true">
+            @click="processInfer(); collapseTemplate = true" :disabled="prompt.length == 0 || lmState.isRunning == true">
             <i-iconoir:play class="mr-2 text-xl"></i-iconoir:play>
             <div>Run inference</div>
           </button>
@@ -59,18 +97,7 @@
           <div>Stop</div>
         </button -->
       </div>
-      <div v-if="lmState.isRunning == true && lmState.isStreaming == false">
-        <LoadingSpinner class="pt-16 text-6xl txt-lighter" />
-      </div>
-      <div class="mb-8 mt-5 h-2/3">
-        <div v-if="formatMode == 'Html'" class="mb-8 text-justify"
-          v-html="stream.replaceAll('\n', '<br />').replaceAll('\t', '&nbsp;&nbsp;')">
-        </div>
-        <pre class="mx-3" v-else-if="formatMode == 'Text'">{{ stream }}</pre>
-        <div class="prosed prose mx-3 mt-8" v-else-if="formatMode == 'Markdown'">
-          <render-md :hljs="hljs" :source="stream"></render-md>
-        </div>
-      </div>
+
     </div>
   </div>
 </template>
@@ -79,22 +106,21 @@
 import { onMounted, ref } from 'vue';
 import { watchDebounced } from '@vueuse/core';
 import OverlayPanel from 'primevue/overlaypanel';
-import Textarea from 'primevue/textarea';
 import { RenderMd } from '@docdundee/vue';
-import LoadingSpinner from '@/widgets/LoadingSpinner.vue';
 import SavePromptDialog from './SavePromptDialog.vue';
 import SaveTemplateDialog from './SaveTemplateDialog.vue';
-import SaveTaskDialog from './SaveTaskDialog.vue';
+//import SaveTaskDialog from './SaveTaskDialog.vue';
 import FormatBar from './FormatBar.vue';
-import { template, prompt, countPromptTokens, countTemplateTokens, processInfer, clearInferResults, stream, lmState } from '@/state';
+import { template, lockTemplate, prompt, countPromptTokens, countTemplateTokens, processInfer, clearInferResults, stream, lmState, clearHistory, history } from '@/state';
 import { hljs } from "@/conf";
 import TemplateEditor from './TemplateEditor.vue';
 import { formatMode } from '@/state/settings';
+import AutoTextarea from '@/widgets/AutoTextarea.vue';
 
 const savePromptCollapse = ref();
 const saveTemplateCollapse = ref();
 const saveTaskCollapse = ref();
-const mainCollapse = ref(false);
+const collapseTemplate = ref(false);
 
 function toggleSavePrompt(evt) {
   savePromptCollapse.value.toggle(evt);

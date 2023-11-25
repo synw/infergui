@@ -27,6 +27,7 @@ declare module '@vue/runtime-core' {
     'IIconoir:networkAlt': typeof import('~icons/iconoir/network-alt')['default']
     'IIconoir:play': typeof import('~icons/iconoir/play')['default']
     IIonArrowBackOutline: typeof import('~icons/ion/arrow-back-outline')['default']
+    'ILineMd:downloadingLoop': typeof import('~icons/line-md/downloading-loop')['default']
     ImageLoader: typeof import('./src/components/inference/ImageLoader.vue')['default']
     'IMingcute:checkFill': typeof import('~icons/mingcute/check-fill')['default']
     'IMingcute:delete2Line': typeof import('~icons/mingcute/delete2-line')['default']

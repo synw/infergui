@@ -5,6 +5,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
 import Textarea from 'primevue/textarea';
+import { watchDebounced } from '@vueuse/core';
 
 const props = defineProps({
   data: {
@@ -36,6 +37,12 @@ const rows = computed(() => {
 function ch() {
   emit("update", _data.value);
 }
+
+watchDebounced(
+  _data,
+  () => { ch() },
+  { debounce: 500, maxWait: 1000 },
+)
 
 watch(
   () => props.data,
