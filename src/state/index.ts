@@ -151,6 +151,10 @@ function setStop() {
   }
 }
 
+function setImageData(imgData: string, id: number) {
+  inferParams.image_data = [{ data: imgData, id: id }]
+}
+
 async function loadCustomTemplate(name: string) {
   const t = await db.loadTemplate(name);
   setStop();
@@ -416,5 +420,6 @@ export {
   updateModels,
   loadBackend,
   getLm,
+  setImageData,
   lockTemplate,
 }

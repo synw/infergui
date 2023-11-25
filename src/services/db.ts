@@ -71,6 +71,7 @@ const useDb = () => {
 
   const delTemplate = async (k: string) => {
     await templates.ready();
+    console.log("DELETE template", k)
     await templates.removeItem(k);
   };
 

@@ -64,13 +64,6 @@
             @delete="deleteShot(currentEditedShot.id)"></shot-editor>
         </template>
 
-        <div v-if="lmState.isModelMultimodal" class="mt-2 flex flex-row">
-          <div class="ml-6 w-32">Image</div>
-          <div class="">
-            <ImageLoader @uploaded="setImageData($event)"></ImageLoader>
-          </div>
-        </div>
-
         <template v-if="showParams">
           <div class="mt-2 flex flex-row">
             <div class="ml-6 w-32">Parameters</div>
@@ -155,8 +148,7 @@ import Textarea from 'primevue/textarea';
 import InputNumber from 'primevue/inputnumber';
 import { TurnBlock, templates as _genericTemplates } from 'modprompt';
 import AutoTextarea from '@/widgets/AutoTextarea.vue';
-import ImageLoader from './ImageLoader.vue';
-import { template, lmState, inferParams } from '@/state';
+import { template, inferParams } from '@/state';
 import ShotEditor from './ShotEditor.vue';
 import { nextTick } from 'process';
 
@@ -243,10 +235,6 @@ function deleteShot(id: number) {
   template.value.shots?.splice(id, 1);
   _resetShotsState();
   editShot.value = false;
-}
-
-function setImageData(imgData: string) {
-  inferParams.image_data = [{ data: imgData, id: 1 }]
 }
 
 const showShots = computed(() => {

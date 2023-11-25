@@ -53,6 +53,12 @@
         </div>
       </div>
 
+      <div v-if="lmState.isModelMultimodal" class="mt-2 flex flex-row">
+        <div class="ml-6 w-32">Image {{ history.length + 1 }}</div>
+        <div class="">
+          <ImageLoader @uploaded="setImageData($event, history.length + 1)"></ImageLoader>
+        </div>
+      </div>
       <div class="pt-2">
         <AutoTextarea v-if="!lmState.isRunning" :data="prompt" class="h-24 w-full" :maxlines="8"
           @update="prompt = $event" />
@@ -109,9 +115,10 @@ import OverlayPanel from 'primevue/overlaypanel';
 import { RenderMd } from '@docdundee/vue';
 import SavePromptDialog from './SavePromptDialog.vue';
 import SaveTemplateDialog from './SaveTemplateDialog.vue';
+import ImageLoader from './ImageLoader.vue';
 //import SaveTaskDialog from './SaveTaskDialog.vue';
 import FormatBar from './FormatBar.vue';
-import { template, lockTemplate, prompt, countPromptTokens, countTemplateTokens, processInfer, clearInferResults, stream, lmState, clearHistory, history } from '@/state';
+import { template, lockTemplate, prompt, setImageData, countPromptTokens, countTemplateTokens, processInfer, clearInferResults, stream, lmState, clearHistory, history } from '@/state';
 import { hljs } from "@/conf";
 import TemplateEditor from './TemplateEditor.vue';
 import { formatMode } from '@/state/settings';

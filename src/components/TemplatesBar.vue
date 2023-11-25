@@ -43,7 +43,7 @@
           </div>
           <div
             class="mr-1 flex w-1/3 flex-row justify-end opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-            <confirm-delete @delete="db.delTemplate(t.name); loadTemplates()"></confirm-delete>
+            <confirm-delete @delete="db.delTemplate(t.id); loadTemplates()"></confirm-delete>
           </div>
         </div>
       </div>
