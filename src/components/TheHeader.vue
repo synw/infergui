@@ -48,7 +48,7 @@
             </OverlayPanel>
           </div>
           <div class="flex flex-row items-center space-x-2 text-lg"
-            v-else-if="activeBackend?.providerType == 'koboldcpp'">
+            v-else-if="['koboldcpp', 'llamacpp'].includes(activeBackend?.providerType)">
             <div><i-iconoir:network-alt class="text-xl"></i-iconoir:network-alt></div>
             <div>{{ lmState.model.name }} <span class="txt-light"> ctx: {{ lmState.model.ctx }}</span></div>
           </div>

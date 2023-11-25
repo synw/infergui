@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "@docdundee/vue": "^0.0.21",
-    "@locallm/api": "^0.0.6",
+    "@locallm/api": "^0.0.9",
     "@ow3/deep-unref-vue": "^0.1.3",
     "@snowind/header": "^0.0.11",
     "@snowind/plugin": "^0.5.0",
@@ -28,7 +28,7 @@
   },
   "devDependencies": {
     "@iconify/json": "^2.2.57",
-    "@locallm/types": "^0.0.5",
+    "@locallm/types": "^0.0.7",
     "@tailwindcss/forms": "^0.5.3",
     "@tailwindcss/typography": "^0.5.10",
     "@types/node": "^20.4.8",

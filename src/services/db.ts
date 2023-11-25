@@ -115,9 +115,9 @@ const useDb = () => {
     await presets.ready();
     const v = await presets.getItem<InferenceParams>(k);
     if (!v) {
-      throw new Error(`Key ${v} not found`)
+      console.warn(`Preset ${v} not found`)
     }
-    return v
+    return v ?? {}
   };
 
   const setBackend = async (k: string, v: LmBackend) => {

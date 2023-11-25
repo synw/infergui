@@ -89,7 +89,6 @@ import FormatBar from './FormatBar.vue';
 import { template, prompt, countPromptTokens, countTemplateTokens, processInfer, clearInferResults, stream, lmState } from '@/state';
 import { hljs } from "@/conf";
 import TemplateEditor from './TemplateEditor.vue';
-import { PromptTemplate } from 'modprompt';
 import { formatMode } from '@/state/settings';
 
 const savePromptCollapse = ref();

@@ -64,6 +64,13 @@
             @delete="deleteShot(currentEditedShot.id)"></shot-editor>
         </template>
 
+        <div v-if="lmState.isModelMultimodal" class="mt-2 flex flex-row">
+          <div class="ml-6 w-32">Image</div>
+          <div class="">
+            <ImageLoader @uploaded="setImageData($event)"></ImageLoader>
+          </div>
+        </div>
+
         <template v-if="showParams">
           <div class="mt-2 flex flex-row">
             <div class="ml-6 w-32">Parameters</div>
@@ -109,6 +116,20 @@
       <div class="ml-6 mt-2 text-base txt-light">Prompt:</div>
       <div class="flex flex-grow flex-row items-center justify-end">
         <div>
+          <button v-if="tmode == 'edit'" class="btn text-xs txt-light" @click="toggleCloneTemplate($event)">
+            Clone template</button>
+          <OverlayPanel ref="cloneTemplateCollapse">
+            <div class="text-lg">Clone to:</div>
+            <div class="mt-2 flex flex-col space-y-1">
+              <template v-for="_template in Object.values(_genericTemplates).slice(1)">
+                <div v-if="template.id != _template.id" class="cursor-pointer" @click="cloneTemplate(_template.id)">
+                  {{ _template.name }}
+                </div>
+              </template>
+            </div>
+          </OverlayPanel>
+        </div>
+        <div>
           <button v-if="tmode == 'edit' && !editShot" class="btn text-xs txt-light" @click="editShot = true">
             Add a shot</button>
         </div>
@@ -130,16 +151,19 @@
 
 <script setup lang="ts">
 import { computed, reactive, ref, watchEffect } from 'vue';
+import OverlayPanel from 'primevue/overlaypanel';
 import Textarea from 'primevue/textarea';
 import InputNumber from 'primevue/inputnumber';
-import { PromptTemplate, TurnBlock } from 'modprompt';
+import { TurnBlock, templates as _genericTemplates } from 'modprompt';
 import AutoTextarea from '@/widgets/AutoTextarea.vue';
-import { template } from '@/state';
+import ImageLoader from './ImageLoader.vue';
+import { template, lmState, inferParams } from '@/state';
 import ShotEditor from './ShotEditor.vue';
 import { nextTick } from 'process';
 
 
 const renderedTemplate = ref("{prompt}");
+const cloneTemplateCollapse = ref();
 const tmode = ref<"edit" | "render">("edit");
 const stop = ref("");
 const afterShot = ref("");
@@ -151,6 +175,9 @@ const currentEditedShot = reactive({
   block: { user: "", assistant: "" } as TurnBlock,
 });
 
+function toggleCloneTemplate(evt) {
+  cloneTemplateCollapse.value.toggle(evt);
+}
 
 function _resetShotsState() {
   currentEditedShot.id = -1;
@@ -163,6 +190,12 @@ function toggleMode(m: "render" | "edit") {
 
 function toggleParams() {
   showParams.value = !showParams.value
+}
+
+function cloneTemplate(id: string) {
+  template.value = template.value.cloneTo(id);
+  toggleCloneTemplate(false);
+  editShot.value = false;
 }
 
 function saveShot(shot: TurnBlock) {
@@ -204,6 +237,10 @@ function deleteShot(id: number) {
   template.value.shots?.splice(id, 1);
   _resetShotsState();
   editShot.value = false;
+}
+
+function setImageData(imgData: string) {
+  inferParams.image_data = [{ data: imgData, id: 1 }]
 }
 
 const showShots = computed(() => {

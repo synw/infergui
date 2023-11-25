@@ -1,14 +1,14 @@
 import { reactive, ref } from "vue";
 import { ApiResponse } from "restmix";
 import { User } from "@snowind/state";
-import { Lm, ModelTemplate } from "@locallm/api";
+import { Lm } from "@locallm/api";
 //import { Lm } from "@/packages/locallm/api";
 //import { ModelTemplate } from "@/packages/locallm/providers/goinfer/interfaces";
 import { PromptTemplate } from "modprompt";
 import llamaTokenizer from 'llama-tokenizer-js';
 import { defaultInferenceParams } from '@/const/params';
 import { TemporaryInferResult, ApiState, LmBackend } from '@/interfaces';
-import { InferenceParams, ModelConf } from '@locallm/types';
+import { InferenceParams, ModelConf, ModelTemplate } from '@locallm/types';
 import { loadModels, loadTasks as _loadTasks, selectModel, infer, abort, probeBackend } from "@/services/api";
 import { msg } from "../services/notify";
 import { useDb } from "../services/db";
@@ -29,6 +29,7 @@ const lmState = reactive<ApiState>({
   isStreaming: false,
   isModelLoaded: false,
   isLoadingModel: false,
+  isModelMultimodal: false,
   model: { name: "", ctx: 2048, template: "unknown", gpu_layers: 0 },
 });
 const db = useDb();
@@ -65,17 +66,17 @@ function setFreeContext(forceAuto = false) {
     freeContext.value = Math.round(lmState.model.ctx - baseContext);
     totalContext.value = lmState.model.ctx;
   } else {
-    if (inferParams.n_predict) {
-      freeContext.value = inferParams.n_predict;
-      totalContext.value = baseContext + inferParams.n_predict;
+    if (inferParams.max_tokens) {
+      freeContext.value = inferParams.max_tokens;
+      totalContext.value = baseContext + inferParams.max_tokens;
     } else {
-      throw new Error("Missing n_predict inference param to set context")
+      throw new Error("Missing max_tokens inference param to set context")
     }
   }
 }
 
 function setMaxTokens() {
-  inferParams.n_predict = freeContext.value - 10;
+  inferParams.max_tokens = freeContext.value - 10;
 }
 
 function countPromptTokens() {
@@ -98,6 +99,10 @@ function clearInferResults() {
 }
 
 async function processInfer() {
+  // TODO: improve this quick fix
+  if (lm.providerType == "llamacpp") {
+    inferParams.template = undefined
+  }
   clearInferResults();
   const id = setInterval(() => {
     secondsCount.value++;
@@ -176,12 +181,14 @@ async function loadTask(t: Record<string, any>) {
 
 async function loadBackends() {
   const _backends = await db.listBackends();
-  if (_backends.length > 0) {
+  if (_backends.length == 0) {
     console.log("Setting default local backends");
     defaultBackends.forEach(async (b) => {
-      await db.setBackend(b.name, b)
+      await db.setBackend(b.name, b);
+      _backends.push(b)
     });
   }
+  console.log("Backends", _backends)
   _backends.forEach((b) => {
     backends[b.name] = b;
   });
@@ -198,8 +205,8 @@ function updateModels(_models: Record<string, ModelTemplate>) {
 }
 
 function checkMaxTokens(ctx: number) {
-  if ((inferParams.n_predict ?? 0) > ctx) {
-    inferParams.n_predict = ctx - 64;
+  if ((inferParams.max_tokens ?? 0) > ctx) {
+    inferParams.max_tokens = ctx - 64;
   }
 }
 
@@ -212,13 +219,18 @@ async function loadBackend(_lm: Lm, _b: LmBackend) {
   });
   if (lm.providerType == "goinfer") {
     await loadModels();
-  } else if (lm.providerType == "koboldcpp") {
+  } else if (["koboldcpp", "llamacpp"].includes(lm.providerType)) {
     const model: ModelConf = {
       name: _lm.model.name,
       ctx: _lm.model.ctx,
     }
+    console.log("Loading model", model, "for", lm.providerType);
     mutateModel(model, false);
     lm.model = model;
+    // check if the model is multimodal
+    if (model.name.toLowerCase().includes("llava")) {
+      lmState.isModelMultimodal = true;
+    }
   }
   backends[_b.name].enabled = true;
   activeBackend.value = _b;
@@ -294,9 +306,9 @@ function mutateInferParams(_params: InferenceParams) {
   inferParams.repeat_penalty = _params.repeat_penalty;
   inferParams.stop = _params.stop;
   inferParams.temperature = _params.temperature;
-  inferParams.tfs_z = _params.tfs_z;
+  inferParams.tfs = _params.tfs;
   inferParams.threads = _params.threads;
-  inferParams.n_predict = _params.n_predict;
+  inferParams.max_tokens = _params.max_tokens;
   inferParams.top_k = _params.top_k;
   inferParams.top_p = _params.top_p;
 }

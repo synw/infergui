@@ -1,13 +1,13 @@
 import { getLm, mutateModel, stream, inferResults, updateModels, lmState } from "@/state";
-import { Lm, type ModelTemplate, type TempInferStats } from "@locallm/api";
+import { Lm, type TempInferStats } from "@locallm/api";
 //import { Lm } from "@/packages/locallm/api";
 //import { type ModelTemplate, type TempInferStats } from "@/packages/locallm/providers/goinfer/interfaces";
-import type { InferenceParams, InferenceResult } from "@locallm/types";
+import type { InferenceParams, InferenceResult, ModelTemplate } from "@locallm/types";
 import { msg } from "./notify";
 import { LmBackend } from "@/interfaces";
 
 async function probeBackend(backends: Array<LmBackend>): Promise<{ lm: Lm, backend: LmBackend } | null> {
-  console.log("Probing backends");
+  console.log("Probing backends", backends);
   for (const [k, v] of Object.entries(backends)) {
     const _lm = new Lm({
       providerType: v.providerType,
@@ -15,7 +15,17 @@ async function probeBackend(backends: Array<LmBackend>): Promise<{ lm: Lm, backe
       apiKey: v.apiKey,
       onToken: (t) => stream.value += t,
     });
+    console.log("Probing", v)
     switch (v.providerType) {
+      case "llamacpp":
+        try {
+          await _lm.loadModel("");
+          console.log(`Provider ${v.name} up`);
+          return { lm: _lm, backend: v }
+        } catch (e) {
+          console.log(`Provider ${v.name} down`, e)
+        }
+        break;
       case "goinfer":
         try {
           await _lm.modelsInfo();

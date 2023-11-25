@@ -1,3 +1,5 @@
+import { LmProviderType } from "@locallm/types";
+
 interface TemporaryInferResult {
   thinkingTimeFormat?: string;
   emitTimeFormat?: string;
@@ -11,6 +13,7 @@ interface ApiState {
   isStreaming: boolean;
   isModelLoaded: boolean;
   isLoadingModel: boolean;
+  isModelMultimodal: boolean;
   model: SafeModelConf;
 }
 
@@ -23,7 +26,7 @@ interface SafeModelConf {
 
 interface LmBackend {
   name: string;
-  providerType: LmBackendType;
+  providerType: LmProviderType;
   serverUrl: string;
   apiKey: string;
   enabled: boolean;
@@ -36,13 +39,6 @@ interface LmBackend {
   inferParams?: OptionalInferParams
 }*/
 
-/*interface LmPrompt {
-  name: string;
-  content: string;
-}*/
-
-type LmBackendType = "koboldcpp" | "goinfer";
-
 type FormatMode = "Html" | "Text" | "Markdown" | "Json";
 
 enum MsgType {
@@ -53,12 +49,6 @@ enum MsgType {
 
 type TabType = "prompts" | "templates";
 
-/*interface StreamedMessage {
-  content: string;
-  num: number;
-  type: MsgType;
-  data?: { [key: string]: any };
-}*/
 
 export {
   FormatMode,
@@ -66,14 +56,4 @@ export {
   ApiState,
   TabType,
   LmBackend,
-  LmBackendType,
-  /*InferResultContract,
-  InferParams,
-  TemporaryInferResult,
-  BaseTemplate,
-  LmPrompt,
-  Task,
-  FormatMode,
-  StreamedMessage,
-  ModelConf,*/
 }

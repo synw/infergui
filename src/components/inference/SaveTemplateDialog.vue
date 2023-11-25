@@ -37,7 +37,10 @@ async function save() {
   if (data.shots) {
     data.shots = toRaw(data.shots)
   }
-  //console.log("SAVING DATA", data);
+  if (data.stop) {
+    data.stop = toRaw(data.stop)
+  }
+  console.log("SAVING DATA", data);
   await db.setTemplate(template.value.id, data);
   await loadTemplates();
   emit("pick")
