@@ -1,6 +1,6 @@
 <template>
   <div>
-    <template v-if="tmode == 'render' || isLocked">
+    <template v-if="tmode == 'render'">
       <AutoTextarea :data="renderedTemplate" :maxlines="8" class="w-full mt-3" disabled />
     </template>
     <template v-else>
@@ -105,7 +105,7 @@
         </template>
       </div>
     </template>
-    <div class="flex flex-row text-sm" v-if="!isLocked">
+    <div class="flex flex-row text-sm">
       <div class="flex flex-grow flex-row items-center justify-end">
         <div>
           <button v-if="tmode == 'edit'" class="btn text-xs txt-light" @click="toggleCloneTemplate($event)">
@@ -152,13 +152,6 @@ import { template, inferParams } from '@/state';
 import ShotEditor from './ShotEditor.vue';
 import { nextTick } from 'process';
 
-
-defineProps({
-  isLocked: {
-    type: Boolean,
-    default: false,
-  }
-})
 
 const renderedTemplate = ref("{prompt}");
 const cloneTemplateCollapse = ref();

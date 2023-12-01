@@ -13,8 +13,7 @@
         'slidedown': templateSidebarShowGeneric === false,
         'pb-3': templateSidebarShowGeneric === false,
       }">
-        <div v-for="t in _genTemplates()" class="group flex flex-row items-center"
-          :class="lockTemplate ? 'txt-light' : ''">
+        <div v-for="t in _genTemplates()" class="group flex flex-row items-center">
           <div class="ml-2 mt-1 w-2/3 justify-start truncate overflow-ellipsi">
             <button class="btn py-0" @click="_loadGenericTemplate(t.id)">
               {{ t.name }}
@@ -35,7 +34,7 @@
         'slideup': templateSidebarShowCustom === true,
         'slidedown': templateSidebarShowCustom === false
       }">
-        <div v-for="t in templates" class="group flex flex-row items-center" :class="lockTemplate ? 'txt-light' : ''">
+        <div v-for="t in templates" class="group flex flex-row items-center">
           <div class="ml-2 w-2/3 justify-start truncate overflow-ellipsis">
             <button class="btn" @click="_loadCustomTemplate(t.id)">
               {{ t.name }}
@@ -55,27 +54,15 @@
 import { onBeforeMount } from 'vue';
 import { templates as _genericTemplates, PromptTemplate } from "modprompt";
 import ConfirmDelete from '@/widgets/ConfirmDelete.vue';
-import { db, loadTemplates, templates, loadCustomTemplate, loadGenericTemplate, cloneToGenericTemplate, lockTemplate } from '@/state';
+import { db, loadTemplates, templates, loadCustomTemplate, loadGenericTemplate, cloneToGenericTemplate } from '@/state';
 import { cloneTemplateMode, templateSidebarShowCustom, templateSidebarShowGeneric } from "@/state/settings";
-import { msg } from '@/services/notify';
 
-function lockMsg() {
-  msg.warn("The actual template is locked", "Clear the history before loading a new template.", 8000)
-}
 
 function _loadCustomTemplate(name: string) {
-  if (lockTemplate.value === true) {
-    lockMsg()
-    return
-  }
   loadCustomTemplate(name);
 }
 
 function _loadGenericTemplate(name: string) {
-  if (lockTemplate.value === true) {
-    lockMsg()
-    return
-  }
   if (cloneTemplateMode.value === true) {
     cloneToGenericTemplate(name)
   } else {

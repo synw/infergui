@@ -1,10 +1,8 @@
-import { computed, reactive, ref, toRaw } from "vue";
+import { reactive, ref } from "vue";
 import { ApiResponse } from "restmix";
 import { User } from "@snowind/state";
 import { Lm } from "@locallm/api";
-//import { Lm } from "@/packages/locallm/api";
-//import { ModelTemplate } from "@/packages/locallm/providers/goinfer/interfaces";
-import { PromptTemplate, TurnBlock } from "modprompt";
+import { PromptTemplate } from "modprompt";
 import llamaTokenizer from 'llama-tokenizer-js';
 import { defaultInferenceParams } from '@/const/params';
 import { TemporaryInferResult, ApiState, LmBackend, HistoryTurn } from '@/interfaces';
@@ -126,7 +124,7 @@ async function processInfer() {
   if (history.length > 0) {
     history.forEach((turn) => {
       //history.push(template.value.renderShot(turn.user, turn.assistant))
-      template.value.addShot(turn.user, turn.assistant);
+      template.value.pushToHistory(turn);
     });
   }
   console.log(template.value.prompt(prompt.value));
@@ -374,18 +372,6 @@ async function loadPresets() {
   presets.splice(0, presets.length, ...p);
 }
 
-const lockTemplate = computed(() => {
-  const hl = history.length;
-  if (hl > 0) {
-    return true
-  } else {
-    if (lmState.isRunning) {
-      return true
-    }
-  }
-  return false
-})
-
 export {
   user,
   backends,
@@ -434,5 +420,4 @@ export {
   loadBackends,
   getLm,
   setImageData,
-  lockTemplate,
 }
