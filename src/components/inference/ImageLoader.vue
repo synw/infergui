@@ -23,7 +23,6 @@ const hasImg = ref(false);
 function encodeImageFileAsURL(element) {
   console.log("Encode img file", element);
   var file = element.files[0];
-  let imgType
   var reader = new FileReader();
   reader.onload = e => {
     image.value = e.target?.result ?? "";

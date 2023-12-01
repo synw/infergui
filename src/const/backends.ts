@@ -21,6 +21,13 @@ const defaultBackends: Array<LmBackend> = [
     serverUrl: "http://localhost:5001",
     apiKey: "",
     enabled: false,
+  },
+  {
+    name: "Llama.cpp phone",
+    providerType: "llamacpp",
+    serverUrl: "http://192.168.1.3:8080",
+    apiKey: "",
+    enabled: false,
   }
 ];
 

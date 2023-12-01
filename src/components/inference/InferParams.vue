@@ -29,6 +29,13 @@
       </div>
       <div>
         <span class="p-float-label">
+          <InputNumber class="w-8" v-model="inferParams.min_p" inputId="minP" :min="0" :max="1" :step="0.05"
+            showButtons />
+          <label for="minP">MinP</label>
+        </span>
+      </div>
+      <div>
+        <span class="p-float-label">
           <InputNumber class="w-8" v-model="inferParams.frequency_penalty" inputId="freqPenalty" :min="0" :max="2"
             :step="0.1" showButtons />
           <label for="freqPenalty">Freq Penalty</label>
@@ -68,11 +75,11 @@
         <label for="tokens">Max tokens</label>
       </div>
       <div class="mr-8 mt-5">
-        <Slider v-model="inferParams.max_tokens" class="w-full" :min="64" :max="lmState.model.ctx"
+        <Slider v-model="inferParams.max_tokens" class="w-full" :min="-1" :max="lmState.model.ctx"
           @slideend="updateCtx($event)" />
       </div>
       <div class="flex flex-row">
-        <div class="p-3 txt-semilight">64</div>
+        <div class="p-3 txt-semilight">-1</div>
         <div class="flex flex-grow justify-center p-3">
           {{ inferParams.max_tokens }}
         </div>

@@ -126,6 +126,11 @@ const useDb = () => {
     await backends.setItem(k, v);
   };
 
+  const deleteBackend = async (k: string) => {
+    await backends.ready();
+    await backends.removeItem(k);
+  }
+
   const listBackends = async (): Promise<Array<LmBackend>> => {
     await backends.ready();
     const _t = new Array<LmBackend>();
@@ -150,6 +155,7 @@ const useDb = () => {
     listPromptsNames,
     listPresetsNames,
     setBackend,
+    deleteBackend,
     listBackends,
   }
 }

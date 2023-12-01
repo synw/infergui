@@ -19,7 +19,8 @@
       </div>
 
       <div v-if="history.length > 0" class="flex flex-col space-y-3 mb-8 mt-5 mx-5">
-        <template v-for="turn in history">
+        <template v-for="(turn, i) in history">
+
           <template v-if="formatMode == 'Html'">
             <div class="text-justify txt-light"
               v-html="turn.user.replaceAll('\n', '<br />').replaceAll('\t', '&nbsp;&nbsp;')"></div>
@@ -37,7 +38,7 @@
         </template>
       </div>
 
-      <div class="mb-8 mt-5 mx-5">
+      <div class="mt-5 mx-5">
         <div v-if="lmState.isRunning == true">{{ prompt }}</div>
         <div v-if="lmState.isRunning == true && lmState.isStreaming == false" class="txt-lighter">
           <div class="mt-5">
@@ -53,12 +54,13 @@
         </div>
       </div>
 
-      <div v-if="lmState.isModelMultimodal" class="mt-2 flex flex-row">
-        <div class="ml-6 w-32">Image {{ history.length + 1 }}</div>
+      <div v-if="lmState.isModelMultimodal && !lmState.isRunning" class="mt-2 flex flex-row items-center">
+        <div class="mx-6 pt-2 txt-light text-lg">Image {{ history.length + 1 }}</div>
         <div class="">
           <ImageLoader @uploaded="setImageData($event, history.length + 1)"></ImageLoader>
         </div>
       </div>
+
       <div class="pt-2">
         <AutoTextarea v-if="!lmState.isRunning" :data="prompt" class="h-24 w-full" :maxlines="8"
           @update="prompt = $event" />
@@ -118,7 +120,7 @@ import SaveTemplateDialog from './SaveTemplateDialog.vue';
 import ImageLoader from './ImageLoader.vue';
 //import SaveTaskDialog from './SaveTaskDialog.vue';
 import FormatBar from './FormatBar.vue';
-import { template, lockTemplate, prompt, setImageData, countPromptTokens, countTemplateTokens, processInfer, clearInferResults, stream, lmState, clearHistory, history } from '@/state';
+import { inferParams, template, lockTemplate, prompt, setImageData, countPromptTokens, countTemplateTokens, processInfer, clearInferResults, stream, lmState, clearHistory, history } from '@/state';
 import { hljs } from "@/conf";
 import TemplateEditor from './TemplateEditor.vue';
 import { formatMode } from '@/state/settings';
@@ -128,6 +130,14 @@ const savePromptCollapse = ref();
 const saveTemplateCollapse = ref();
 const saveTaskCollapse = ref();
 const collapseTemplate = ref(false);
+
+/*function imgFromHistory(i: number) {
+  if (inferParams.image_data) {
+    if (inferParams.image_data.at(i)) {
+
+    }
+  }
+}*/
 
 function toggleSavePrompt(evt) {
   savePromptCollapse.value.toggle(evt);

@@ -32,6 +32,12 @@ interface LmBackend {
   enabled: boolean;
 }
 
+interface HistoryTurn {
+  user: string;
+  assistant: string;
+  images?: Array<{ id: string, data: ArrayBuffer }>;
+}
+
 /*interface Task {
   name: string;
   template: string;
@@ -40,12 +46,6 @@ interface LmBackend {
 }*/
 
 type FormatMode = "Html" | "Text" | "Markdown" | "Json";
-
-enum MsgType {
-  TokenMsgType = "token",
-  SystemMsgType = "system",
-  ErrorMsgType = "error",
-}
 
 type TabType = "prompts" | "templates";
 
@@ -56,4 +56,5 @@ export {
   ApiState,
   TabType,
   LmBackend,
+  HistoryTurn,
 }

@@ -1,4 +1,4 @@
-import { computed, reactive, ref } from "vue";
+import { computed, reactive, ref, toRaw } from "vue";
 import { ApiResponse } from "restmix";
 import { User } from "@snowind/state";
 import { Lm } from "@locallm/api";
@@ -7,7 +7,7 @@ import { Lm } from "@locallm/api";
 import { PromptTemplate, TurnBlock } from "modprompt";
 import llamaTokenizer from 'llama-tokenizer-js';
 import { defaultInferenceParams } from '@/const/params';
-import { TemporaryInferResult, ApiState, LmBackend } from '@/interfaces';
+import { TemporaryInferResult, ApiState, LmBackend, HistoryTurn } from '@/interfaces';
 import { InferenceParams, ModelConf, ModelTemplate } from '@locallm/types';
 import { loadModels, loadTasks as _loadTasks, selectModel, infer, abort, probeBackend } from "@/services/api";
 import { msg } from "../services/notify";
@@ -36,7 +36,7 @@ const db = useDb();
 const backends = reactive<Record<string, LmBackend>>({});
 const activeBackend = ref<LmBackend | null>(null);
 const stream = ref("");
-const history = reactive<Array<TurnBlock>>([]);
+const history = reactive<Array<HistoryTurn>>([]);
 const models = reactive<Record<string, ModelTemplate>>({});
 const prompts = reactive<Array<string>>([]);
 const templates = reactive<Array<PromptTemplate>>([]);
@@ -82,18 +82,18 @@ function setMaxTokens() {
 
 function countPromptTokens() {
   let v = prompt.value;
-  if (lmState.isModelMultimodal) {
+  /*if (lmState.isModelMultimodal) {
     if (inferParams.image_data) {
       v += inferParams.image_data[0].data;
     }
-  }
+  }*/
   promptTokensCount.value = llamaTokenizer.encode(v).length;
-  setMaxTokens();
+  //setMaxTokens();
 }
 
 function countTemplateTokens() {
   templateTokensCount.value = llamaTokenizer.encode(template.value.render()).length;
-  setMaxTokens();
+  //setMaxTokens();
 }
 
 function clearInferResults() {
@@ -107,6 +107,7 @@ function clearInferResults() {
 
 function clearHistory() {
   history.splice(0, history.length);
+  inferParams.image_data = undefined;
 }
 
 async function processInfer() {
@@ -124,10 +125,20 @@ async function processInfer() {
   // process history
   if (history.length > 0) {
     history.forEach((turn) => {
+      //history.push(template.value.renderShot(turn.user, turn.assistant))
       template.value.addShot(turn.user, turn.assistant);
     });
   }
-  const res = await infer(prompt.value, template.value.render(), inferParams);
+  console.log(template.value.prompt(prompt.value));
+  const _inferParams: InferenceParams = {
+    stream: true,
+    temperature: inferParams.temperature,
+    stop: inferParams.stop,
+    image_data: inferParams.image_data,
+  }
+  console.log("PARAMS", JSON.stringify(inferParams, null, "  "));
+  const res = await infer(prompt.value, template.value.render(), _inferParams);
+  //inferParams.image_data = undefined;
   //console.log("RES", res)
   history.push({ user: prompt.value, assistant: stream.value.trim() });
   stream.value = "";
@@ -213,11 +224,12 @@ async function loadBackends() {
       _backends.push(b)
     });
   }
-  console.log("Backends", _backends)
+  Object.keys(backends).forEach((b) => {
+    delete backends[b]
+  });
   _backends.forEach((b) => {
     backends[b.name] = b;
   });
-  //console.log("BACKENDS", backends);
 }
 
 function updateModels(_models: Record<string, ModelTemplate>) {
@@ -229,11 +241,11 @@ function updateModels(_models: Record<string, ModelTemplate>) {
   }
 }
 
-function checkMaxTokens(ctx: number) {
+/*function checkMaxTokens(ctx: number) {
   if ((inferParams.max_tokens ?? 0) > ctx) {
     inferParams.max_tokens = ctx - 64;
   }
-}
+}*/
 
 async function loadBackend(_lm: Lm, _b: LmBackend) {
   lm = new Lm({
@@ -317,7 +329,7 @@ function mutateModel(model: ModelConf, loadTemplate: boolean) {
   //console.log("State model", lmState.model);
   lmState.isModelLoaded = true;
   lmState.isLoadingModel = false;
-  checkMaxTokens(lmState.model.ctx);
+  //checkMaxTokens(lmState.model.ctx);
   if (autoMaxContext.value == true) {
     setMaxTokens();
   }
@@ -402,7 +414,7 @@ export {
   loadGenericTemplate,
   cloneToGenericTemplate,
   loadPrompt,
-  checkMaxTokens,
+  //checkMaxTokens,
   countPromptTokens,
   countTemplateTokens,
   initState,
@@ -419,6 +431,7 @@ export {
   stopInfer,
   updateModels,
   loadBackend,
+  loadBackends,
   getLm,
   setImageData,
   lockTemplate,
