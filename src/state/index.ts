@@ -126,8 +126,9 @@ async function processInfer() {
   }
   let imgOri: ImgData = { id: 0, data: "" };
   if (inferParams.image_data) {
-    imgOri = Object.assign({}, inferParams.image_data[0]);
-    inferParams.image_data[0].data = inferParams.image_data[0].data.replace(/^data:image\/[a-z]+;base64,/, "");
+    const nImg = inferParams.image_data.length - 1;
+    imgOri = Object.assign({}, inferParams.image_data[nImg]);
+    inferParams.image_data[nImg].data = inferParams.image_data[nImg].data.replace(/^data:image\/[a-z]+;base64,/, "");
   }
   const _inferParams: InferenceParams = {
     stream: true
@@ -170,14 +171,18 @@ function setStop() {
 }
 
 function setImageData(imgData: string, id: number) {
-  inferParams.image_data = [
+  //console.log("SET IMG ID", id);
+  if (!inferParams.image_data) {
+    inferParams.image_data = [];
+  }
+  inferParams.image_data.push(
     {
       id: id,
       data: imgData,
     }
-  ];
+  );
   currentImgData.value = imgData;
-  console.log("IMG DATA", inferParams.image_data)
+  //console.log("IMG DATA", inferParams.image_data)
 }
 
 async function loadCustomTemplate(name: string) {
@@ -281,7 +286,9 @@ async function loadBackend(_lm: Lm, _b: LmBackend) {
     // check if the model is multimodal
     if (model.name.toLowerCase().includes("llava")) {
       lmState.isModelMultimodal = true;
-    }
+    };
+    lmState.isModelMultimodal = true;
+
   }
   backends[_b.name].enabled = true;
   activeBackend.value = _b;
