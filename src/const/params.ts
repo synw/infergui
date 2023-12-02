@@ -18,8 +18,6 @@ import { InferenceParams } from "@locallm/types"
 
 const defaultInferenceParams: InferenceParams = {
   stream: true,
-  threads: 3,
-  gpu_layers: 0,
   temperature: 0.2,
   stop: ["</s>"],
 };

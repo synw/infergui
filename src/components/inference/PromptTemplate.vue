@@ -20,25 +20,36 @@
 
       <div v-if="history.length > 0" class="flex flex-col space-y-3 mt-5 mx-5">
         <template v-for="turn in history">
-          <template v-if="formatMode == 'Html'">
-            <div class="text-justify txt-light"
-              v-html="turn.user.replaceAll('\n', '<br />').replaceAll('\t', '&nbsp;&nbsp;')"></div>
-            <div class="text-justify" v-html="turn.assistant.replaceAll('\n', '<br />').replaceAll('\t', '&nbsp;&nbsp;')">
+          <div v-if="turn.images">
+            <img class="w-max" :src="turn.images[0].data" alt="Error" />
+          </div>
+          <template v-if="turn.user.length > 0">
+            <template v-if="formatMode == 'Html'">
+              <div class="text-justify txt-light"
+                v-html="turn.user.replaceAll('\n', '<br />').replaceAll('\t', '&nbsp;&nbsp;')"></div>
+              <div class="text-justify"
+                v-html="turn.assistant.replaceAll('\n', '<br />').replaceAll('\t', '&nbsp;&nbsp;')">
+              </div>
+            </template>
+            <template v-else-if="formatMode == 'Text'">
+              <pre class="txt-light">{{ turn.user }}</pre>
+              <pre>{{ turn.assistant }}</pre>
+            </template>
+            <div class="prosed prose" v-else-if="formatMode == 'Markdown'">
+              <div class="txt-light" v-html="turn.user"></div>
+              <render-md :hljs="hljs" :source="turn.assistant"></render-md>
             </div>
           </template>
-          <template v-else-if="formatMode == 'Text'">
-            <pre class="txt-light">{{ turn.user }}</pre>
-            <pre>{{ turn.assistant }}</pre>
-          </template>
-          <div class="prosed prose" v-else-if="formatMode == 'Markdown'">
-            <div class="txt-light" v-html="turn.user"></div>
-            <render-md :hljs="hljs" :source="turn.assistant"></render-md>
-          </div>
         </template>
       </div>
 
-      <div class="mx-5 mt-3">
-        <div v-if="lmState.isRunning == true" class="txt-light">{{ prompt }}</div>
+      <div class="mx-5 mt-5">
+        <div v-if="lmState.isRunning == true" class="flex flex-col space-y-3">
+          <div v-if="currentImgData.length > 0">
+            <img :src="currentImgData" alt="Error" />
+          </div>
+          <div class="txt-light">{{ prompt }}</div>
+        </div>
         <div v-if="lmState.isRunning == true && lmState.isStreaming == false" class="txt-lighter">
           <div class="mt-3">
             <i-line-md:downloading-loop class="text-lg mr-2"></i-line-md:downloading-loop>Ingesting prompt ...
@@ -58,7 +69,7 @@
       <div v-if="lmState.isModelMultimodal && !lmState.isRunning" class="mt-2 flex flex-row items-center">
         <div class="mx-6 pt-2 txt-light text-lg">Image {{ history.length + 1 }}</div>
         <div class="">
-          <ImageLoader @uploaded="setImageData($event, history.length + 1)"></ImageLoader>
+          <ImageLoader></ImageLoader>
         </div>
       </div>
 
@@ -115,7 +126,7 @@ import SaveTemplateDialog from './SaveTemplateDialog.vue';
 import ImageLoader from './ImageLoader.vue';
 //import SaveTaskDialog from './SaveTaskDialog.vue';
 import FormatBar from './FormatBar.vue';
-import { template, prompt, setImageData, countPromptTokens, countTemplateTokens, processInfer, clearInferResults, stream, lmState, clearHistory, history } from '@/state';
+import { template, prompt, currentImgData, countPromptTokens, countTemplateTokens, processInfer, clearInferResults, stream, lmState, clearHistory, history } from '@/state';
 import { hljs } from "@/conf";
 import TemplateEditor from './TemplateEditor.vue';
 import { formatMode } from '@/state/settings';
@@ -126,13 +137,6 @@ const saveTemplateCollapse = ref();
 const saveTaskCollapse = ref();
 const collapseTemplate = ref(false);
 
-/*function imgFromHistory(i: number) {
-  if (inferParams.image_data) {
-    if (inferParams.image_data.at(i)) {
-
-    }
-  }
-}*/
 
 function toggleSavePrompt(evt) {
   savePromptCollapse.value.toggle(evt);

@@ -2,10 +2,10 @@ import { reactive, ref } from "vue";
 import { ApiResponse } from "restmix";
 import { User } from "@snowind/state";
 import { Lm } from "@locallm/api";
-import { PromptTemplate } from "modprompt";
+import { PromptTemplate, HistoryTurn, ImgData } from "modprompt";
 import llamaTokenizer from 'llama-tokenizer-js';
 import { defaultInferenceParams } from '@/const/params';
-import { TemporaryInferResult, ApiState, LmBackend, HistoryTurn } from '@/interfaces';
+import { TemporaryInferResult, ApiState, LmBackend } from '@/interfaces';
 import { InferenceParams, ModelConf, ModelTemplate } from '@locallm/types';
 import { loadModels, loadTasks as _loadTasks, selectModel, infer, abort, probeBackend } from "@/services/api";
 import { msg } from "../services/notify";
@@ -44,6 +44,7 @@ const presets = reactive<Array<string>>([]);
 const template = ref<PromptTemplate>(new PromptTemplate("none"));
 const stop = ref("");
 const prompt = ref("");
+const currentImgData = ref("");
 const inferParams = reactive<InferenceParams>(defaultInferenceParams);
 const inferResults = reactive<TemporaryInferResult>({
   tokensPerSecond: 0,
@@ -80,11 +81,6 @@ function setMaxTokens() {
 
 function countPromptTokens() {
   let v = prompt.value;
-  /*if (lmState.isModelMultimodal) {
-    if (inferParams.image_data) {
-      v += inferParams.image_data[0].data;
-    }
-  }*/
   promptTokensCount.value = llamaTokenizer.encode(v).length;
   //setMaxTokens();
 }
@@ -111,7 +107,9 @@ function clearHistory() {
 async function processInfer() {
   // TODO: improve this quick fix
   if (lm.providerType == "llamacpp") {
-    inferParams.template = undefined
+    inferParams.template = undefined;
+    inferParams.gpu_layers = undefined;
+    inferParams.threads = undefined;
   }
   clearInferResults();
   const id = setInterval(() => {
@@ -123,22 +121,33 @@ async function processInfer() {
   // process history
   if (history.length > 0) {
     history.forEach((turn) => {
-      //history.push(template.value.renderShot(turn.user, turn.assistant))
       template.value.pushToHistory(turn);
     });
   }
-  console.log(template.value.prompt(prompt.value));
-  const _inferParams: InferenceParams = {
-    stream: true,
-    temperature: inferParams.temperature,
-    stop: inferParams.stop,
-    image_data: inferParams.image_data,
+  let imgOri: ImgData = { id: 0, data: "" };
+  if (inferParams.image_data) {
+    imgOri = Object.assign({}, inferParams.image_data[0]);
+    inferParams.image_data[0].data = inferParams.image_data[0].data.replace(/^data:image\/[a-z]+;base64,/, "");
   }
-  console.log("PARAMS", JSON.stringify(inferParams, null, "  "));
+  const _inferParams: InferenceParams = {
+    stream: true
+  };
+  Object.keys(inferParams).forEach((k) => {
+    if (inferParams[k]) {
+      _inferParams[k] = inferParams[k];
+    }
+  });
+  console.log(template.value.prompt(prompt.value));
+  //console.log("PK", Object.keys(_inferParams));
+  //console.log("PARAMS", JSON.stringify(_inferParams, null, "  "));
   const res = await infer(prompt.value, template.value.render(), _inferParams);
-  //inferParams.image_data = undefined;
   //console.log("RES", res)
-  history.push({ user: prompt.value, assistant: stream.value.trim() });
+  const turn: HistoryTurn = { user: prompt.value, assistant: stream.value.trim() };
+  if (inferParams.image_data) {
+    turn.images = [imgOri];
+  }
+  history.push(turn);
+  currentImgData.value = "";
   stream.value = "";
   prompt.value = "";
   clearInterval(id);
@@ -161,7 +170,14 @@ function setStop() {
 }
 
 function setImageData(imgData: string, id: number) {
-  inferParams.image_data = [{ data: imgData, id: id }]
+  inferParams.image_data = [
+    {
+      id: id,
+      data: imgData,
+    }
+  ];
+  currentImgData.value = imgData;
+  console.log("IMG DATA", inferParams.image_data)
 }
 
 async function loadCustomTemplate(name: string) {
@@ -387,6 +403,7 @@ export {
   template,
   stop,
   prompt,
+  currentImgData,
   inferParams,
   inferResults,
   secondsCount,
