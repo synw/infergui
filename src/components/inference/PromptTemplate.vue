@@ -20,10 +20,9 @@
 
       <div v-if="history.length > 0" class="flex flex-col space-y-3 mt-5 mx-5">
         <template v-for="turn in history">
-          <template v-if="turn.images">
-
-            <img :src="turn.images[0].data" alt="Error" />
-          </template>
+          <div v-if="turn.images">
+            <img class="w-max" :src="turn.images[0].data" alt="Error" />
+          </div>
           <template v-if="turn.user.length > 0">
             <template v-if="formatMode == 'Html'">
               <div class="text-justify txt-light"
@@ -44,8 +43,13 @@
         </template>
       </div>
 
-      <div class="mx-5 mt-3">
-        <div v-if="lmState.isRunning == true" class="txt-light">{{ prompt }}</div>
+      <div class="mx-5 mt-5">
+        <div v-if="lmState.isRunning == true" class="flex flex-col space-y-3">
+          <div v-if="currentImgData.length > 0">
+            <img :src="currentImgData" alt="Error" />
+          </div>
+          <div class="txt-light">{{ prompt }}</div>
+        </div>
         <div v-if="lmState.isRunning == true && lmState.isStreaming == false" class="txt-lighter">
           <div class="mt-3">
             <i-line-md:downloading-loop class="text-lg mr-2"></i-line-md:downloading-loop>Ingesting prompt ...
@@ -122,7 +126,7 @@ import SaveTemplateDialog from './SaveTemplateDialog.vue';
 import ImageLoader from './ImageLoader.vue';
 //import SaveTaskDialog from './SaveTaskDialog.vue';
 import FormatBar from './FormatBar.vue';
-import { template, prompt, countPromptTokens, countTemplateTokens, processInfer, clearInferResults, stream, lmState, clearHistory, history } from '@/state';
+import { template, prompt, currentImgData, countPromptTokens, countTemplateTokens, processInfer, clearInferResults, stream, lmState, clearHistory, history } from '@/state';
 import { hljs } from "@/conf";
 import TemplateEditor from './TemplateEditor.vue';
 import { formatMode } from '@/state/settings';
@@ -133,13 +137,6 @@ const saveTemplateCollapse = ref();
 const saveTaskCollapse = ref();
 const collapseTemplate = ref(false);
 
-/*function imgFromHistory(i: number) {
-  if (inferParams.image_data) {
-    if (inferParams.image_data.at(i)) {
-
-    }
-  }
-}*/
 
 function toggleSavePrompt(evt) {
   savePromptCollapse.value.toggle(evt);

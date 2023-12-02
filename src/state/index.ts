@@ -44,6 +44,7 @@ const presets = reactive<Array<string>>([]);
 const template = ref<PromptTemplate>(new PromptTemplate("none"));
 const stop = ref("");
 const prompt = ref("");
+const currentImgData = ref("");
 const inferParams = reactive<InferenceParams>(defaultInferenceParams);
 const inferResults = reactive<TemporaryInferResult>({
   tokensPerSecond: 0,
@@ -80,11 +81,6 @@ function setMaxTokens() {
 
 function countPromptTokens() {
   let v = prompt.value;
-  /*if (lmState.isModelMultimodal) {
-    if (inferParams.image_data) {
-      v += inferParams.image_data[0].data;
-    }
-  }*/
   promptTokensCount.value = llamaTokenizer.encode(v).length;
   //setMaxTokens();
 }
@@ -125,27 +121,33 @@ async function processInfer() {
   // process history
   if (history.length > 0) {
     history.forEach((turn) => {
-      //history.push(template.value.renderShot(turn.user, turn.assistant))
       template.value.pushToHistory(turn);
     });
   }
   let imgOri: ImgData = { id: 0, data: "" };
   if (inferParams.image_data) {
-    imgOri = inferParams.image_data[0];
+    imgOri = Object.assign({}, inferParams.image_data[0]);
     inferParams.image_data[0].data = inferParams.image_data[0].data.replace(/^data:image\/[a-z]+;base64,/, "");
   }
+  const _inferParams: InferenceParams = {
+    stream: true
+  };
+  Object.keys(inferParams).forEach((k) => {
+    if (inferParams[k]) {
+      _inferParams[k] = inferParams[k];
+    }
+  });
   console.log(template.value.prompt(prompt.value));
-  console.log("PARAMS", JSON.stringify(inferParams, null, "  "));
-  const res = await infer(prompt.value, template.value.render(), inferParams);
-  //inferParams.image_data = undefined;
+  //console.log("PK", Object.keys(_inferParams));
+  //console.log("PARAMS", JSON.stringify(_inferParams, null, "  "));
+  const res = await infer(prompt.value, template.value.render(), _inferParams);
   //console.log("RES", res)
   const turn: HistoryTurn = { user: prompt.value, assistant: stream.value.trim() };
   if (inferParams.image_data) {
-    console.log("IMG ORI", imgOri);
     turn.images = [imgOri];
   }
   history.push(turn);
-
+  currentImgData.value = "";
   stream.value = "";
   prompt.value = "";
   clearInterval(id);
@@ -172,7 +174,10 @@ function setImageData(imgData: string, id: number) {
     {
       id: id,
       data: imgData,
-    }]
+    }
+  ];
+  currentImgData.value = imgData;
+  console.log("IMG DATA", inferParams.image_data)
 }
 
 async function loadCustomTemplate(name: string) {
@@ -398,6 +403,7 @@ export {
   template,
   stop,
   prompt,
+  currentImgData,
   inferParams,
   inferResults,
   secondsCount,
