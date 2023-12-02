@@ -13,6 +13,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import FileUpload from 'primevue/fileupload';
+import { history, setImageData } from "@/state";
 
 const emit = defineEmits(["uploaded"]);
 
@@ -26,14 +27,14 @@ function encodeImageFileAsURL(element) {
   var reader = new FileReader();
   reader.onload = e => {
     image.value = e.target?.result ?? "";
-    console.log("IMG", image.value);
+    //console.log("IMG", image.value);
   };
   reader.onloadend = function () {
     hasImg.value = true;
     const res = reader.result?.toString() ?? ""
     const encoded = res;
     //console.log('RESULT', encoded);
-    emit("uploaded", encoded)
+    setImageData(encoded, history.length + 1);
   }
   reader.readAsDataURL(file);
 

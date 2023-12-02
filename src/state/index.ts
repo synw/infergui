@@ -2,7 +2,7 @@ import { reactive, ref } from "vue";
 import { ApiResponse } from "restmix";
 import { User } from "@snowind/state";
 import { Lm } from "@locallm/api";
-import { PromptTemplate, HistoryTurn } from "modprompt";
+import { PromptTemplate, HistoryTurn, ImgData } from "modprompt";
 import llamaTokenizer from 'llama-tokenizer-js';
 import { defaultInferenceParams } from '@/const/params';
 import { TemporaryInferResult, ApiState, LmBackend } from '@/interfaces';
@@ -129,7 +129,9 @@ async function processInfer() {
       template.value.pushToHistory(turn);
     });
   }
+  let imgOri: ImgData = { id: 0, data: "" };
   if (inferParams.image_data) {
+    imgOri = inferParams.image_data[0];
     inferParams.image_data[0].data = inferParams.image_data[0].data.replace(/^data:image\/[a-z]+;base64,/, "");
   }
   console.log(template.value.prompt(prompt.value));
@@ -137,7 +139,13 @@ async function processInfer() {
   const res = await infer(prompt.value, template.value.render(), inferParams);
   //inferParams.image_data = undefined;
   //console.log("RES", res)
-  history.push({ user: prompt.value, assistant: stream.value.trim() });
+  const turn: HistoryTurn = { user: prompt.value, assistant: stream.value.trim() };
+  if (inferParams.image_data) {
+    console.log("IMG ORI", imgOri);
+    turn.images = [imgOri];
+  }
+  history.push(turn);
+
   stream.value = "";
   prompt.value = "";
   clearInterval(id);

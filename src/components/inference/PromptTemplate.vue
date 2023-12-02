@@ -20,20 +20,27 @@
 
       <div v-if="history.length > 0" class="flex flex-col space-y-3 mt-5 mx-5">
         <template v-for="turn in history">
-          <template v-if="formatMode == 'Html'">
-            <div class="text-justify txt-light"
-              v-html="turn.user.replaceAll('\n', '<br />').replaceAll('\t', '&nbsp;&nbsp;')"></div>
-            <div class="text-justify" v-html="turn.assistant.replaceAll('\n', '<br />').replaceAll('\t', '&nbsp;&nbsp;')">
+          <template v-if="turn.images">
+
+            <img :src="turn.images[0].data" alt="Error" />
+          </template>
+          <template v-if="turn.user.length > 0">
+            <template v-if="formatMode == 'Html'">
+              <div class="text-justify txt-light"
+                v-html="turn.user.replaceAll('\n', '<br />').replaceAll('\t', '&nbsp;&nbsp;')"></div>
+              <div class="text-justify"
+                v-html="turn.assistant.replaceAll('\n', '<br />').replaceAll('\t', '&nbsp;&nbsp;')">
+              </div>
+            </template>
+            <template v-else-if="formatMode == 'Text'">
+              <pre class="txt-light">{{ turn.user }}</pre>
+              <pre>{{ turn.assistant }}</pre>
+            </template>
+            <div class="prosed prose" v-else-if="formatMode == 'Markdown'">
+              <div class="txt-light" v-html="turn.user"></div>
+              <render-md :hljs="hljs" :source="turn.assistant"></render-md>
             </div>
           </template>
-          <template v-else-if="formatMode == 'Text'">
-            <pre class="txt-light">{{ turn.user }}</pre>
-            <pre>{{ turn.assistant }}</pre>
-          </template>
-          <div class="prosed prose" v-else-if="formatMode == 'Markdown'">
-            <div class="txt-light" v-html="turn.user"></div>
-            <render-md :hljs="hljs" :source="turn.assistant"></render-md>
-          </div>
         </template>
       </div>
 
@@ -58,7 +65,7 @@
       <div v-if="lmState.isModelMultimodal && !lmState.isRunning" class="mt-2 flex flex-row items-center">
         <div class="mx-6 pt-2 txt-light text-lg">Image {{ history.length + 1 }}</div>
         <div class="">
-          <ImageLoader @uploaded="setImageData($event, history.length + 1)"></ImageLoader>
+          <ImageLoader></ImageLoader>
         </div>
       </div>
 
@@ -115,7 +122,7 @@ import SaveTemplateDialog from './SaveTemplateDialog.vue';
 import ImageLoader from './ImageLoader.vue';
 //import SaveTaskDialog from './SaveTaskDialog.vue';
 import FormatBar from './FormatBar.vue';
-import { template, prompt, setImageData, countPromptTokens, countTemplateTokens, processInfer, clearInferResults, stream, lmState, clearHistory, history } from '@/state';
+import { template, prompt, countPromptTokens, countTemplateTokens, processInfer, clearInferResults, stream, lmState, clearHistory, history } from '@/state';
 import { hljs } from "@/conf";
 import TemplateEditor from './TemplateEditor.vue';
 import { formatMode } from '@/state/settings';
