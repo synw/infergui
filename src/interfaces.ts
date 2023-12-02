@@ -32,12 +32,6 @@ interface LmBackend {
   enabled: boolean;
 }
 
-interface HistoryTurn {
-  user: string;
-  assistant: string;
-  images?: Array<{ id: string, data: ArrayBuffer }>;
-}
-
 /*interface Task {
   name: string;
   template: string;
@@ -56,5 +50,4 @@ export {
   ApiState,
   TabType,
   LmBackend,
-  HistoryTurn,
 }

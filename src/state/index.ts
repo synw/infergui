@@ -2,10 +2,10 @@ import { reactive, ref } from "vue";
 import { ApiResponse } from "restmix";
 import { User } from "@snowind/state";
 import { Lm } from "@locallm/api";
-import { PromptTemplate } from "modprompt";
+import { PromptTemplate, HistoryTurn } from "modprompt";
 import llamaTokenizer from 'llama-tokenizer-js';
 import { defaultInferenceParams } from '@/const/params';
-import { TemporaryInferResult, ApiState, LmBackend, HistoryTurn } from '@/interfaces';
+import { TemporaryInferResult, ApiState, LmBackend } from '@/interfaces';
 import { InferenceParams, ModelConf, ModelTemplate } from '@locallm/types';
 import { loadModels, loadTasks as _loadTasks, selectModel, infer, abort, probeBackend } from "@/services/api";
 import { msg } from "../services/notify";
@@ -111,7 +111,9 @@ function clearHistory() {
 async function processInfer() {
   // TODO: improve this quick fix
   if (lm.providerType == "llamacpp") {
-    inferParams.template = undefined
+    inferParams.template = undefined;
+    inferParams.gpu_layers = undefined;
+    inferParams.threads = undefined;
   }
   clearInferResults();
   const id = setInterval(() => {
@@ -127,15 +129,12 @@ async function processInfer() {
       template.value.pushToHistory(turn);
     });
   }
-  console.log(template.value.prompt(prompt.value));
-  const _inferParams: InferenceParams = {
-    stream: true,
-    temperature: inferParams.temperature,
-    stop: inferParams.stop,
-    image_data: inferParams.image_data,
+  if (inferParams.image_data) {
+    inferParams.image_data[0].data = inferParams.image_data[0].data.replace(/^data:image\/[a-z]+;base64,/, "");
   }
+  console.log(template.value.prompt(prompt.value));
   console.log("PARAMS", JSON.stringify(inferParams, null, "  "));
-  const res = await infer(prompt.value, template.value.render(), _inferParams);
+  const res = await infer(prompt.value, template.value.render(), inferParams);
   //inferParams.image_data = undefined;
   //console.log("RES", res)
   history.push({ user: prompt.value, assistant: stream.value.trim() });
@@ -161,7 +160,11 @@ function setStop() {
 }
 
 function setImageData(imgData: string, id: number) {
-  inferParams.image_data = [{ data: imgData, id: id }]
+  inferParams.image_data = [
+    {
+      id: id,
+      data: imgData,
+    }]
 }
 
 async function loadCustomTemplate(name: string) {

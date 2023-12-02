@@ -26,11 +26,12 @@ function encodeImageFileAsURL(element) {
   var reader = new FileReader();
   reader.onload = e => {
     image.value = e.target?.result ?? "";
+    console.log("IMG", image.value);
   };
   reader.onloadend = function () {
     hasImg.value = true;
     const res = reader.result?.toString() ?? ""
-    const encoded = res.replace(/^data:image\/[a-z]+;base64,/, "");
+    const encoded = res;
     //console.log('RESULT', encoded);
     emit("uploaded", encoded)
   }
