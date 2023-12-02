@@ -287,7 +287,7 @@ async function loadBackend(_lm: Lm, _b: LmBackend) {
     if (model.name.toLowerCase().includes("llava")) {
       lmState.isModelMultimodal = true;
     };
-    lmState.isModelMultimodal = true;
+    //lmState.isModelMultimodal = true;
 
   }
   backends[_b.name].enabled = true;
