@@ -25,8 +25,12 @@ import ConfirmDialog from "primevue/confirmdialog";
 import Toast from "primevue/toast";
 import { initNotifyService } from "@/services/notify";
 import { initState } from './state';
+import { loadGrammars } from './state/grammar';
 
-onBeforeMount(() => initState());
+onBeforeMount(() => {
+  initState();
+  loadGrammars();
+});
 onMounted(() => initNotifyService())
 </script>
 

@@ -38,21 +38,21 @@
         <span class="p-float-label">
           <InputNumber class="w-8" v-model="inferParams.frequency_penalty" inputId="freqPenalty" :min="0" :max="2"
             :step="0.1" showButtons />
-          <label for="freqPenalty">Freq Penalty</label>
+          <label for="freqPenalty">Freq</label>
         </span>
       </div>
       <div>
         <span class="p-float-label">
           <InputNumber class="w-8" v-model="inferParams.presence_penalty" inputId="presPenalty" :min="0" :max="2"
             :step="0.1" showButtons />
-          <label for="presPenalty">Pres Penalty</label>
+          <label for="presPenalty">Pres</label>
         </span>
       </div>
       <div>
         <span class="p-float-label">
           <InputNumber class="w-8" v-model="inferParams.repeat_penalty" inputId="repeatPenalty" :min="0" :max="2"
             :step="0.1" showButtons />
-          <label for="repeatPenalty">Repeat Penalty</label>
+          <label for="repeatPenalty">Repeat</label>
         </span>
       </div>
       <div v-if="isGoinfer">

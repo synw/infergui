@@ -1,7 +1,9 @@
 import { reactive, ref } from "vue";
 import { ApiResponse } from "restmix";
+import { compile, serializeGrammar } from "@intrinsicai/gbnfgen";
 import { User } from "@snowind/state";
 import { Lm } from "@locallm/api";
+//import { Lm } from "@/packages/locallm/api";
 import { PromptTemplate, HistoryTurn, ImgData } from "modprompt";
 import llamaTokenizer from 'llama-tokenizer-js';
 import { defaultInferenceParams } from '@/const/params';
@@ -13,6 +15,7 @@ import { useDb } from "../services/db";
 import { autoMaxContext, selectedPreset } from "./settings";
 import { loadPreset } from "./presets";
 import { defaultBackends } from "@/const/backends";
+import { grammar, useGrammar } from "./grammar";
 
 let timer: ReturnType<typeof setInterval>;
 const user = new User();
@@ -105,12 +108,6 @@ function clearHistory() {
 }
 
 async function processInfer() {
-  // TODO: improve this quick fix
-  if (lm.providerType == "llamacpp") {
-    inferParams.template = undefined;
-    inferParams.gpu_layers = undefined;
-    inferParams.threads = undefined;
-  }
   clearInferResults();
   const id = setInterval(() => {
     secondsCount.value++;
@@ -138,9 +135,16 @@ async function processInfer() {
       _inferParams[k] = inferParams[k];
     }
   });
+  // grammar
+  if (useGrammar.value === true) {
+    const gr = serializeGrammar(await compile(grammar.code, "Grammar"));
+    _inferParams.grammar = gr;
+    //console.log("Using grammar:");
+    //console.log(gr);
+  }
   console.log(template.value.prompt(prompt.value));
   //console.log("PK", Object.keys(_inferParams));
-  //console.log("PARAMS", JSON.stringify(_inferParams, null, "  "));
+  console.log("PARAMS", JSON.stringify(_inferParams, null, "  "));
   const res = await infer(prompt.value, template.value.render(), _inferParams);
   //console.log("RES", res)
   const turn: HistoryTurn = { user: prompt.value, assistant: stream.value.trim() };

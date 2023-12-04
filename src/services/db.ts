@@ -2,7 +2,7 @@ import localForage from "localforage";
 import type { InferenceParams } from "@locallm/types";
 import { defaultInferenceParams } from "@/const/params";
 import { LmTemplate, PromptTemplate } from "modprompt";
-import { LmBackend } from "@/interfaces";
+import { GbnfGrammar, LmBackend } from "@/interfaces";
 
 const useDb = () => {
   const prompts = localForage.createInstance({
@@ -21,6 +21,10 @@ const useDb = () => {
     driver: localForage.INDEXEDDB,
     storeName: 'backends',
   });
+  const grammarsDb = localForage.createInstance({
+    driver: localForage.INDEXEDDB,
+    storeName: 'grammars',
+  });
 
   const init = async () => {
     await prompts.ready();
@@ -30,6 +34,7 @@ const useDb = () => {
     await templates.ready();
     await presets.ready();
     await backends.ready();
+    await grammarsDb.ready();
     if ((await presets.length()) <= 1) {
       console.log("The presets db is empty, loading default");
       setPreset("Default", defaultInferenceParams)
@@ -140,6 +145,28 @@ const useDb = () => {
     return _t
   }
 
+  const setGrammar = async (k: string, v: string) => {
+    await grammarsDb.ready();
+    await grammarsDb.setItem(k, v);
+  };
+
+  const deleteGrammar = async (k: string) => {
+    await grammarsDb.ready();
+    await grammarsDb.removeItem(k);
+  }
+
+  const listGrammars = async (): Promise<Array<GbnfGrammar>> => {
+    await grammarsDb.ready();
+    const _t = new Array<GbnfGrammar>();
+    await grammarsDb.iterate((v, k, i) => {
+      _t.push({
+        name: k,
+        code: `${v}`,
+      })
+    });
+    return _t
+  }
+
   return {
     init,
     setPrompt,
@@ -157,6 +184,9 @@ const useDb = () => {
     setBackend,
     deleteBackend,
     listBackends,
+    setGrammar,
+    deleteGrammar,
+    listGrammars,
   }
 }
 

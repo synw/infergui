@@ -39,9 +39,14 @@ interface LmBackend {
   inferParams?: OptionalInferParams
 }*/
 
+interface GbnfGrammar {
+  name: string;
+  code: string;
+}
+
 type FormatMode = "Html" | "Text" | "Markdown" | "Json";
 
-type TabType = "prompts" | "templates";
+type TabType = "prompts" | "templates" | "grammars";
 
 
 export {
@@ -50,4 +55,5 @@ export {
   ApiState,
   TabType,
   LmBackend,
+  GbnfGrammar,
 }

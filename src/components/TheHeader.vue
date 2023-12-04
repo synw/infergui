@@ -51,6 +51,16 @@
             v-else-if="['koboldcpp', 'llamacpp'].includes(activeBackend?.providerType)">
             <div><i-iconoir:network-alt class="text-xl"></i-iconoir:network-alt></div>
             <div>{{ lmState.model.name }} <span class="txt-light"> ctx: {{ lmState.model.ctx }}</span></div>
+            <div v-if="template.id != 'none'" class="pl-2">
+              <div class="txt-semilight text-sm bord-lighter border px-2 py-1 rounded-lg">
+                {{ template.name }}
+              </div>
+            </div>
+            <div v-if="useGrammar" class="pl-2">
+              <div class="txt-semilight text-sm bord-lighter border px-2 py-1 rounded-lg">
+                Grammar
+              </div>
+            </div>
           </div>
         </template>
         <div class="text-lg" v-else>
@@ -116,7 +126,8 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { SwTopbar, useTopbar } from "@snowind/header";
-import { user, stopInfer, lmState, activeBackend } from "@/state";
+import { user, stopInfer, lmState, activeBackend, template } from "@/state";
+import { useGrammar } from '@/state/grammar';
 import { useRouter } from 'vue-router';
 import OverlayPanel from 'primevue/overlaypanel';
 import ModelsPicker from '@/components/ModelsPicker.vue';
