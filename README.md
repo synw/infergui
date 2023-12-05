@@ -1,11 +1,32 @@
 # Infer gui
 
-A graphical user interface for local language models. Supported backends:
+A graphical user interface for local language models. It support different local backends:
 
+- [Llama.cpp server](https://github.com/ggerganov/llama.cpp/tree/master/examples/server#llamacppexampleserver)
 - [Koboldcpp](https://github.com/LostRuins/koboldcpp)
 - [Goinfer](https://github.com/synw/goinfer)
 
-![Screenshot](/docs/screenshot.png)
+This interface uses no hidden magic: everything is explicit.
+
+## Features
+
+- Template editor
+- Gbnf grammars support
+- Multimodal support
+
+## Screenshots
+
+### Templates editor
+
+![Screenshot](/docs/template_editor.png)
+
+### Gbnf grammar editor
+
+![Screenshot](/docs/grammar_editor.png)
+
+### Multimodal
+
+![Screenshot](/docs/multimodal.png)
 
 ## Install
 
@@ -18,11 +39,7 @@ npm i
 ## Run
 
 ```
-npm run dev
+npm run local
 ```
 
-## Build
-
-```
-npm run build
-```
+Run a local backend and open `localhost:5173` in a browser

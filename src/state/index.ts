@@ -156,9 +156,19 @@ async function processInfer() {
   stream.value = "";
   prompt.value = "";
   clearInterval(id);
-  inferResults.thinkingTimeFormat = res?.stats?.thinkingTimeFormat;
-  inferResults.emitTimeFormat = res?.stats?.emitTimeFormat;
-  inferResults.totalTimeFormat = res?.stats?.totalTimeFormat;
+  console.log("Stats:", res.stats);
+  switch (lm.providerType) {
+    case "goinfer":
+      inferResults.thinkingTimeFormat = res.stats?.thinkingTimeFormat;
+      inferResults.emitTimeFormat = res.stats?.emitTimeFormat;
+      inferResults.totalTimeFormat = res.stats?.totalTimeFormat;
+      break;
+    //case "llamacpp":res.stats?.
+    //  break;
+    default:
+      break;
+  }
+
 }
 
 async function stopInfer() {
