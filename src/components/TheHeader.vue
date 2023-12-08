@@ -87,7 +87,7 @@
           @click="toggleSettingsCollapse($event)">
           <i-fluent:settings-32-regular class="text-2xl"></i-fluent:settings-32-regular>
         </button>
-        <OverlayPanel ref="settingsCollapse" @close="toggleSettingsCollapse">
+        <OverlayPanel ref="settingsCollapse" @close="toggleSettingsCollapse($event)">
           <SettingsPopin></SettingsPopin>
         </OverlayPanel>
 

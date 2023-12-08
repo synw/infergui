@@ -2,7 +2,7 @@
   <div class="flex flex-col overflow-y-auto">
     <div v-for="prompt in prompts" class="flex flex-row group">
       <div class="justify-start w-2/3 ml-2 truncate">
-        <button class="btn" @click="loadPrompt(prompt)">
+        <button class="btn py-0" @click="loadPrompt(prompt)">
           {{ prompt }}
         </button>
       </div>

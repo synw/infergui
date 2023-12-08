@@ -3,8 +3,7 @@ import { ApiResponse } from "restmix";
 import { compile, serializeGrammar } from "@intrinsicai/gbnfgen";
 import { User } from "@snowind/state";
 import { Lm } from "@locallm/api";
-//import { Lm } from "@/packages/locallm/api";
-import { PromptTemplate, HistoryTurn, ImgData } from "modprompt";
+import { PromptTemplate, HistoryTurn } from "modprompt";
 import llamaTokenizer from 'llama-tokenizer-js';
 import { defaultInferenceParams } from '@/const/params';
 import { TemporaryInferResult, ApiState, LmBackend } from '@/interfaces';
@@ -48,6 +47,7 @@ const template = ref<PromptTemplate>(new PromptTemplate("none"));
 const stop = ref("");
 const prompt = ref("");
 const currentImgData = ref("");
+const _currentImgId = ref(0);
 const inferParams = reactive<InferenceParams>(defaultInferenceParams);
 const inferResults = reactive<TemporaryInferResult>({
   tokensPerSecond: 0,
@@ -107,6 +107,17 @@ function clearHistory() {
   inferParams.image_data = undefined;
 }
 
+function _pushToHistory() {
+  const turn: HistoryTurn = { user: prompt.value, assistant: stream.value.trim() };
+  if (inferParams.image_data) {
+    turn.images = [{
+      id: _currentImgId.value,
+      data: currentImgData.value
+    }];
+  }
+  history.push(turn);
+}
+
 async function processInfer() {
   clearInferResults();
   const id = setInterval(() => {
@@ -121,10 +132,10 @@ async function processInfer() {
       template.value.pushToHistory(turn);
     });
   }
-  let imgOri: ImgData = { id: 0, data: "" };
+  //let imgOri: ImgData = { id: 0, data: "" };
   if (inferParams.image_data) {
     const nImg = inferParams.image_data.length - 1;
-    imgOri = Object.assign({}, inferParams.image_data[nImg]);
+    //imgOri = Object.assign({}, inferParams.image_data[nImg]);
     inferParams.image_data[nImg].data = inferParams.image_data[nImg].data.replace(/^data:image\/[a-z]+;base64,/, "");
   }
   const _inferParams: InferenceParams = {
@@ -147,16 +158,8 @@ async function processInfer() {
   console.log("PARAMS", JSON.stringify(_inferParams, null, "  "));
   const res = await infer(prompt.value, template.value.render(), _inferParams);
   //console.log("RES", res)
-  const turn: HistoryTurn = { user: prompt.value, assistant: stream.value.trim() };
-  if (inferParams.image_data) {
-    turn.images = [imgOri];
-  }
-  history.push(turn);
-  currentImgData.value = "";
-  stream.value = "";
-  prompt.value = "";
-  clearInterval(id);
-  console.log("Stats:", res.stats);
+  _finishInfer();
+  //console.log("Stats:", res.stats);
   switch (lm.providerType) {
     case "goinfer":
       inferResults.thinkingTimeFormat = res.stats?.thinkingTimeFormat;
@@ -171,11 +174,20 @@ async function processInfer() {
 
 }
 
+function _finishInfer() {
+  _pushToHistory();
+  currentImgData.value = "";
+  _currentImgId.value = 0;
+  stream.value = "";
+  prompt.value = "";
+}
+
 async function stopInfer() {
   await abort();
   clearInterval(timer);
   lmState.isRunning = false;
   lmState.isStreaming = false;
+  _finishInfer();
 }
 
 function setStop() {
@@ -196,6 +208,7 @@ function setImageData(imgData: string, id: number) {
     }
   );
   currentImgData.value = imgData;
+  _currentImgId.value = id;
   //console.log("IMG DATA", inferParams.image_data)
 }
 
@@ -298,9 +311,11 @@ async function loadBackend(_lm: Lm, _b: LmBackend) {
     mutateModel(model, false);
     lm.model = model;
     // check if the model is multimodal
-    if (model.name.toLowerCase().includes("llava")) {
-      lmState.isModelMultimodal = true;
-    };
+    if (lm.providerType == "llamacpp") {
+      if (model.name.toLowerCase().includes("llava")) {
+        lmState.isModelMultimodal = true;
+      };
+    }
     //lmState.isModelMultimodal = true;
 
   }

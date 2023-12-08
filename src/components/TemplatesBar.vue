@@ -36,7 +36,7 @@
       }">
         <div v-for="t in templates" class="group flex flex-row items-center">
           <div class="ml-2 w-2/3 justify-start truncate overflow-ellipsis">
-            <button class="btn" @click="_loadCustomTemplate(t.id)">
+            <button class="btn py-0" @click="_loadCustomTemplate(t.id)">
               {{ t.name }}
             </button>
           </div>

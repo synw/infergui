@@ -14,10 +14,19 @@
         </div>
       </sw-switch>
     </div>
+    <div class="flex flex-row">
+      <sw-switch label="Switch" v-model:value="lmState.isModelMultimodal" class="switch-primary"
+        @update:value="$emit('close')">
+        <div class="ml-2">
+          Enable multimodal
+        </div>
+      </sw-switch>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { lmState } from "@/state";
 import { autoMaxContext, cloneTemplateMode } from "@/state/settings";
 import SwSwitch from "@snowind/switch";
 

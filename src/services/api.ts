@@ -1,7 +1,5 @@
 import { getLm, mutateModel, stream, inferResults, updateModels, lmState } from "@/state";
 import { Lm, type TempInferStats } from "@locallm/api";
-//import { Lm } from "@/packages/locallm/api";
-//import { type TempInferStats } from "@/packages/locallm/providers/goinfer/interfaces";
 import type { InferenceParams, InferenceResult, ModelTemplate } from "@locallm/types";
 import { msg } from "./notify";
 import { LmBackend } from "@/interfaces";
