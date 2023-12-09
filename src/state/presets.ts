@@ -20,7 +20,7 @@ async function loadPreset(preset: string) {
   for (const [k, v] of Object.entries(params)) {
     _inferParams[k] = v
   };
-  console.log("PArams", _inferParams);
+  //console.log("PArams", _inferParams);
   mutateInferParams(_inferParams);
 }
 
