@@ -69,22 +69,24 @@
       </div>
 
     </div>
-    <div class="mt-8" v-if="!autoMaxContext">
-      <div class="p-float-label">
-        <InputText inputId="tokens" class="hidden w-full" />
-        <label for="tokens">Max tokens</label>
-      </div>
-      <div class="mr-8 mt-5">
-        <Slider v-model="inferParams.max_tokens" class="w-full" :min="-1" :max="lmState.model.ctx"
-          @slideend="updateCtx($event)" />
-      </div>
-      <div class="flex flex-row">
-        <div class="p-3 txt-semilight">-1</div>
-        <div class="flex flex-grow justify-center p-3">
-          {{ inferParams.max_tokens }}
+    <div class="mt-8">
+      <template v-if="!autoMaxContext">
+        <div class="p-float-label">
+          <InputText inputId="tokens" class="hidden w-full" />
+          <label for="tokens">Max tokens</label>
         </div>
-        <div class="p-3 txt-semilight">{{ lmState.model.ctx }}</div>
-      </div>
+        <div class="mr-8 mt-5">
+          <Slider v-model="inferParams.max_tokens" class="w-full" :min="-1" :max="lmState.model.ctx"
+            @slideend="updateCtx($event)" />
+        </div>
+        <div class="flex flex-row">
+          <div class="p-3 txt-semilight">-1</div>
+          <div class="flex flex-grow justify-center p-3">
+            {{ inferParams.max_tokens }}
+          </div>
+          <div class="p-3 txt-semilight">{{ lmState.model.ctx }}</div>
+        </div>
+      </template>
     </div>
   </div>
 </template>
@@ -93,8 +95,8 @@
 import InputNumber from 'primevue/inputnumber';
 import Slider from 'primevue/slider';
 import InputText from 'primevue/inputtext';
-import { getLm, inferParams, lmState, setFreeContext, stop } from '@/state';
-import { autoMaxContext } from '@/state/settings';
+import { autoMaxContext } from "@/state/settings";
+import { getLm, inferParams, lmState, stop, setFreeContext } from '@/state';
 import { computed } from 'vue';
 
 const isGoinfer = computed(() => getLm().providerType == "goinfer");

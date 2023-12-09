@@ -1,4 +1,4 @@
-import { reactive, ref } from "vue";
+import { Ref, reactive, ref } from "vue";
 import { ApiResponse } from "restmix";
 import { compile, serializeGrammar } from "@intrinsicai/gbnfgen";
 import { User } from "@snowind/state";
@@ -11,12 +11,12 @@ import { InferenceParams, ModelConf, ModelTemplate } from '@locallm/types';
 import { loadModels, loadTasks as _loadTasks, selectModel, infer, abort, probeBackend } from "@/services/api";
 import { msg } from "../services/notify";
 import { useDb } from "../services/db";
-import { autoMaxContext, selectedPreset } from "./settings";
+import { selectedPreset } from "./settings";
 import { loadPreset } from "./presets";
 import { defaultBackends } from "@/const/backends";
 import { grammar, useGrammar } from "./grammar";
 
-let timer: ReturnType<typeof setInterval>;
+let timer = ref<ReturnType<typeof setInterval>>();
 const user = new User();
 let lm = new Lm({
   providerType: defaultBackends[0].providerType,
@@ -63,34 +63,36 @@ function getLm(): Lm {
   return lm
 }
 
-function setFreeContext(forceAuto = false) {
+function setFreeContext() {
   const baseContext = promptTokensCount.value + templateTokensCount.value;
-  if (autoMaxContext.value || forceAuto) {
-    freeContext.value = Math.round(lmState.model.ctx - baseContext);
-    totalContext.value = lmState.model.ctx;
-  } else {
-    if (inferParams.max_tokens) {
+  let useMaxTokens = false;
+  if (inferParams.max_tokens) {
+    if (inferParams.max_tokens > 0) {
+      useMaxTokens = true;
       freeContext.value = inferParams.max_tokens;
       totalContext.value = baseContext + inferParams.max_tokens;
-    } else {
-      throw new Error("Missing max_tokens inference param to set context")
     }
   }
-}
-
-function setMaxTokens() {
-  inferParams.max_tokens = freeContext.value - 10;
+  if (!useMaxTokens) {
+    freeContext.value = Math.round(lmState.model.ctx - baseContext);
+    totalContext.value = lmState.model.ctx;
+  }
 }
 
 function countPromptTokens() {
   let v = prompt.value;
   promptTokensCount.value = llamaTokenizer.encode(v).length;
-  //setMaxTokens();
+  setFreeContext();
 }
 
 function countTemplateTokens() {
   templateTokensCount.value = llamaTokenizer.encode(template.value.render()).length;
-  //setMaxTokens();
+  setFreeContext();
+}
+
+function setAutomaxContext() {
+  inferParams.max_tokens = -1;
+  setFreeContext();
 }
 
 function clearInferResults() {
@@ -125,7 +127,7 @@ async function processInfer() {
     const tps = parseFloat((inferResults.totalTokens / secondsCount.value).toFixed(1));
     inferResults.tokensPerSecond = tps;
   }, 1000);
-  timer = id;
+  timer.value = id;
   // process history
   if (history.length > 0) {
     history.forEach((turn) => {
@@ -146,6 +148,19 @@ async function processInfer() {
       _inferParams[k] = inferParams[k];
     }
   });
+  if (_inferParams.max_tokens) {
+    if (_inferParams.max_tokens <= 0) {
+      if (lm.providerType == "llamacpp") {
+        _inferParams.max_tokens = undefined;
+      } else if (lm.providerType == "koboldcpp") {
+        _inferParams.max_tokens = freeContext.value;
+      }
+    }
+  } else {
+    if (lm.providerType == "koboldcpp") {
+      _inferParams.max_tokens = freeContext.value;
+    }
+  }
   // grammar
   if (useGrammar.value === true) {
     const gr = serializeGrammar(await compile(grammar.code, "Grammar"));
@@ -175,6 +190,9 @@ async function processInfer() {
 }
 
 function _finishInfer() {
+  clearInterval(timer.value);
+  lmState.isRunning = false;
+  lmState.isStreaming = false;
   _pushToHistory();
   currentImgData.value = "";
   _currentImgId.value = 0;
@@ -184,9 +202,6 @@ function _finishInfer() {
 
 async function stopInfer() {
   await abort();
-  clearInterval(timer);
-  lmState.isRunning = false;
-  lmState.isStreaming = false;
   _finishInfer();
 }
 
@@ -380,10 +395,7 @@ function mutateModel(model: ModelConf, loadTemplate: boolean) {
   lmState.isModelLoaded = true;
   lmState.isLoadingModel = false;
   //checkMaxTokens(lmState.model.ctx);
-  if (autoMaxContext.value == true) {
-    setMaxTokens();
-  }
-  setFreeContext(true);
+  setFreeContext();
   clearInferResults();
 }
 
@@ -448,6 +460,7 @@ export {
   freeContext,
   totalContext,
   activeBackend,
+  setAutomaxContext,
   setFreeContext,
   loadCustomTemplate,
   loadGenericTemplate,
