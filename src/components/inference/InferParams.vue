@@ -8,47 +8,47 @@
           <label for="temp">Temp</label>
         </span>
       </div>
-      <div>
+      <div v-if="inferParams.tfs">
         <span class="p-float-label">
           <InputNumber class="w-8" v-model="inferParams.tfs" inputId="tfs" :min="0" :max="2" :step="0.1" showButtons />
           <label for="tfs">Tfs</label>
         </span>
       </div>
-      <div>
+      <div v-if="inferParams.top_p">
         <span class="p-float-label">
           <InputNumber class="w-8" v-model="inferParams.top_k" inputId="topK" :min="0" :max="100" showButtons />
           <label for="topK">TopK</label>
         </span>
       </div>
-      <div>
+      <div v-if="inferParams.top_k">
         <span class="p-float-label">
           <InputNumber class="w-8" v-model="inferParams.top_p" inputId="topP" :min="0" :max="1" :step="0.05"
             showButtons />
           <label for="topP">TopP</label>
         </span>
       </div>
-      <div>
+      <div v-if="inferParams.min_p">
         <span class="p-float-label">
           <InputNumber class="w-8" v-model="inferParams.min_p" inputId="minP" :min="0" :max="1" :step="0.05"
             showButtons />
           <label for="minP">MinP</label>
         </span>
       </div>
-      <div>
+      <div v-if="inferParams.frequency_penalty">
         <span class="p-float-label">
           <InputNumber class="w-8" v-model="inferParams.frequency_penalty" inputId="freqPenalty" :min="0" :max="2"
             :step="0.1" showButtons />
           <label for="freqPenalty">Freq</label>
         </span>
       </div>
-      <div>
+      <div v-if="inferParams.presence_penalty">
         <span class="p-float-label">
           <InputNumber class="w-8" v-model="inferParams.presence_penalty" inputId="presPenalty" :min="0" :max="2"
             :step="0.1" showButtons />
           <label for="presPenalty">Pres</label>
         </span>
       </div>
-      <div>
+      <div v-if="inferParams.repeat_penalty">
         <span class="p-float-label">
           <InputNumber class="w-8" v-model="inferParams.repeat_penalty" inputId="repeatPenalty" :min="0" :max="2"
             :step="0.1" showButtons />

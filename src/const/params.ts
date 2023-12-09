@@ -22,4 +22,16 @@ const defaultInferenceParams: InferenceParams = {
   stop: ["</s>"],
 };
 
-export { defaultInferenceParams }
+// defaults from Llama.cpp
+const availableDefaultInferenceParams: InferenceParams = {
+  temperature: 0.8,
+  top_k: 40,
+  top_p: 0.95,
+  min_p: 0.05,
+  tfs: 1,
+  repeat_penalty: 1.1,
+  presence_penalty: 0,
+  frequency_penalty: 0,
+}
+
+export { defaultInferenceParams, availableDefaultInferenceParams }

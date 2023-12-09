@@ -24,8 +24,17 @@
           <div>Save preset</div>
         </button>
       </div>
+      <div class="mt-3">
+        <button class="flex flex-row items-center btn" @click="viewMode = 'params'">
+          <div class="mr-2 txt-light">
+            <i-fluent-mdl2:column-options></i-fluent-mdl2:column-options>
+          </div>
+          <div>
+            Edit params</div>
+        </button>
+      </div>
     </template>
-    <template v-else>
+    <template v-else-if="viewMode == 'save'">
       <div class="flex flex-col pt-5">
         <div class="p-float-label">
           <InputText inputId="promptname" v-model="presetname" class="" v-focus
@@ -37,6 +46,9 @@
         </div>
       </div>
     </template>
+    <template v-else>
+      <params-editor></params-editor>
+    </template>
   </div>
 </template>
 
@@ -47,10 +59,11 @@ import ConfirmDelete from '@/widgets/ConfirmDelete.vue';
 import { db, inferParams, presets, loadPresets, mutateInferParams } from "@/state";
 import { selectedPreset } from "@/state/settings";
 import { loadPreset, savePreset, delPreset } from "@/state/presets";
+import ParamsEditor from "./ParamsEditor.vue";
 
 const emit = defineEmits(["close"]);
 
-type ViewMode = "list" | "save";
+type ViewMode = "list" | "save" | "params";
 
 const viewMode = ref<ViewMode>("list");
 const presetname = ref();

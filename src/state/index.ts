@@ -406,6 +406,7 @@ function mutateInferParams(_params: InferenceParams) {
   inferParams.stop = _params.stop;
   inferParams.temperature = _params.temperature;
   inferParams.tfs = _params.tfs;
+  inferParams.min_p = _params.min_p;
   inferParams.threads = _params.threads;
   inferParams.max_tokens = _params.max_tokens;
   inferParams.top_k = _params.top_k;
