@@ -22,14 +22,15 @@ async function saveGrammar(name: string) {
 function loadGrammar(gr: GbnfGrammar) {
   grammar.name = gr.name;
   grammar.code = gr.code;
+  grammar.isGeneric = gr.isGeneric;
   useGrammar.value = true;
 }
 
 async function loadGrammars() {
   const g = await db.listGrammars();
-  console.log("DB g", g);
+  //console.log("DB g", g);
   grammars.splice(0, grammars.length, ...g);
-  console.log("G", grammars)
+  //console.log("G", grammars)
 }
 
 export { grammar, useGrammar, grammars, saveGrammar, loadGrammars, loadGrammar }

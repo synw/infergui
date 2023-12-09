@@ -163,7 +163,12 @@ async function processInfer() {
   }
   // grammar
   if (useGrammar.value === true) {
-    const gr = serializeGrammar(await compile(grammar.code, "Grammar"));
+    let gr = "";
+    if (grammar.isGeneric) {
+      gr = grammar.code;
+    } else {
+      gr = serializeGrammar(await compile(grammar.code, "Grammar"));
+    }
     _inferParams.grammar = gr;
     //console.log("Using grammar:");
     //console.log(gr);

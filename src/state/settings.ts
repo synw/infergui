@@ -9,6 +9,8 @@ const formatMode = useStorage<FormatMode>("formatMode", "Text");
 const cloneTemplateMode = useStorage<boolean>("cloneTemplateMode", false);
 const templateSidebarShowGeneric = useStorage<boolean>("templateSidebarShowGeneric", false);
 const templateSidebarShowCustom = useStorage<boolean>("templateSidebarShowCustom", false);
+const grammarSidebarShowGeneric = useStorage<boolean>("grammarSidebarShowGeneric", false);
+const grammarSidebarShowCustom = useStorage<boolean>("grammarSidebarShowCustom", false);
 
 export {
   autoMaxContext,
@@ -18,4 +20,6 @@ export {
   cloneTemplateMode,
   templateSidebarShowCustom,
   templateSidebarShowGeneric,
+  grammarSidebarShowCustom,
+  grammarSidebarShowGeneric,
 }

@@ -42,6 +42,7 @@ interface LmBackend {
 interface GbnfGrammar {
   name: string;
   code: string;
+  isGeneric?: boolean;
 }
 
 type FormatMode = "Html" | "Text" | "Markdown" | "Json";
