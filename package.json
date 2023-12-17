@@ -4,13 +4,13 @@
   "private": true,
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && gzipper c ./dist --verbose --incremental --exclude avif,jpg --threshold 999 --remove-larger --brotli --brotli-param-mode font",
     "local": "vite preview --port 5173"
   },
   "dependencies": {
     "@docdundee/vue": "^0.0.21",
     "@intrinsicai/gbnfgen": "^0.10.0",
-    "@locallm/api": "^0.0.17",
+    "@locallm/api": "^0.0.19",
     "@ow3/deep-unref-vue": "^0.1.3",
     "@snowind/header": "^0.0.11",
     "@snowind/plugin": "^0.5.0",
@@ -30,13 +30,14 @@
   },
   "devDependencies": {
     "@iconify/json": "^2.2.57",
-    "@locallm/types": "^0.0.12",
+    "@locallm/types": "^0.0.13",
     "@tailwindcss/forms": "^0.5.3",
     "@tailwindcss/typography": "^0.5.10",
     "@types/node": "^20.4.8",
     "@vitejs/plugin-vue": "^4.2.1",
     "@vue/compiler-sfc": "^3.2.47",
     "autoprefixer": "^10.4.14",
+    "gzipper": "^7.2.0",
     "path": "^0.12.7",
     "postcss": "^8.4.23",
     "sass": "^1.69.0",

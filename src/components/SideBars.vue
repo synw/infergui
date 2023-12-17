@@ -14,7 +14,7 @@
       <prompts-bar class="mt-3" v-if="activeBar == 'prompts'"></prompts-bar>
       <templates-bar v-else-if="activeBar == 'templates'"></templates-bar>
       <grammars-bar class="mt-3" v-else-if="activeBar == 'grammars'"></grammars-bar>
-      <tasks-bar v-else></tasks-bar>
+      <!-- tasks-bar v-else></tasks-bar -->
     </div>
   </div>
 </template>
@@ -23,7 +23,7 @@
 import { onMounted, ref } from 'vue';
 import PromptsBar from './PromptsBar.vue';
 import TemplatesBar from "@/components/TemplatesBar.vue";
-import TasksBar from './TasksBar.vue';
+//import TasksBar from './TasksBar.vue';
 import GrammarsBar from './GrammarsBar.vue';
 import { TabType } from "@/interfaces";
 import { sidebarLeftActiveTab } from "@/state/settings";

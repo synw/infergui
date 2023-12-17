@@ -25,30 +25,8 @@
     <template #branding>
       <div class="ml-3 flex h-full flex-row items-center">
         <template v-if="activeBackend !== null">
-          <div class="text-lg cursor-pointer" v-if="activeBackend?.providerType == 'goinfer'">
-            <button class="btn mr-5 border-none" @click="toggleModelCollapse">
-              <template v-if="lmState.isLoadingModel">
-                Loading model ..
-              </template>
-              <template v-else-if="lmState.isModelLoaded">
-                <div class="flex flex-row items-center space-x-2">
-                  <div><i-iconoir:network-alt class="text-xl"></i-iconoir:network-alt></div>
-                  <div>{{ lmState.model.name }} <span class="txt-light"> ctx: {{ lmState.model.ctx }}</span></div>
-                </div>
-              </template>
-              <template v-else>
-                <div class="flex flex-row items-center space-x-2">
-                  <div>Pick a model</div>
-                  <div><i-iconoir:network-alt class="text-xl"></i-iconoir:network-alt></div>
-                </div>
-              </template>
-            </button>
-            <OverlayPanel ref="modelCollapse">
-              <models-picker @close="toggleModelCollapse"></models-picker>
-            </OverlayPanel>
-          </div>
           <div class="flex flex-row items-center space-x-2 text-lg"
-            v-else-if="['koboldcpp', 'llamacpp'].includes(activeBackend?.providerType)">
+            v-if="['koboldcpp', 'llamacpp'].includes(activeBackend?.providerType)">
             <div><i-iconoir:network-alt class="text-xl"></i-iconoir:network-alt></div>
             <div>{{ lmState.model.name }} <span class="txt-light"> ctx: {{ lmState.model.ctx }}</span></div>
             <div v-if="template.id != 'none'" class="pl-2">
@@ -70,13 +48,22 @@
     </template>
     <template #menu>
       <div class="flex h-full w-full flex-row items-center justify-end space-x-2">
+
         <button v-if="lmState.isRunning == true || lmState.isStreaming == true"
           class="btn flex w-48 flex-row items-center justify-center txt-light bord-light block-lighter"
           @click="stopInfer()">
           <i-icomoon-free:stop class="mr-2"></i-icomoon-free:stop>
           <div>Stop</div>
         </button>
-        <button v-else class="btn flex flex-row items-center justify-center border-0 bord-light txt-semilight"
+        <button id="clearinfer-btn" class="btn txt-semilight"
+          v-if="!(lmState.isRunning || (stream.length == 0 && history.length == 0))"
+          @click="stream = ''; clearInferResults(); clearHistory();">
+          <i-ion:trash-sharp class="text-2xl"></i-ion:trash-sharp>
+        </button>
+        <div>
+          <format-bar v-if="stream.length > 0 || history.length > 0"></format-bar>
+        </div>
+        <button class="btn flex flex-row items-center justify-center border-0 bord-light txt-semilight"
           @click="togglePresetsCollapse($event)">
           <i-eva:options-2-outline class="text-2xl"></i-eva:options-2-outline>
         </button>
@@ -126,7 +113,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { SwTopbar, useTopbar } from "@snowind/header";
-import { user, stopInfer, lmState, activeBackend, template } from "@/state";
+import { user, stopInfer, lmState, activeBackend, template, stream, history, clearInferResults, clearHistory } from "@/state";
 import { useGrammar } from '@/state/grammar';
 import { useRouter } from 'vue-router';
 import OverlayPanel from 'primevue/overlaypanel';
@@ -134,6 +121,7 @@ import ModelsPicker from '@/components/ModelsPicker.vue';
 import PresetsPicker from "@/components/PresetsPicker.vue";
 import SettingsPopin from './SettingsPopin.vue';
 import BackendsPopin from './BackendsPopin.vue';
+import FormatBar from '@/components/inference/FormatBar.vue';
 
 const router = useRouter()
 const topBar = useTopbar(router);

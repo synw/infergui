@@ -6,7 +6,7 @@
           <div>
             <div class="flex flex-row w-full txt-light">
               <button class="w-max p-2 border border-t-0 bord-lighter"
-                :class="activeTab == 'template' ? ['border-b-0', 'txt-semilight'] : 'txt-lighter'"
+                :class="(activeTab == 'template' && !collapseTemplate) ? ['border-b-0', 'txt-semilight'] : 'txt-lighter'"
                 @click="openTab('template'); collapseTemplate = false">Template</button>
               <button class="w-max p-2 border border-t-0 bord-lighter"
                 :class="activeTab == 'grammar' ? ['border-b-0', 'txt-semilight'] : 'txt-lighter'"
@@ -117,12 +117,8 @@
               <save-prompt-dialog class="p-3" @pick="toggleSavePrompt($event)"></save-prompt-dialog>
             </OverlayPanel>
           </div>
-          <format-bar v-if="stream.length > 0 || history.length > 0" @select="selectFormatMode($event)"></format-bar>
-          <button id="clearinfer-btn" class="btn txt-semilight"
-            :disabled="(lmState.isRunning || (stream.length == 0 && history.length == 0)) ? true : false"
-            @click="stream = ''; clearInferResults(); clearHistory(); collapseTemplate = false">
-            <i-grommet-icons:clear class="text-xl"></i-grommet-icons:clear>
-          </button>
+
+
           <div>
             <button id="runinfer-btn" class="btn flex w-48 flex-row items-center txt-light bord-light block-lighter"
               @click="processInfer(); collapseTemplate = true"
@@ -146,7 +142,6 @@ import SavePromptDialog from './SavePromptDialog.vue';
 import SaveTemplateDialog from './SaveTemplateDialog.vue';
 import ImageLoader from './ImageLoader.vue';
 //import SaveTaskDialog from './SaveTaskDialog.vue';
-import FormatBar from './FormatBar.vue';
 import { template, prompt, currentImgData, countPromptTokens, countTemplateTokens, processInfer, clearInferResults, stream, lmState, clearHistory, history } from '@/state';
 import { hljs } from "@/conf";
 import TemplateEditor from './TemplateEditor.vue';
@@ -178,10 +173,6 @@ function toggleSaveTemplate(evt) {
 
 function toggleSaveTask(evt) {
   saveTaskCollapse.value.toggle(evt);
-}
-
-function selectFormatMode(evt) {
-  //console.log("F", evt)
 }
 
 onMounted(() => {

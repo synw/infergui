@@ -1,4 +1,5 @@
-import { InferenceParams } from "@locallm/types"
+//import { InferenceParams } from "@locallm/types"
+import { InferenceParams } from "../packages/types/interfaces"
 
 /*const defaultInferenceParams: InferenceParams = {
   stream: true,
@@ -30,8 +31,6 @@ const availableDefaultInferenceParams: InferenceParams = {
   min_p: 0.05,
   tfs: 1,
   repeat_penalty: 1.1,
-  presence_penalty: 0,
-  frequency_penalty: 0,
 }
 
 export { defaultInferenceParams, availableDefaultInferenceParams }

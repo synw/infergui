@@ -34,20 +34,6 @@
           <label for="minP">MinP</label>
         </span>
       </div>
-      <div v-if="inferParams.frequency_penalty">
-        <span class="p-float-label">
-          <InputNumber class="w-8" v-model="inferParams.frequency_penalty" inputId="freqPenalty" :min="0" :max="2"
-            :step="0.1" showButtons />
-          <label for="freqPenalty">Freq</label>
-        </span>
-      </div>
-      <div v-if="inferParams.presence_penalty">
-        <span class="p-float-label">
-          <InputNumber class="w-8" v-model="inferParams.presence_penalty" inputId="presPenalty" :min="0" :max="2"
-            :step="0.1" showButtons />
-          <label for="presPenalty">Pres</label>
-        </span>
-      </div>
       <div v-if="inferParams.repeat_penalty">
         <span class="p-float-label">
           <InputNumber class="w-8" v-model="inferParams.repeat_penalty" inputId="repeatPenalty" :min="0" :max="2"
@@ -55,12 +41,12 @@
           <label for="repeatPenalty">Repeat</label>
         </span>
       </div>
-      <div v-if="isGoinfer">
+      <!-- div v-if="isGoinfer">
         <span class="p-float-label">
           <InputNumber class="w-8 txt-lighter" v-model="inferParams.threads" inputId="threads" showButtons />
           <label for="threads">Threads</label>
         </span>
-      </div>
+      </div -->
     </div>
     <div class="mr-8 mt-8 flex flex-row space-x-3">
       <div class="p-float-label">
@@ -98,8 +84,6 @@ import InputText from 'primevue/inputtext';
 import { autoMaxContext } from "@/state/settings";
 import { getLm, inferParams, lmState, stop, setFreeContext } from '@/state';
 import { computed } from 'vue';
-
-const isGoinfer = computed(() => getLm().providerType == "goinfer");
 
 function updateCtx(evt) {
   setFreeContext()

@@ -5,7 +5,7 @@
         <div class="flex flex-row space-y-8">
           <div>
             <sw-switch v-model:value="backend.enabled" class="switch-primary"
-              @update:value="updateBackend(backend.name, Boolean($event))">
+              @update:value="enableBackend(backend.name, Boolean($event))">
               <div class="ml-2">
                 {{ backend.name }}
               </div>
@@ -20,25 +20,29 @@
     <template v-else-if="mode == 'edit'">
       <div class="flex flex-col" v-for="backend in backends">
         <div class="flex flex-row items-center">
-          <div class="ml-2 flex-grow">
+          <div class="ml-2 flex-grow cursor-pointer" @click="updateBackend(backend)">
             {{ backend.name }}
           </div>
-          <div class="">
+          <div>
             <confirm-delete @delete="deleteBackend(backend.name)"></confirm-delete>
           </div>
         </div>
       </div>
       <div class="flex flex-row mt-3 text-sm space-x-2">
         <button class="btn border txt-light bord-lighter" @click="mode = 'select'">Back</button>
-        <button class="btn border txt-light bord-lighter" @click="mode = 'add'">New backend</button>
+        <button class="btn border txt-light bord-lighter" @click="mode = 'add';">New backend</button>
       </div>
     </template>
-    <template v-else>
+    <template v-else-if="mode == 'add' || mode == 'updateb'">
       <div class="flex flex-col space-y-6">
-        <div class="text-lg">Add a backend</div>
+        <div class="text-lg" v-if="mode == 'add'">Add a backend</div>
+        <div class="text-lg" v-else>Edit backend</div>
         <div>
           <div class="p-float-label">
-            <Dropdown v-model="backend" inputId="backend" :options="backendsTypes" optionLabel="name" class="w-full" />
+            <Dropdown v-if="mode == 'add'" v-model="backend" inputId="backend" :options="backendsTypes" optionLabel="name"
+              option-value="provider" class="w-full" />
+            <Dropdown v-else :model-value="backend.provider" inputId="backend" :options="backendsTypes" optionLabel="name"
+              option-value="provider" class="w-full" :disabled="true" :placeholder="backend.provider" />
             <label for="backend">Type</label>
           </div>
         </div>
@@ -62,7 +66,7 @@
         </div>
         <div class="flex flex-row text-sm space-x-2 pt-3">
           <button class="btn border txt-light bord-lighter" @click="mode = 'edit'; clearForm()">Back</button>
-          <button class="btn success flex-grow" :disabled="!canSaveForm" @click="addBackend()">Save</button>
+          <button class="btn success flex-grow" :disabled="!canSaveForm" @click="saveBackend()">Save</button>
         </div>
       </div>
     </template>
@@ -81,24 +85,32 @@ import ConfirmDelete from '@/widgets/ConfirmDelete.vue';
 import { LmBackend } from '@/interfaces';
 
 const emit = defineEmits(["close"]);
-const mode = ref<"edit" | "select" | "add">("select");
+const mode = ref<"edit" | "select" | "add" | "updateb">("select");
 const name = ref();
 const url = ref();
 const apiKey = ref();
 const backendsTypes = ref([
   { name: "Llamacpp.cpp", provider: "llamacpp" },
   { name: "Koboldcpp", provider: "koboldcpp" },
-  { name: "Goinfer", provider: "goinfer" }
+  //{ name: "Ollama", provider: "ollama" },
 ]);
 const backend = ref();
 
-async function updateBackend(name: string, val: boolean) {
-  console.log("Update", name, val);
+function updateBackend(_backend: LmBackend) {
+  mode.value = "updateb";
+  name.value = _backend.name;
+  url.value = _backend.serverUrl;
+  apiKey.value = _backend.apiKey;
+  backend.value = { name: _backend.name, provider: _backend.providerType }
+}
+
+async function enableBackend(name: string, val: boolean) {
+  console.log("Enable", name, val);
   if (val === true) {
     for (const [k, v] of Object.entries(backends)) {
       if (name == k) {
         backends[k].enabled = true;
-        const res = await probeBackend([v]);
+        const res = await probeBackend(v);
         if (res !== null) {
           await loadBackend(res.lm, res.backend)
         } else {
@@ -128,7 +140,7 @@ async function deleteBackend(name: string) {
   await loadBackends();
 }
 
-async function addBackend() {
+async function saveBackend() {
   const b: LmBackend = {
     name: name.value,
     providerType: backend.value.provider,
@@ -136,7 +148,7 @@ async function addBackend() {
     apiKey: apiKey.value,
     enabled: false,
   }
-  console.log("Adding new backend", JSON.stringify(b, null, "  "));
+  //console.log("Adding new backend", JSON.stringify(b, null, "  "));
   await db.setBackend(b.name, b);
   await loadBackends();
   mode.value = "edit";

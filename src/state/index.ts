@@ -1,14 +1,16 @@
-import { Ref, reactive, ref } from "vue";
+import { reactive, ref } from "vue";
 import { ApiResponse } from "restmix";
 import { compile, serializeGrammar } from "@intrinsicai/gbnfgen";
 import { User } from "@snowind/state";
-import { Lm } from "@locallm/api";
 import { PromptTemplate, HistoryTurn } from "modprompt";
 import llamaTokenizer from 'llama-tokenizer-js';
 import { defaultInferenceParams } from '@/const/params';
-import { TemporaryInferResult, ApiState, LmBackend } from '@/interfaces';
+import { ApiState, LmBackend } from '@/interfaces';
+import { Lm } from "@locallm/api";
 import { InferenceParams, ModelConf, ModelTemplate } from '@locallm/types';
-import { loadModels, loadTasks as _loadTasks, selectModel, infer, abort, probeBackend } from "@/services/api";
+//import { Lm } from "../packages/locallm/api";
+//import { InferenceParams, ModelConf, ModelTemplate } from '../packages/types/interfaces';
+import { loadModels, loadTasks as _loadTasks, infer, abort, probeLocalBackends } from "@/services/api";
 import { msg } from "../services/notify";
 import { useDb } from "../services/db";
 import { selectedPreset } from "./settings";
@@ -22,7 +24,9 @@ let lm = new Lm({
   providerType: defaultBackends[0].providerType,
   serverUrl: defaultBackends[0].serverUrl,
   apiKey: defaultBackends[0].apiKey,
-  onToken: (t) => stream.value += t,
+  onToken: (t) => {
+    stream.value += t;
+  },
 });
 const lmState = reactive<ApiState>({
   isRunning: false,
@@ -30,7 +34,7 @@ const lmState = reactive<ApiState>({
   isModelLoaded: false,
   isLoadingModel: false,
   isModelMultimodal: false,
-  model: { name: "", ctx: 2048, template: "unknown", gpu_layers: 0 },
+  model: { name: "", ctx: 2048 },
 });
 const db = useDb();
 const backends = reactive<Record<string, LmBackend>>({});
@@ -49,7 +53,7 @@ const prompt = ref("");
 const currentImgData = ref("");
 const _currentImgId = ref(0);
 const inferParams = reactive<InferenceParams>(defaultInferenceParams);
-const inferResults = reactive<TemporaryInferResult>({
+const inferResults = reactive<Record<string, number>>({
   tokensPerSecond: 0,
   totalTokens: 0,
 });
@@ -97,9 +101,9 @@ function setAutomaxContext() {
 
 function clearInferResults() {
   inferResults.totalTokens = 0;
-  inferResults.thinkingTimeFormat = "";
+  /*inferResults.thinkingTimeFormat = "";
   inferResults.emitTimeFormat = "";
-  inferResults.totalTimeFormat = "";
+  inferResults.totalTimeFormat = "";*/
   inferResults.tokensPerSecond = 0;
   secondsCount.value = 0;
 }
@@ -175,18 +179,6 @@ async function processInfer() {
   //console.log("RES", res)
   _finishInfer();
   //console.log("Stats:", res.stats);
-  switch (lm.providerType) {
-    case "goinfer":
-      inferResults.thinkingTimeFormat = res.stats?.thinkingTimeFormat;
-      inferResults.emitTimeFormat = res.stats?.emitTimeFormat;
-      inferResults.totalTimeFormat = res.stats?.totalTimeFormat;
-      break;
-    //case "llamacpp":res.stats?.
-    //  break;
-    default:
-      break;
-  }
-
 }
 
 function _finishInfer() {
@@ -262,7 +254,7 @@ async function loadPrompt(name: string) {
   countPromptTokens();
 }
 
-async function loadTask(t: Record<string, any>) {
+/*async function loadTask(t: Record<string, any>) {
   let ctx = t?.modelConf?.ctx ?? lmState.model.ctx;
   //let gpu_layers = t?.modelConf.gpu_layers ?? lmState.model.gpu_layers;
   if (t?.modelConf?.name != lmState.model.name) {
@@ -274,7 +266,7 @@ async function loadTask(t: Record<string, any>) {
   Object.keys(ip).forEach((p) => {
     inferParams[p] = ip[p]
   });
-}
+}*/
 
 async function loadBackends() {
   const _backends = await db.listBackends();
@@ -313,9 +305,11 @@ async function loadBackend(_lm: Lm, _b: LmBackend) {
     providerType: _lm.providerType,
     serverUrl: _lm.serverUrl,
     apiKey: _lm.apiKey,
-    onToken: (t) => stream.value += t,
+    onToken: (t) => {
+      stream.value += t
+    },
   });
-  if (lm.providerType == "goinfer") {
+  if (lm.providerType == "ollama") {
     await loadModels();
   } else if (["koboldcpp", "llamacpp"].includes(lm.providerType)) {
     const model: ModelConf = {
@@ -323,7 +317,7 @@ async function loadBackend(_lm: Lm, _b: LmBackend) {
       ctx: _lm.model.ctx,
     }
     console.log("Loading model", model, "for", lm.providerType);
-    mutateModel(model, false);
+    mutateModel(model);
     lm.model = model;
     // check if the model is multimodal
     if (lm.providerType == "llamacpp") {
@@ -360,7 +354,7 @@ async function initState() {
   });
   db.init().then(async () => {
     loadBackends().then(async () => {
-      const res = await probeBackend(Object.values(backends));
+      const res = await probeLocalBackends(Object.values(backends));
       if (res !== null) {
         loadBackend(res.lm, res.backend)
       }
@@ -373,10 +367,10 @@ async function initState() {
   //loadTasks();
 }
 
-function mutateModel(model: ModelConf, loadTemplate: boolean) {
+function mutateModel(model: ModelConf) {
   lmState.isLoadingModel = true;
   //console.log("Mutate model", model);
-  if (model.name in models) {
+  /*if (model.name in models) {
     const modelTemplate = models[model.name];
     if (modelTemplate.name != "unknown") {
       // the model has a generic template
@@ -384,12 +378,10 @@ function mutateModel(model: ModelConf, loadTemplate: boolean) {
         loadGenericTemplate(modelTemplate.name);
       }
     }
-  }
+  }*/
   lmState.model = {
     name: model.name,
-    ctx: model.ctx ?? 2048,
-    template: model.template ?? "unknown",
-    gpu_layers: model.gpu_layers,
+    ctx: model.ctx,
   }
   //console.log("State model", lmState.model);
   lmState.isModelLoaded = true;
@@ -400,8 +392,6 @@ function mutateModel(model: ModelConf, loadTemplate: boolean) {
 }
 
 function mutateInferParams(_params: InferenceParams) {
-  inferParams.frequency_penalty = _params.frequency_penalty;
-  inferParams.presence_penalty = _params.presence_penalty;
   inferParams.repeat_penalty = _params.repeat_penalty;
   inferParams.stop = _params.stop;
   inferParams.temperature = _params.temperature;
@@ -477,8 +467,8 @@ export {
   loadTemplates,
   clearInferResults,
   clearHistory,
-  loadTasks,
-  loadTask,
+  //loadTasks,
+  //loadTask,
   loadPresets,
   processInfer,
   stopInfer,

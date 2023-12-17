@@ -1,12 +1,6 @@
-import { LmProviderType } from "@locallm/types";
+//import { LmProviderType } from "@locallm/types";
+import { LmProviderType, ModelConf } from "./packages/types/interfaces";
 
-interface TemporaryInferResult {
-  thinkingTimeFormat?: string;
-  emitTimeFormat?: string;
-  totalTimeFormat?: string;
-  tokensPerSecond: number;
-  totalTokens: number;
-}
 
 interface ApiState {
   isRunning: boolean;
@@ -14,14 +8,7 @@ interface ApiState {
   isModelLoaded: boolean;
   isLoadingModel: boolean;
   isModelMultimodal: boolean;
-  model: SafeModelConf;
-}
-
-interface SafeModelConf {
-  name: string;
-  ctx: number;
-  template: string;
-  gpu_layers?: number;
+  model: ModelConf;
 }
 
 interface LmBackend {
@@ -51,7 +38,6 @@ type TabType = "prompts" | "templates" | "grammars";
 
 export {
   FormatMode,
-  TemporaryInferResult,
   ApiState,
   TabType,
   LmBackend,

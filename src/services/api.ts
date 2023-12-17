@@ -1,53 +1,70 @@
 import { getLm, mutateModel, stream, inferResults, updateModels, lmState } from "@/state";
-import { Lm, type TempInferStats } from "@locallm/api";
+import { Lm } from "@locallm/api";
+//import { Lm } from "../packages/locallm/api";
 import type { InferenceParams, InferenceResult, ModelTemplate } from "@locallm/types";
+//import type { InferenceParams, InferenceResult, ModelTemplate } from "../packages/types/interfaces";
 import { msg } from "./notify";
 import { LmBackend } from "@/interfaces";
 
-async function probeBackend(backends: Array<LmBackend>): Promise<{ lm: Lm, backend: LmBackend } | null> {
+
+async function probeBackend(_backend: LmBackend): Promise<{ lm: Lm, backend: LmBackend } | null> {
+  const _lm = new Lm({
+    providerType: _backend.providerType,
+    serverUrl: _backend.serverUrl,
+    apiKey: _backend.apiKey,
+    onToken: (t) => stream.value += t,
+  });
+  //console.log("LM", JSON.stringify(_lm.provider, null, "  "));
+
+  //console.log("Probing", v)
+  switch (_backend.providerType) {
+    case "llamacpp":
+      try {
+        await _lm.loadModel("");
+        console.log(`Provider ${_backend.name} up`);
+        return { lm: _lm, backend: _backend }
+      } catch (e) {
+        console.log(`Provider ${_backend.name} down`, e)
+      }
+      break;
+    case "koboldcpp":
+      try {
+        await _lm.loadModel("");
+        if (_lm.model.name.length > 0) {
+          console.log(`Provider ${_backend.name} up`)
+          return { lm: _lm, backend: _backend }
+        } else {
+          console.log(`Provider ${_backend.name} down`)
+        }
+      } catch (e) {
+        console.log(`Provider ${_backend.name} down`, e)
+      }
+      break;
+    /*case "ollama":
+      try {
+        await _lm.modelsInfo();
+        console.log(`Provider ${v.name} up`)
+      } catch (e) {
+        console.log(`Provider ${v.name} down`, e)
+      }
+      break;
+    default:
+      throw new Error("Unknown provider type")*/
+  }
+  return null
+}
+
+
+async function probeLocalBackends(backends: Array<LmBackend>): Promise<{ lm: Lm, backend: LmBackend } | null> {
   //console.log("Probing backends", backends);
-  for (const [k, v] of Object.entries(backends)) {
-    const _lm = new Lm({
-      providerType: v.providerType,
-      serverUrl: v.serverUrl,
-      apiKey: v.apiKey,
-      onToken: (t) => stream.value += t,
-    });
-    //console.log("Probing", v)
-    switch (v.providerType) {
-      case "llamacpp":
-        try {
-          await _lm.loadModel("");
-          console.log(`Provider ${v.name} up`);
-          return { lm: _lm, backend: v }
-        } catch (e) {
-          console.log(`Provider ${v.name} down`, e)
-        }
-        break;
-      case "goinfer":
-        try {
-          await _lm.modelsInfo();
-          console.log(`Provider ${v.name} up`);
-          return { lm: _lm, backend: v }
-        } catch (e) {
-          console.log(`Provider ${v.name} down`, e)
-        }
-        break;
-      case "koboldcpp":
-        try {
-          await _lm.loadModel("");
-          if (_lm.model.name.length > 0) {
-            console.log(`Provider ${v.name} up`)
-            return { lm: _lm, backend: v }
-          } else {
-            console.log(`Provider ${v.name} down`)
-          }
-        } catch (e) {
-          console.log(`Provider ${v.name} down`, e)
-        }
-        break;
-      default:
-        throw new Error("Unknown provider type")
+  for (const v of Object.values(backends)) {
+    // probe only local backends
+    if (!v.serverUrl.includes("localhost")) {
+      continue
+    }
+    const res = await probeBackend(v);
+    if (res) {
+      return res
     }
   }
   return null
@@ -84,11 +101,12 @@ async function infer(_prompt: string, _template: string, _params: InferenceParam
   const lm = getLm();
 
   lm.onToken = (token: string) => {
+    //sconsole.log(`>>>${token}<<<`);
     stream.value = stream.value + token;
     resEl.scrollTop = resEl.scrollHeight;
     ++inferResults.totalTokens
   }
-  lm.onStartEmit = (s: TempInferStats) => {
+  lm.onStartEmit = (s) => {
     lmState.isStreaming = true;
     //console.log("Start emit", s);
   };
@@ -114,17 +132,11 @@ async function loadModels() {
   const lm = getLm();
   await lm.modelsInfo();
   const mt: Record<string, ModelTemplate> = {};
-  lm.models.forEach((mc) => {
-    mt[mc.name] = {
-      name: mc.template ?? "unknown",
-      ctx: mc.ctx ?? 2048,
-    }
-  });
   // update state
   updateModels(mt);
   if (lm.model.name.length > 0) {
     //console.log("LOAD", lm.model)
-    mutateModel(lm.model, true);
+    mutateModel(lm.model);
   }
 }
 
@@ -159,17 +171,17 @@ async function loadTask(path: string): Promise<void> {
   return task*/
 }
 
-async function selectModel(name: string, ctx: number, gpu_layers?: number, load_template: boolean = true) {
+async function selectModel(name: string, ctx: number, threads?: number, gpu_layers?: number) {
   try {
     const lm = getLm();
-    await lm.loadModel(name, ctx, "", gpu_layers);
+    await lm.loadModel(name, ctx, threads, gpu_layers);
   } catch (e) {
     if (e == "Error: the model is already loaded") {
       msg.warn("The model is already loaded", "The model has already been loaded");
       return
     }
   }
-  mutateModel({ name: name, ctx: ctx, gpu_layers: gpu_layers }, load_template);
+  mutateModel({ name: name, ctx: ctx });
 }
 
-export { infer, abort, loadModels, selectModel, loadTasks, loadTask, probeBackend }
+export { infer, abort, loadModels, selectModel, loadTasks, loadTask, probeLocalBackends, probeBackend }
