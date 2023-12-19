@@ -1,6 +1,6 @@
 {
   "name": "infergui",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "scripts": {
     "dev": "vite",
     "local": "vite preview --port 5173",

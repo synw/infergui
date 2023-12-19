@@ -39,10 +39,10 @@
         <div class="text-lg" v-else>Edit backend</div>
         <div>
           <div class="p-float-label">
-            <Dropdown v-if="mode == 'add'" v-model="backend" inputId="backend" :options="backendsTypes" optionLabel="name"
-              option-value="provider" class="w-full" />
-            <Dropdown v-else :model-value="backend.provider" inputId="backend" :options="backendsTypes" optionLabel="name"
-              option-value="provider" class="w-full" :disabled="true" :placeholder="backend.provider" />
+            <Dropdown v-if="mode == 'add'" v-model="backendType" inputId="backend" :options="backendsTypes"
+              optionLabel="name" option-value="provider" class="w-full" />
+            <Dropdown v-else :model-value="backendType" inputId="backend" :options="backendsTypes" optionLabel="name"
+              option-value="provider" class="w-full" :disabled="true" :placeholder="backendType" />
             <label for="backend">Type</label>
           </div>
         </div>
@@ -94,14 +94,16 @@ const backendsTypes = ref([
   { name: "Koboldcpp", provider: "koboldcpp" },
   //{ name: "Ollama", provider: "ollama" },
 ]);
-const backend = ref();
+const backendType = ref();
+//const backend = ref();
 
 function updateBackend(_backend: LmBackend) {
   mode.value = "updateb";
   name.value = _backend.name;
   url.value = _backend.serverUrl;
   apiKey.value = _backend.apiKey;
-  backend.value = { name: _backend.name, provider: _backend.providerType }
+  backendType.value = _backend.providerType;
+  //backend.value = { name: _backend.name, provider: _backend.providerType }
 }
 
 async function enableBackend(name: string, val: boolean) {
@@ -128,7 +130,7 @@ async function enableBackend(name: string, val: boolean) {
 }
 
 function clearForm() {
-  backend.value = null;
+  backendType.value = null;
   name.value = null;
   url.value = null;
   apiKey.value = null;
@@ -143,7 +145,7 @@ async function deleteBackend(name: string) {
 async function saveBackend() {
   const b: LmBackend = {
     name: name.value,
-    providerType: backend.value.provider,
+    providerType: backendType.value,
     serverUrl: url.value,
     apiKey: apiKey.value,
     enabled: false,
@@ -156,6 +158,6 @@ async function saveBackend() {
 }
 
 const canSaveForm = computed(() => {
-  return backend.value && url.value && name.value
+  return backendType.value && url.value && name.value
 })
 </script>

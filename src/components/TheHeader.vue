@@ -86,7 +86,7 @@
           @click="toggleBackendCollapse($event)">
           <i-uil:server class="text-2xl"></i-uil:server>
         </button>
-        <OverlayPanel ref="backendCollapse" @close="toggleBackendCollapse">
+        <OverlayPanel ref="backendCollapse" @close="toggleBackendCollapse($event)">
           <BackendsPopin></BackendsPopin>
         </OverlayPanel>
 

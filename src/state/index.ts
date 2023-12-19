@@ -313,6 +313,7 @@ async function loadBackend(_lm: Lm, _b: LmBackend) {
   if (lm.providerType == "ollama") {
     await loadModels();
   } else if (["koboldcpp", "llamacpp"].includes(lm.providerType)) {
+    console.log("API", JSON.stringify(lm.apiKey, null, "  "));
     const model: ModelConf = {
       name: _lm.model.name,
       ctx: _lm.model.ctx,
