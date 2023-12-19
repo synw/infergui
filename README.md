@@ -1,5 +1,7 @@
 # Infer gui
 
+[![pub package](https://img.shields.io/npm/v/infergui)](https://www.npmjs.com/package/infergui)
+
 A graphical user interface for local language models. It support different local backends:
 
 - [Llama.cpp server](https://github.com/ggerganov/llama.cpp/tree/master/examples/server#llamacppexampleserver)
