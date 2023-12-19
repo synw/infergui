@@ -41,8 +41,12 @@
             </div>
           </div>
         </template>
-        <div class="text-lg" v-else>
-          No backend
+        <div class="flex flex-row items-center" v-else>
+          <div class="text-lg">No backend</div>
+          <div class="ml-3">
+            <button class="btn bord-semilight txt-light py-0 text-sm rounded-md"
+              @click="probeAndLoadLocalBackends()">Retry</button>
+          </div>
         </div>
       </div>
     </template>
@@ -113,7 +117,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { SwTopbar, useTopbar } from "@snowind/header";
-import { user, stopInfer, lmState, activeBackend, template, stream, history, clearInferResults, clearHistory } from "@/state";
+import { user, stopInfer, lmState, activeBackend, template, stream, history, clearInferResults, clearHistory, probeAndLoadLocalBackends } from "@/state";
 import { useGrammar } from '@/state/grammar';
 import { useRouter } from 'vue-router';
 import OverlayPanel from 'primevue/overlaypanel';

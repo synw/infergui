@@ -276,6 +276,7 @@ async function loadBackends() {
       await db.setBackend(b.name, b);
       _backends.push(b)
     });
+    window.location.reload();
   }
   Object.keys(backends).forEach((b) => {
     delete backends[b]
@@ -332,6 +333,15 @@ async function loadBackend(_lm: Lm, _b: LmBackend) {
   activeBackend.value = _b;
 }
 
+async function probeAndLoadLocalBackends() {
+  const res = await probeLocalBackends(Object.values(backends));
+  if (res !== null) {
+    loadBackend(res.lm, res.backend)
+  } else {
+    msg.warn("No backend found", "Please run a local backend and retry or connect to a remote backend", 10000)
+  }
+}
+
 async function initState() {
   //console.log("KEY", import.meta.env.VITE_API_KEY);
   lm.api.onResponse(async <T>(res: ApiResponse<T>): Promise<ApiResponse<T>> => {
@@ -352,12 +362,9 @@ async function initState() {
     }
     return res
   });
-  db.init().then(async () => {
-    loadBackends().then(async () => {
-      const res = await probeLocalBackends(Object.values(backends));
-      if (res !== null) {
-        loadBackend(res.lm, res.backend)
-      }
+  db.init().then(() => {
+    loadBackends().then(() => {
+      probeAndLoadLocalBackends()
     });
     loadPrompts();
     loadTemplates();
@@ -477,4 +484,5 @@ export {
   loadBackends,
   getLm,
   setImageData,
+  probeAndLoadLocalBackends,
 }
