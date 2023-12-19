@@ -29,13 +29,31 @@ This interface uses no hidden magic: everything is explicit.
 
 ## Install
 
+### With npm
+
+Install:
+
+```bash
+npm i -g infergui
+```
+
+Run:
+
+```bash
+infergui
+```
+
+Run a local backend and open `localhost:5183` in a browser
+
+### With git
+
 Clone and install the dependencies:
 
 ```
 npm i
 ```
 
-## Run
+Build and run:
 
 ```
 npm run build
