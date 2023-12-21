@@ -17,6 +17,9 @@ app.use(serve(path.join(dirpath, '../')));
 
 app.use(router.routes()).use(router.allowedMethods());
 
+process.on('SIGINT', () => process.exit(1));
+process.on('SIGTERM', () => process.exit(1));
+
 app.listen(5183, () => {
   console.log('Server running on port 5183');
 });
