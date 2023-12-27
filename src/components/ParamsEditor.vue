@@ -36,22 +36,6 @@
       </sw-switch>
     </div>
     <div>
-      <sw-switch v-model:value="useParams.frequency_penalty" class="switch-primary"
-        @update:value="setParam('frequency_penalty')">
-        <div class="ml-2">
-          Frequency penalty
-        </div>
-      </sw-switch>
-    </div>
-    <div>
-      <sw-switch v-model:value="useParams.presence_penalty" class="switch-primary"
-        @update:value="setParam('presence_penalty')">
-        <div class="ml-2">
-          Presence penalty
-        </div>
-      </sw-switch>
-    </div>
-    <div>
       <sw-switch v-model:value="useParams.repeat_penalty" class="switch-primary"
         @update:value="setParam('repeat_penalty')">
         <div class="ml-2">
@@ -75,8 +59,6 @@ const useParams = reactive<Record<string, boolean>>({
   top_p: inferParams?.top_p ? true : false,
   min_p: inferParams?.min_p ? true : false,
   repeat_penalty: inferParams?.repeat_penalty ? true : false,
-  presence_penalty: inferParams?.presence_penalty ? true : false,
-  frequency_penalty: inferParams?.frequency_penalty ? true : false,
 
 });
 
