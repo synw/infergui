@@ -69,3 +69,24 @@ To run in dev mode with watch autoreload:
 ```
 npm run dev
 ```
+
+## Models server
+
+![Screenshot](/docs/pick_model.png)
+
+To be able to switch models at runtime use the models server. It is a Koboldcpp process
+manager integrated in the `infergui` micro server. To enable the models server run the
+command with these parameters:
+
+- `-m=`: the absolute path to your models directory, that contains the gguf files
+- `-k=`: the absolute path to your Koboldcpp command
+
+Example:
+
+```bash
+infergui -m=/home/me/my/models -k=/home/me/bin/koboldcpp
+```
+
+With these parameters the frontend will display a list of available models
+and let the user switch to any model at anytime.
+

@@ -6,7 +6,7 @@
     <template #mobile-branding>
       <div class="ml-2 inline-flex h-full flex-row items-center truncate pt-1 text-2xl">
         <div class="text-lg">
-          <button class="btn mr-5 border-none" @click="toggleModelCollapse">
+          <button class="btn mr-5 border-none" @click="toggleModelCollapse($event)">
             <template v-if="lmState.isLoadingModel">
               Loading model ..
             </template>
@@ -17,7 +17,7 @@
             </template>
           </button>
           <OverlayPanel ref="modelCollapse">
-            <models-picker @close="toggleModelCollapse"></models-picker>
+            <models-picker @close="toggleModelCollapse($event)"></models-picker>
           </OverlayPanel>
         </div>
       </div>
@@ -25,10 +25,20 @@
     <template #branding>
       <div class="ml-3 flex h-full flex-row items-center">
         <template v-if="activeBackend !== null">
-          <div class="flex flex-row items-center space-x-2 text-lg"
-            v-if="['koboldcpp', 'llamacpp'].includes(activeBackend?.providerType)">
+          <div class="flex flex-row items-center space-x-2 text-lg">
             <div><i-iconoir:network-alt class="text-xl"></i-iconoir:network-alt></div>
-            <div>{{ lmState.model.name }} <span class="txt-light"> ctx: {{ lmState.model.ctx }}</span></div>
+            <template v-if="lmState.isLoadingModel">
+              Loading model ..
+            </template>
+            <div>
+              <template v-if="!hasModelsServer">
+                {{ lmState.model.name }}
+              </template>
+              <template v-else>
+                <span class="cursor-pointer" @click="toggleModelCollapse">{{ lmState.model.name }}</span>
+              </template>
+              <span class="txt-light"> ctx: {{ lmState.model.ctx }}</span>
+            </div>
             <div v-if="template.id != 'none'" class="pl-2">
               <div class="txt-semilight text-sm bord-lighter border px-2 py-1 rounded-lg">
                 {{ template.name }}
@@ -39,11 +49,30 @@
                 Grammar
               </div>
             </div>
+            <OverlayPanel ref="modelCollapse">
+              <models-picker @close="toggleModelCollapse($event)"></models-picker>
+            </OverlayPanel>
           </div>
         </template>
         <div class="flex flex-row items-center" v-else>
-          <div class="text-lg">No backend</div>
-          <div class="ml-3">
+          <div class="text-lg" v-if="!hasModelsServer">No backend</div>
+          <div class="text-lg" v-else>
+            <button class="btn mr-5 border-none" @click="toggleModelCollapse">
+              <template v-if="lmState.isLoadingModel">
+                Loading model ..
+              </template>
+              <template v-else-if="lmState.isModelLoaded">
+                <span class="cursor-pointer" @click="toggleModelCollapse">{{ lmState.model.name }}</span>
+              </template>
+              <template v-else>
+                Pick a model&nbsp;<i-carbon:network-4></i-carbon:network-4>
+              </template>
+            </button>
+            <OverlayPanel ref="modelCollapse">
+              <models-picker @close="toggleModelCollapse($event)"></models-picker>
+            </OverlayPanel>
+          </div>
+          <div class="ml-3" v-if="!hasModelsServer">
             <button class="btn bord-semilight txt-light py-0 text-sm rounded-md"
               @click="probeAndLoadLocalBackends()">Retry</button>
           </div>
@@ -117,7 +146,19 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { SwTopbar, useTopbar } from "@snowind/header";
-import { user, stopInfer, lmState, activeBackend, template, stream, history, clearInferResults, clearHistory, probeAndLoadLocalBackends } from "@/state";
+import {
+  user,
+  stopInfer,
+  lmState,
+  activeBackend,
+  template,
+  stream,
+  history,
+  clearInferResults,
+  clearHistory,
+  probeAndLoadLocalBackends,
+  hasModelsServer,
+} from "@/state";
 import { useGrammar } from '@/state/grammar';
 import { useRouter } from 'vue-router';
 import OverlayPanel from 'primevue/overlaypanel';

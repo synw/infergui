@@ -13,3 +13,4 @@ yarn-error.log
 package-lock.json
 /src/packages
 .gzipper
+/run.sh

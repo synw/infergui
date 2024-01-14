@@ -1,10 +1,29 @@
-import { getLm, mutateModel, stream, inferResults, updateModels, lmState } from "@/state";
+import { getLm, mutateModel, stream, inferResults, updateModels, lmState, hasModelsServer, models } from "@/state";
 import { Lm } from "@locallm/api";
 //import { Lm } from "../packages/locallm/api";
 import type { InferenceParams, InferenceResult, ModelTemplate } from "@locallm/types";
 //import type { InferenceParams, InferenceResult, ModelTemplate } from "../packages/types/interfaces";
 import { msg } from "./notify";
 import { LmBackend } from "@/interfaces";
+import { useApi } from "restmix";
+
+const api = useApi({
+  serverUrl: "http://localhost:5183"
+})
+
+async function probeModelsServer(): Promise<boolean> {
+  let isUp = false;
+  const res = await api.get<{ models: Array<string> }>("/models");
+  if (res.ok) {
+    isUp = true;
+    hasModelsServer.value = true;
+    res.data.models.forEach((m) => models[m] = { name: "unknown", ctx: 2048 });
+    //console.log("MODELS:", res.data);
+  } else {
+    console.log("No models server found")
+  }
+  return isUp
+}
 
 
 async function probeBackend(_backend: LmBackend): Promise<{ lm: Lm, backend: LmBackend } | null> {
@@ -172,16 +191,27 @@ async function loadTask(path: string): Promise<void> {
 }
 
 async function selectModel(name: string, ctx: number, threads?: number, gpu_layers?: number) {
-  try {
-    const lm = getLm();
-    await lm.loadModel(name, ctx, threads, gpu_layers);
-  } catch (e) {
-    if (e == "Error: the model is already loaded") {
-      msg.warn("The model is already loaded", "The model has already been loaded");
-      return
-    }
+  const res = await api.post<Record<string, any>>(
+    "/loadmodel",
+    { name: name, ctx: ctx, threads: threads, gpu_layers: gpu_layers }
+  );
+  if (res.ok) {
+    console.log("Model", name, "loaded", `(ctx: ${ctx})`);
   }
-  mutateModel({ name: name, ctx: ctx });
+  else {
+    console.error("Error loading the model", res.data)
+    throw new Error(`Error loading model ${res.data}`)
+  }
 }
 
-export { infer, abort, loadModels, selectModel, loadTasks, loadTask, probeLocalBackends, probeBackend }
+export {
+  infer,
+  abort,
+  loadModels,
+  selectModel,
+  loadTasks,
+  loadTask,
+  probeLocalBackends,
+  probeBackend,
+  probeModelsServer
+}

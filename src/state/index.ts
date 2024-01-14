@@ -10,7 +10,7 @@ import { Lm } from "@locallm/api";
 import { InferenceParams, ModelConf, ModelTemplate } from '@locallm/types';
 //import { Lm } from "../packages/locallm/api";
 //import { InferenceParams, ModelConf, ModelTemplate } from '../packages/types/interfaces';
-import { loadModels, loadTasks as _loadTasks, infer, abort, probeLocalBackends } from "@/services/api";
+import { loadModels, loadTasks as _loadTasks, infer, abort, probeLocalBackends, probeModelsServer } from "@/services/api";
 import { msg } from "../services/notify";
 import { useDb } from "../services/db";
 import { selectedPreset } from "./settings";
@@ -46,6 +46,7 @@ const prompts = reactive<Array<string>>([]);
 const templates = reactive<Array<PromptTemplate>>([]);
 const tasks = reactive<Array<Record<string, any>>>([]);
 const presets = reactive<Array<string>>([]);
+const hasModelsServer = ref(false);
 
 const template = ref<PromptTemplate>(new PromptTemplate("none"));
 const stop = ref("");
@@ -310,15 +311,16 @@ async function loadBackend(_lm: Lm, _b: LmBackend) {
       stream.value += t
     },
   });
+  //lm.api._mode = 
   if (lm.providerType == "ollama") {
     await loadModels();
   } else if (["koboldcpp", "llamacpp"].includes(lm.providerType)) {
-    console.log("API", JSON.stringify(lm.apiKey, null, "  "));
+    //console.log("API", JSON.stringify(lm.apiKey, null, "  "));
     const model: ModelConf = {
       name: _lm.model.name,
       ctx: _lm.model.ctx,
     }
-    console.log("Loading model", model, "for", lm.providerType);
+    console.log("Loading model", model.name, "for", lm.providerType);
     mutateModel(model);
     lm.model = model;
     // check if the model is multimodal
@@ -338,12 +340,13 @@ async function probeAndLoadLocalBackends() {
   const res = await probeLocalBackends(Object.values(backends));
   if (res !== null) {
     loadBackend(res.lm, res.backend)
-  } else {
+  } else if (!hasModelsServer.value) {
     msg.warn("No backend found", "Please run a local backend and retry or connect to a remote backend", 10000)
   }
 }
 
 async function initState() {
+  probeModelsServer().then((isUp) => { hasModelsServer.value = isUp });
   //console.log("KEY", import.meta.env.VITE_API_KEY);
   lm.api.onResponse(async <T>(res: ApiResponse<T>): Promise<ApiResponse<T>> => {
     if (!res.ok) {
@@ -459,6 +462,7 @@ export {
   freeContext,
   totalContext,
   activeBackend,
+  hasModelsServer,
   setAutomaxContext,
   setFreeContext,
   loadCustomTemplate,
