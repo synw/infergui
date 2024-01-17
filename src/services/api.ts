@@ -1,7 +1,7 @@
 import { getLm, mutateModel, stream, inferResults, updateModels, lmState, hasModelsServer, models } from "@/state";
 import { Lm } from "@locallm/api";
-//import { Lm } from "../packages/locallm/api";
 import type { InferenceParams, InferenceResult, ModelTemplate } from "@locallm/types";
+//import { Lm } from "../packages/locallm/api";
 //import type { InferenceParams, InferenceResult, ModelTemplate } from "../packages/types/interfaces";
 import { msg } from "./notify";
 import { LmBackend } from "@/interfaces";
@@ -117,26 +117,26 @@ async function infer(_prompt: string, _template: string, _params: InferenceParam
     }
   };
 
-  const lm = getLm();
+  const _lm = getLm();
 
-  lm.onToken = (token: string) => {
+  _lm.onToken = (token: string) => {
     //sconsole.log(`>>>${token}<<<`);
     stream.value = stream.value + token;
     resEl.scrollTop = resEl.scrollHeight;
     ++inferResults.totalTokens
   }
-  lm.onStartEmit = (s) => {
+  _lm.onStartEmit = (s) => {
     lmState.isStreaming = true;
     //console.log("Start emit", s);
   };
-  lm.onError = (msg: string) => {
+  _lm.onError = (msg: string) => {
     lmState.isStreaming = true;
     lmState.isRunning = true;
     console.error("ERROR", msg)
   };
   //console.log("PARAMS", JSON.stringify(completionParams, null, "  "));
   lmState.isRunning = true;
-  respData = await lm.infer(_prompt, completionParams)
+  respData = await _lm.infer(_prompt, completionParams)
   lmState.isStreaming = false;
   lmState.isRunning = false;
   return respData
