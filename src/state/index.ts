@@ -125,6 +125,12 @@ function _pushToHistory() {
   history.push(turn);
 }
 
+function cutHistoryAfterTurn(turn: number) {
+  const newHistory = history.slice(0, turn);
+  const l = newHistory.length;
+  history.splice(l, history.length - newHistory.length);
+}
+
 async function processInfer() {
   clearInferResults();
   const id = setInterval(() => {
@@ -490,4 +496,5 @@ export {
   getLm,
   setImageData,
   probeAndLoadLocalBackends,
+  cutHistoryAfterTurn,
 }

@@ -6,16 +6,7 @@
     </div>
   </div>
   <Toast />
-  <ConfirmDialog>
-    <template #message="slotProps">
-      <div class="flex flex-row items-center p-4">
-        <!-- div>
-          <named-icon :icon="`${slotProps.message.icon}`" class="text-3xl"></named-icon>
-        </div -->
-        <div class="pl-2">{{ slotProps.message.message }}</div>
-      </div>
-    </template>
-  </ConfirmDialog>
+  <ConfirmDialog></ConfirmDialog>
 </template>
 
 <script setup lang="ts">
@@ -44,6 +35,10 @@ onMounted(() => initNotifyService())
 .prosed:not(.not-prose)
   @apply prose dark:prose-invert max-w-none prose-h1:txt-light prose-h2:txt-light prose-h3:txt-light prose-h2:mt-3
   @apply max-w-[100%] xl:min-w-[52rem]
+.p-confirm-dialog-accept
+  @apply txt-success ml-5 p-3 block-success
+.p-confirm-dialog-reject
+  @apply txt-danger p-3
 </style>
 
 

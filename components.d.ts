@@ -27,6 +27,7 @@ declare module 'vue' {
     'IIcomoonFree:stop': typeof import('~icons/icomoon-free/stop')['default']
     'IIconoir:networkAlt': typeof import('~icons/iconoir/network-alt')['default']
     'IIconoir:play': typeof import('~icons/iconoir/play')['default']
+    'IIconParkTwotone:replayMusic': typeof import('~icons/icon-park-twotone/replay-music')['default']
     'IIon:trashSharp': typeof import('~icons/ion/trash-sharp')['default']
     IIonArrowBackOutline: typeof import('~icons/ion/arrow-back-outline')['default']
     'ILineMd:downloadingLoop': typeof import('~icons/line-md/downloading-loop')['default']

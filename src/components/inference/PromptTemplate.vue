@@ -37,25 +37,55 @@
       </div>
 
       <div v-if="history.length > 0" class="flex flex-col space-y-3 mt-5 mx-5">
-        <template v-for="turn in history">
+        <template v-for="(turn, i) in history">
           <div v-if="turn.images">
             <img class="w-max" :src="turn.images[0].data" alt="Error" />
           </div>
           <template v-if="turn.user.length > 0">
             <template v-if="formatMode == 'Html'">
-              <div class="text-justify txt-light"
-                v-html="turn.user.replaceAll('\n', '<br />').replaceAll('\t', '&nbsp;&nbsp;')"></div>
-              <div class="text-justify"
+              <div class="text-justify">
+                <div class="txt-light inline-block"
+                  v-html="turn.user.replaceAll('\n', '<br />').replaceAll('\t', '&nbsp;&nbsp;')">
+                </div>
+                <span>
+                  <button v-if="turn.assistant.length > 0" class="btn flex-none txt-lighter hover:txt-light"
+                    @click="restartFromTurn(i, turn)">
+                    <i-icon-park-twotone:replay-music class="text-lg"></i-icon-park-twotone:replay-music>&nbsp;Restart
+                    from here
+                  </button>
+                </span>
+              </div>
+              <div class="text-justify mt-5"
                 v-html="turn.assistant.replaceAll('\n', '<br />').replaceAll('\t', '&nbsp;&nbsp;')">
               </div>
             </template>
             <template v-else-if="formatMode == 'Text'">
-              <pre class="txt-light">{{ turn.user }}</pre>
+              <div>
+                <pre class="txt-light inline-block">{{ turn.user }}</pre>
+                <span>
+                  <button v-if="turn.assistant.length > 0" class="btn flex-none txt-lighter hover:txt-light"
+                    @click="restartFromTurn(i, turn)">
+                    <i-icon-park-twotone:replay-music class="text-lg"></i-icon-park-twotone:replay-music>&nbsp;Restart
+                    from here
+                  </button>
+                </span>
+              </div>
               <pre>{{ turn.assistant }}</pre>
             </template>
-            <div class="prosed prose" v-else-if="formatMode == 'Markdown'">
-              <div class="txt-light" v-html="turn.user"></div>
-              <render-md :hljs="hljs" :source="turn.assistant"></render-md>
+            <div v-else-if="formatMode == 'Markdown'">
+              <div class="">
+                <div class="txt-light inline-block" v-html="turn.user"></div>
+                <span>
+                  <button v-if="turn.assistant.length > 0" class="btn flex-none txt-lighter hover:txt-light"
+                    @click="restartFromTurn(i, turn)">
+                    <i-icon-park-twotone:replay-music class="text-lg"></i-icon-park-twotone:replay-music>&nbsp;Restart
+                    from here
+                  </button>
+                </span>
+                <div class="prosed prose">
+                  <render-md :hljs="hljs" :source="turn.assistant"></render-md>
+                </div>
+              </div>
             </div>
           </template>
         </template>
@@ -141,13 +171,26 @@ import { RenderMd } from '@docdundee/vue';
 import SavePromptDialog from './SavePromptDialog.vue';
 import SaveTemplateDialog from './SaveTemplateDialog.vue';
 import ImageLoader from './ImageLoader.vue';
+import { confirmSuccess } from '@/services/notify';
 //import SaveTaskDialog from './SaveTaskDialog.vue';
-import { template, prompt, currentImgData, countPromptTokens, countTemplateTokens, processInfer, stream, lmState, history } from '@/state';
+import {
+  template,
+  prompt,
+  currentImgData,
+  countPromptTokens,
+  countTemplateTokens,
+  processInfer,
+  stream,
+  lmState,
+  history,
+  cutHistoryAfterTurn,
+} from '@/state';
 import { hljs } from "@/conf";
 import TemplateEditor from './TemplateEditor.vue';
 import { formatMode } from '@/state/settings';
 import AutoTextarea from '@/widgets/AutoTextarea.vue';
 import GrammarEditor from './GrammarEditor.vue';
+import { HistoryTurn } from 'modprompt';
 
 const savePromptCollapse = ref();
 const saveTemplateCollapse = ref();
@@ -171,8 +214,19 @@ function toggleSaveTemplate(evt) {
   saveTemplateCollapse.value.toggle(evt);
 }
 
-function toggleSaveTask(evt) {
+/*function toggleSaveTask(evt) {
   saveTaskCollapse.value.toggle(evt);
+}*/
+
+function restartFromTurn(n: number, turn: HistoryTurn) {
+  confirmSuccess(
+    `Restart from turn ${n + 1} ?`,
+    "This will delete later conversation history",
+    async () => {
+      cutHistoryAfterTurn(n);
+      prompt.value = turn.user;
+    }
+  )
 }
 
 onMounted(() => {

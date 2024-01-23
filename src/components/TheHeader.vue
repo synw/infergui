@@ -103,13 +103,6 @@
         <OverlayPanel ref="presetsCollapse">
           <presets-picker @close="togglePresetsCollapse"></presets-picker>
         </OverlayPanel>
-        <button class="btn flex flex-row items-center justify-center border-0 bord-light txt-semilight"
-          @click="toggleSettingsCollapse($event)">
-          <i-fluent:settings-32-regular class="text-2xl"></i-fluent:settings-32-regular>
-        </button>
-        <OverlayPanel ref="settingsCollapse" @close="toggleSettingsCollapse($event)">
-          <SettingsPopin></SettingsPopin>
-        </OverlayPanel>
 
         <button class="btn flex flex-row items-center justify-center border-0 bord-light txt-semilight"
           @click="toggleBackendCollapse($event)">
@@ -117,6 +110,14 @@
         </button>
         <OverlayPanel ref="backendCollapse" @close="toggleBackendCollapse($event)">
           <BackendsPopin></BackendsPopin>
+        </OverlayPanel>
+
+        <button class="btn flex flex-row items-center justify-center border-0 bord-light txt-semilight"
+          @click="toggleSettingsCollapse($event)">
+          <i-fluent:settings-32-regular class="text-2xl"></i-fluent:settings-32-regular>
+        </button>
+        <OverlayPanel ref="settingsCollapse" @close="toggleSettingsCollapse($event)">
+          <SettingsPopin></SettingsPopin>
         </OverlayPanel>
 
         <div class="cursor-pointer pr-5 pl-3 text-lg txt-lighter dark:txt-light" @click="user.toggleDarkMode()">

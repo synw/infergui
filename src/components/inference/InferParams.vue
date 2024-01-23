@@ -82,8 +82,7 @@ import InputNumber from 'primevue/inputnumber';
 import Slider from 'primevue/slider';
 import InputText from 'primevue/inputtext';
 import { autoMaxContext } from "@/state/settings";
-import { getLm, inferParams, lmState, stop, setFreeContext } from '@/state';
-import { computed } from 'vue';
+import { inferParams, lmState, stop, setFreeContext } from '@/state';
 
 function updateCtx(evt) {
   setFreeContext()
