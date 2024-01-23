@@ -8,13 +8,22 @@ const defaultInferenceParams: InferenceParams = {
   stop: ["</s>"],
 };
 
-// defaults from Llama.cpp
-const availableDefaultInferenceParams: InferenceParams = {
+const minPInferenceParams: InferenceParams = {
+  stream: true,
   temperature: 0.2,
   top_k: 0,
   top_p: 1,
   min_p: 0.05,
+  stop: ["</s>"],
+};
+
+// defaults from Llama.cpp
+const availableDefaultInferenceParams: InferenceParams = {
+  temperature: 0.2,
+  top_k: 40,
+  top_p: 0.95,
+  min_p: 0.05,
   repeat_penalty: 1.1,
 }
 
-export { defaultInferenceParams, availableDefaultInferenceParams }
+export { defaultInferenceParams, availableDefaultInferenceParams, minPInferenceParams }

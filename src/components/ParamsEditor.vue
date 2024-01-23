@@ -48,7 +48,7 @@
 
 <script setup lang="ts">
 import SwSwitch from "@snowind/switch";
-import { availableDefaultInferenceParams, defaultInferenceParams } from '@/const/params';
+import { availableDefaultInferenceParams } from '@/const/params';
 import { inferParams } from "@/state";
 import { reactive } from "vue";
 
@@ -59,7 +59,6 @@ const useParams = reactive<Record<string, boolean>>({
   top_p: inferParams?.top_p ? true : false,
   min_p: inferParams?.min_p ? true : false,
   repeat_penalty: inferParams?.repeat_penalty ? true : false,
-
 });
 
 function setParam(param: string) {

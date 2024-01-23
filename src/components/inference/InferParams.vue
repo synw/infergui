@@ -14,13 +14,13 @@
           <label for="tfs">Tfs</label>
         </span>
       </div>
-      <div v-if="inferParams.top_p != undefined">
+      <div v-if="inferParams.top_k != undefined">
         <span class="p-float-label">
           <InputNumber class="w-8" v-model="inferParams.top_k" inputId="topK" :min="0" :max="100" showButtons />
           <label for="topK">TopK</label>
         </span>
       </div>
-      <div v-if="inferParams.top_k != undefined">
+      <div v-if="inferParams.top_p != undefined">
         <span class="p-float-label">
           <InputNumber class="w-8" v-model="inferParams.top_p" inputId="topP" :min="0" :max="1" :step="0.05"
             showButtons />

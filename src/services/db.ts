@@ -1,6 +1,6 @@
 import localForage from "localforage";
 import type { InferenceParams } from "@locallm/types";
-import { defaultInferenceParams } from "@/const/params";
+import { defaultInferenceParams, minPInferenceParams } from "@/const/params";
 import { LmTemplate, PromptTemplate } from "modprompt";
 import { GbnfGrammar, LmBackend } from "@/interfaces";
 
@@ -37,7 +37,8 @@ const useDb = () => {
     await grammarsDb.ready();
     if ((await presets.length()) <= 1) {
       console.log("The presets db is empty, loading default");
-      setPreset("Default", defaultInferenceParams)
+      setPreset("Default", defaultInferenceParams);
+      setPreset("MinP", minPInferenceParams);
     }
   }
 
@@ -76,7 +77,7 @@ const useDb = () => {
 
   const delTemplate = async (k: string) => {
     await templates.ready();
-    console.log("DELETE template", k)
+    //console.log("DELETE template", k)
     await templates.removeItem(k);
   };
 
