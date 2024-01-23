@@ -94,7 +94,7 @@
           <i-ion:trash-sharp class="text-2xl"></i-ion:trash-sharp>
         </button>
         <div>
-          <format-bar v-if="stream.length > 0 || history.length > 0"></format-bar>
+          <format-bar></format-bar>
         </div>
         <button class="btn flex flex-row items-center justify-center border-0 bord-light txt-semilight"
           @click="togglePresetsCollapse($event)">
