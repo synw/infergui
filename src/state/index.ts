@@ -154,6 +154,7 @@ async function processInfer() {
   const _inferParams: InferenceParams = {
     stream: true
   };
+  //console.log("STOP", inferParams.stop);
   Object.keys(inferParams).forEach((k) => {
     if (inferParams[k]) {
       _inferParams[k] = inferParams[k];
@@ -228,8 +229,13 @@ function setImageData(imgData: string, id: number) {
 
 async function loadCustomTemplate(name: string) {
   const t = await db.loadTemplate(name);
-  setStop();
   template.value = t;
+  if (template.value.stop) {
+    inferParams.stop = template.value.stop
+  } else {
+    inferParams.stop = []
+  }
+  setStop();
   countTemplateTokens();
 }
 
