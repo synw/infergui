@@ -351,10 +351,10 @@ async function loadBackend(_lm: Lm, _b: LmBackend) {
 async function probeAndLoadLocalBackends() {
   const res = await probeLocalBackends(Object.values(backends));
   if (res !== null) {
-    loadBackend(res.lm, res.backend)
-  } else if (!hasModelsServer.value) {
+    loadBackend(res.lm, res.backend);
+  } /*else if (!hasModelsServer.value) {
     msg.warn("No backend found", "Please run a local backend and retry or connect to a remote backend", 10000)
-  }
+  }*/
 }
 
 async function initState() {
