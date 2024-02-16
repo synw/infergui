@@ -48,7 +48,17 @@ infergui
 
 Run a local backend and open `localhost:5183` in a browser
 
-### With git
+### With Python
+
+```
+git clone https://github.com/synw/infergui
+cd infergui/dist
+python3 -m http.server
+```
+
+Run a local backend and open `localhost:8000` in a browser
+
+## Dev mode
 
 Clone and install the dependencies:
 
@@ -56,19 +66,19 @@ Clone and install the dependencies:
 npm i
 ```
 
-Build and run:
-
-```
-npm run build
-npm run local
-```
-
-Run a local backend and open `localhost:5173` in a browser
-
 To run in dev mode with watch autoreload:
 
 ```
 npm run dev
+```
+
+Run a local backend and open `localhost:5173` in a browser
+
+To build and run:
+
+```
+npm run build
+npm run local
 ```
 
 ## Models server
