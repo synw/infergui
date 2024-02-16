@@ -125,7 +125,6 @@
         <AutoTextarea v-if="!lmState.isRunning" :data="prompt" class="h-24 w-full" :maxlines="8"
           @update="prompt = $event" />
 
-
         <div class="flex flex-row items-center justify-end space-x-2 py-3" v-if="lmState.isModelLoaded">
           <div class="flex flex-grow flex-row items-center txt-semilight">
             <!-- button class="btn px-2" v-show="template.id != 'none'" @click="toggleSaveTask($event)">
@@ -147,8 +146,6 @@
               <save-prompt-dialog class="p-3" @pick="toggleSavePrompt($event)"></save-prompt-dialog>
             </OverlayPanel>
           </div>
-
-
           <div>
             <button id="runinfer-btn" class="btn flex w-48 flex-row items-center txt-light bord-light block-lighter"
               @click="processInfer(); collapseTemplate = true"

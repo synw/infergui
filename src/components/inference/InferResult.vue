@@ -7,14 +7,14 @@
         <div class="w-1/2 text-2xl" v-if="inferResults.tokensPerSecond > 0">{{ inferResults.tokensPerSecond }} <span
             class="text-base">t/s</span></div>
       </div>
-      <div v-if="inferResults.thinkingTimeFormat?.length ?? 0 > 0">
+      <div v-if="inferResults.thinkingTimeFormat ?? 0 > 0">
         <span class="txt-light">Thinking time</span>: {{ inferResults.thinkingTimeFormat }}
       </div>
-      <div v-if="inferResults.emitTimeFormat?.length ?? 0 > 0">
+      <div v-if="inferResults.emitTimeFormat ?? 0 > 0">
         <span class="txt-light">Emit time</span>:
         {{ inferResults.emitTimeFormat }}
       </div>
-      <div v-if="inferResults.totalTimeFormat?.length ?? 0 > 0">
+      <div v-if="inferResults.totalTimeFormat ?? 0 > 0">
         <span class="txt-light">Total time</span>:
         {{ inferResults.totalTimeFormat }}
       </div>

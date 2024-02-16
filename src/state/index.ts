@@ -34,14 +34,14 @@ const lmState = reactive<ApiState>({
   isModelLoaded: false,
   isLoadingModel: false,
   isModelMultimodal: false,
-  model: { name: "", ctx: 2048 },
+  model: { name: "", ctx: 2048 } as ModelConf,
 });
 const db = useDb();
 const backends = reactive<Record<string, LmBackend>>({});
 const activeBackend = ref<LmBackend | null>(null);
 const stream = ref("");
 const history = reactive<Array<HistoryTurn>>([]);
-const models = reactive<Record<string, ModelTemplate>>({});
+const models = reactive<Record<string, ModelConf>>({});
 const prompts = reactive<Array<string>>([]);
 const templates = reactive<Array<PromptTemplate>>([]);
 const tasks = reactive<Array<Record<string, any>>>([]);
@@ -326,6 +326,9 @@ async function loadBackend(_lm: Lm, _b: LmBackend) {
   //lm.api._mode = 
   if (lm.providerType == "ollama") {
     await loadModels();
+    //console.log("Models", lm.models);
+    lm.models.forEach((m) => models[m.name] = m);
+    //models.value = lm.models;
   } else if (["koboldcpp", "llamacpp"].includes(lm.providerType)) {
     //console.log("API", JSON.stringify(lm.apiKey, null, "  "));
     const model: ModelConf = {
@@ -402,16 +405,13 @@ function mutateModel(model: ModelConf) {
       }
     }
   }*/
-  lmState.model = {
-    name: model.name,
-    ctx: model.ctx,
-  }
-  //console.log("State model", lmState.model);
+  lmState.model = model;
   lmState.isModelLoaded = true;
   lmState.isLoadingModel = false;
   //checkMaxTokens(lmState.model.ctx);
   setFreeContext();
   clearInferResults();
+  //console.log("State", lmState);
 }
 
 function mutateInferParams(_params: InferenceParams) {

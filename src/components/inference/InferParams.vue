@@ -1,78 +1,55 @@
 <template>
   <div id="params" class="flex w-full flex-col 3xl:max-w-[28rem]">
-    <div id="pform" class="grid w-full grid-cols-2 gap-x-3 gap-y-8 3xl:grid-cols-3">
-      <div>
-        <span class="p-float-label">
-          <InputNumber class="w-8" v-model="inferParams.temperature" inputId="temp" :min="0" :max="2" :step="0.1"
-            showButtons />
-          <label for="temp">Temp</label>
-        </span>
+    <div id="pform" class="grid w-full grid-cols-2 gap-x-3 gap-y-3 3xl:grid-cols-3">
+      <div class="flex flex-col">
+        <label for="temp" class="txt-semilight">Temperature</label>
+        <InputNumber class="w-8" v-model="inferParams.temperature" inputId="temp" :min="0" :max="2" :step="0.1"
+          showButtons />          
       </div>
-      <div v-if="inferParams.tfs != undefined">
-        <span class="p-float-label">
-          <InputNumber class="w-8" v-model="inferParams.tfs" inputId="tfs" :min="0" :max="2" :step="0.1" showButtons />
-          <label for="tfs">Tfs</label>
-        </span>
+      <div v-if="inferParams.tfs != undefined" class="flex flex-col">
+        <label for="tfs" class="txt-semilight">Tfs</label>
+        <InputNumber class="w-8" v-model="inferParams.tfs" inputId="tfs" :min="0" :max="2" :step="0.1" showButtons /> 
       </div>
-      <div v-if="inferParams.top_k != undefined">
-        <span class="p-float-label">
-          <InputNumber class="w-8" v-model="inferParams.top_k" inputId="topK" :min="0" :max="100" showButtons />
-          <label for="topK">TopK</label>
-        </span>
+      <div v-if="inferParams.top_k != undefined" class="flex flex-col">
+        <label for="topK" class="txt-semilight">TopK</label>
+          <InputNumber class="w-8" v-model="inferParams.top_k" inputId="topK" :min="0" :max="100" showButtons />   
       </div>
-      <div v-if="inferParams.top_p != undefined">
-        <span class="p-float-label">
+      <div v-if="inferParams.top_p != undefined" class="flex flex-col">
+        <label for="topP" class="txt-semilight">TopP</label> 
           <InputNumber class="w-8" v-model="inferParams.top_p" inputId="topP" :min="0" :max="1" :step="0.05"
-            showButtons />
-          <label for="topP">TopP</label>
-        </span>
+            showButtons />   
       </div>
-      <div v-if="inferParams.min_p != undefined">
-        <span class="p-float-label">
+      <div v-if="inferParams.min_p != undefined" class="flex flex-col">
+        <label for="minP" class="txt-semilight">MinP</label> 
           <InputNumber class="w-8" v-model="inferParams.min_p" inputId="minP" :min="0" :max="1" :step="0.05"
-            showButtons />
-          <label for="minP">MinP</label>
-        </span>
+            showButtons />  
       </div>
-      <div v-if="inferParams.repeat_penalty != undefined">
-        <span class="p-float-label">
+      <div v-if="inferParams.repeat_penalty != undefined" class="flex flex-col">
+        <label for="repeatPenalty" class="txt-semilight">Repeat</label>
           <InputNumber class="w-8" v-model="inferParams.repeat_penalty" inputId="repeatPenalty" :min="0" :max="2"
             :step="0.1" showButtons />
-          <label for="repeatPenalty">Repeat</label>
-        </span>
       </div>
-      <!-- div v-if="isGoinfer">
-        <span class="p-float-label">
-          <InputNumber class="w-8 txt-lighter" v-model="inferParams.threads" inputId="threads" showButtons />
-          <label for="threads">Threads</label>
-        </span>
-      </div -->
     </div>
-    <div class="mr-8 mt-8 flex flex-row space-x-3">
+    <div class="mr-8 mt-3 flex flex-col">
+      <label for="stop" class="txt-semilight">Stop words</label>
+      <InputText inputId="stop" v-model="stop" class="w-full" @focusout="setStopParam()" />
+    </div>
+    <div class="mt-8" v-if="!autoMaxContext">
       <div class="p-float-label">
-        <InputText inputId="stop" v-model="stop" class="w-full" @focusout="setStopParam()" />
-        <label for="stop">Stop words</label>
+        <InputText inputId="tokens" class="hidden w-full" />
+        <label for="tokens" class="txt-semilight">Max tokens</label>
       </div>
-
-    </div>
-    <div class="mt-8">
-      <template v-if="!autoMaxContext">
-        <div class="p-float-label">
-          <InputText inputId="tokens" class="hidden w-full" />
-          <label for="tokens">Max tokens</label>
+      <div class="mr-8 mt-3">
+        <Slider v-model="inferParams.max_tokens" class="w-full" :min="-1" :max="lmState.model.ctx"
+          @slideend="updateCtx($event)" />
+      </div>
+      <div class="flex flex-row">
+        <div class="p-3 txt-semilight">-1</div>
+        <div class="flex flex-grow justify-center p-3">
+          {{ inferParams.max_tokens }}
         </div>
-        <div class="mr-8 mt-5">
-          <Slider v-model="inferParams.max_tokens" class="w-full" :min="-1" :max="lmState.model.ctx"
-            @slideend="updateCtx($event)" />
-        </div>
-        <div class="flex flex-row">
-          <div class="p-3 txt-semilight">-1</div>
-          <div class="flex flex-grow justify-center p-3">
-            {{ inferParams.max_tokens }}
-          </div>
-          <div class="p-3 txt-semilight">{{ lmState.model.ctx }}</div>
-        </div>
-      </template>
+        <div class="p-3 txt-semilight">{{ lmState.model.ctx }}</div>
+      </div>
     </div>
   </div>
 </template>

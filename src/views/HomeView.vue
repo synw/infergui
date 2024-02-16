@@ -6,10 +6,10 @@
     <div class="w-full max-w-6xl flex-shrink overflow-y-auto border-x bord-lighter">
       <prompt-template></prompt-template>
     </div>
-    <div class="min-w-72 flex-shrink-0 flex-grow p-3 pt-8">
+    <div class="min-w-72 flex-shrink-0 flex-grow p-3">
       <infer-params></infer-params>
-      <infer-stats class="mt-3"></infer-stats>
-      <infer-result class="mt-3"></infer-result>
+      <infer-stats class="mt-8"></infer-stats>
+      <infer-result class="mt-3 pt-8"></infer-result>
     </div>
   </div>
 </template>

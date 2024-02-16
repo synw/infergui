@@ -1,5 +1,5 @@
 <template>
-  <div class="w-full 3xl:max-w-[28rem]">
+  <div class="w-full 3xl:max-w-[28rem] cursor-pointer" @click="toggle">
     <div class="flex w-full flex-row items-center pr-4 text-sm">
       <div class="text-center danger" :style="`width:${templatePercent}%`">{{ templateTokensCount }}</div>
       <div class="text-center warning" :style="`width:${promptPercent}%`">{{ promptTokensCount }}</div>
@@ -9,12 +9,26 @@
       <div class="primary" :style="`width:${currentPercent}%`"></div>
       <div class="lighter" :style="`width:${remainingPercent}%`"></div>
     </div>
+    <OverlayPanel ref="op">
+      <div class="flex flex-col">
+        <div><span class="txt-light">Template:</span> {{ templateTokensCount }}</div>
+        <div><span class="txt-light">Prompt:</span> {{ promptTokensCount }}</div>
+        <div><span class="txt-light">Free context:</span> {{ freeContext }}</div>
+      </div>
+    </OverlayPanel>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
+import OverlayPanel from 'primevue/overlaypanel';
 import { freeContext, promptTokensCount, templateTokensCount, inferResults, totalContext } from '@/state';
+
+const op = ref();
+
+const toggle = (event) => {
+    op.value.toggle(event);
+}
 
 const promptPercent = computed(() => {
   return Math.round((promptTokensCount.value * 100) / totalContext.value)

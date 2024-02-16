@@ -15,13 +15,13 @@ const defaultBackends: Array<LmBackend> = [
     apiKey: "",
     enabled: false,
   },
-  /*{
+  {
     name: "Ollama local",
     providerType: "ollama",
     serverUrl: "http://localhost:11434",
     apiKey: "",
     enabled: false,
-  },*/
+  },
 ];
 
 export { defaultBackends }

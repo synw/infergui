@@ -6,6 +6,7 @@ A graphical user interface for local language models. It support different local
 
 - [Llama.cpp server](https://github.com/ggerganov/llama.cpp/tree/master/examples/server#llamacppexampleserver)
 - [Koboldcpp](https://github.com/LostRuins/koboldcpp)
+- [Ollama](https://github.com/jmorganca/ollama)
 
 This interface uses no hidden magic: everything is explicit.
 

@@ -32,12 +32,18 @@
             </template>
             <div>
               <template v-if="!hasModelsServer">
-                {{ lmState.model.name }}
+                <template v-if="lmState.isModelLoaded">
+                  <span class="cursor-pointer" @click="toggleModelCollapse">{{ lmState.model.name }}</span>
+                  <span class="txt-light"> ctx: {{ lmState.model.ctx }}</span>
+                </template>
+                <template v-else>
+                  <span class="cursor-pointer" @click="toggleModelCollapse">Pick a model</span>
+                </template>
               </template>
               <template v-else>
                 <span class="cursor-pointer" @click="toggleModelCollapse">{{ lmState.model.name }}</span>
+                <span class="txt-light"> ctx: {{ lmState.model.ctx }}</span>
               </template>
-              <span class="txt-light"> ctx: {{ lmState.model.ctx }}</span>
             </div>
             <div v-if="template.id != 'none'" class="pl-2">
               <div class="txt-semilight text-sm bord-lighter border px-2 py-1 rounded-lg">

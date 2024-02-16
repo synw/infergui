@@ -59,16 +59,17 @@ async function probeBackend(_backend: LmBackend): Promise<{ lm: Lm, backend: LmB
         console.log(`Provider ${_backend.name} down`, e)
       }
       break;
-    /*case "ollama":
+    case "ollama":
       try {
         await _lm.modelsInfo();
-        console.log(`Provider ${v.name} up`)
+        console.log(`Provider ${_backend.name} up`)
+        return { lm: _lm, backend: _backend }
       } catch (e) {
-        console.log(`Provider ${v.name} down`, e)
+        console.log(`Provider ${_backend.name} down`, e)
       }
       break;
     default:
-      throw new Error("Unknown provider type")*/
+      throw new Error("Unknown provider type")
   }
   return null
 }
@@ -134,7 +135,7 @@ async function infer(_prompt: string, _template: string, _params: InferenceParam
     lmState.isRunning = true;
     console.error("ERROR", msg)
   };
-  //console.log("PARAMS", JSON.stringify(completionParams, null, "  "));
+  //console.log("APIPARAMS", JSON.stringify(completionParams, null, "  "));
   lmState.isRunning = true;
   respData = await _lm.infer(_prompt, completionParams)
   lmState.isStreaming = false;
@@ -190,7 +191,7 @@ async function loadTask(path: string): Promise<void> {
   return task*/
 }
 
-async function selectModel(name: string, ctx: number, threads?: number, gpu_layers?: number) {
+async function selectModelModelsServer(name: string, ctx: number, threads?: number, gpu_layers?: number) {
   const res = await api.post<Record<string, any>>(
     "/loadmodel",
     { name: name, ctx: ctx, threads: threads, gpu_layers: gpu_layers }
@@ -208,7 +209,7 @@ export {
   infer,
   abort,
   loadModels,
-  selectModel,
+  selectModelModelsServer,
   loadTasks,
   loadTask,
   probeLocalBackends,
