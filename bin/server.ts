@@ -62,6 +62,6 @@ process.on('SIGTERM', async () => {
   process.exit(1)
 });
 
-app.listen(5183, () => {
+app.listen(process.env.PORT ?? 5183, () => {
   console.log('Please open localhost:5183 in a browser');
 });
