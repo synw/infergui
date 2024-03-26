@@ -17,6 +17,7 @@ import { selectedPreset } from "./settings";
 import { loadPreset } from "./presets";
 import { defaultBackends } from "@/const/backends";
 import { grammar, useGrammar } from "./grammar";
+import { useTemplateForModel } from "@/services/tfm";
 
 let timer = ref<ReturnType<typeof setInterval>>();
 const user = new User();
@@ -37,6 +38,7 @@ const lmState = reactive<ApiState>({
   model: { name: "", ctx: 2048 } as ModelConf,
 });
 const db = useDb();
+const tfm = useTemplateForModel();
 const backends = reactive<Record<string, LmBackend>>({});
 const activeBackend = ref<LmBackend | null>(null);
 const stream = ref("");
@@ -115,7 +117,11 @@ function clearHistory() {
 }
 
 function _pushToHistory() {
-  const turn: HistoryTurn = { user: prompt.value, assistant: stream.value.trim() };
+  let respData = stream.value.trim();
+  if (inferParams.grammar) {
+    respData = '```json\n' + respData + '\n```'
+  }
+  const turn: HistoryTurn = { user: prompt.value, assistant: respData };
   if (inferParams.image_data) {
     turn.images = [{
       id: _currentImgId.value,
@@ -184,6 +190,14 @@ async function processInfer() {
   //console.log("PK", Object.keys(_inferParams));
   console.log("PARAMS", JSON.stringify(_inferParams, null, "  "));
   const res = await infer(prompt.value, template.value.render(), _inferParams);
+  // path for emitted stop tokens
+  if (template.value.stop) {
+    template.value.stop.forEach((s) => {
+      if (stream.value.endsWith(s)) {
+        stream.value = stream.value.replace(s, "")
+      }
+    })
+  }
   //console.log("RES", res)
   _finishInfer();
   //console.log("Stats:", res.stats);
@@ -227,18 +241,6 @@ function setImageData(imgData: string, id: number) {
   //console.log("IMG DATA", inferParams.image_data)
 }
 
-async function loadCustomTemplate(name: string) {
-  const t = await db.loadTemplate(name);
-  template.value = t;
-  if (template.value.stop) {
-    inferParams.stop = template.value.stop
-  } else {
-    inferParams.stop = []
-  }
-  setStop();
-  countTemplateTokens();
-}
-
 async function cloneToGenericTemplate(name: string) {
   template.value = template.value.cloneTo(name);
   if (template.value.stop) {
@@ -250,6 +252,23 @@ async function cloneToGenericTemplate(name: string) {
   countTemplateTokens();
 }
 
+async function saveTemplate(modelName: string, templateName: string) {
+  await tfm.set(modelName, templateName);
+}
+
+async function loadCustomTemplate(name: string) {
+  const t = await db.loadTemplate(name);
+  template.value = t;
+  if (template.value.stop) {
+    inferParams.stop = template.value.stop
+  } else {
+    inferParams.stop = []
+  }
+  setStop();
+  countTemplateTokens();
+  await saveTemplate(lm.model.name, name);
+}
+
 async function loadGenericTemplate(name: string) {
   template.value = new PromptTemplate(name);
   if (template.value.stop) {
@@ -259,6 +278,7 @@ async function loadGenericTemplate(name: string) {
   }
   setStop();
   countTemplateTokens();
+  await saveTemplate(lm.model.name, name);
 }
 
 
@@ -393,7 +413,27 @@ async function initState() {
   //loadTasks();
 }
 
-function mutateModel(model: ModelConf) {
+async function loadTemplate(model: ModelConf) {
+  //console.log("Loading template for", model.name);
+  let templ = "none";
+  try {
+    templ = await tfm.get(model.name);
+  } catch (e) { }
+  if (templ == "none") {
+    templ = tfm.guess(model.name);
+    if (templ != "none") {
+      template.value = new PromptTemplate(templ);
+      console.log("Guessed template", templ, "for", model.name);
+      await tfm.set(templ, model.name);
+    }
+  } else {
+    console.log("Found template", templ, "for", model.name)
+    template.value = new PromptTemplate(templ);
+  }
+  //console.log("Template:", templ)
+}
+
+async function mutateModel(model: ModelConf) {
   lmState.isLoadingModel = true;
   //console.log("Mutate model", model);
   /*if (model.name in models) {
@@ -406,6 +446,7 @@ function mutateModel(model: ModelConf) {
     }
   }*/
   lmState.model = model;
+  await loadTemplate(model);
   lmState.isModelLoaded = true;
   lmState.isLoadingModel = false;
   //checkMaxTokens(lmState.model.ctx);

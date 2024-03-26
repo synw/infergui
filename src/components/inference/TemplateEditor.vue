@@ -148,7 +148,7 @@ import Textarea from 'primevue/textarea';
 import InputNumber from 'primevue/inputnumber';
 import { TurnBlock, templates as _genericTemplates } from 'modprompt';
 import AutoTextarea from '@/widgets/AutoTextarea.vue';
-import { template, inferParams } from '@/state';
+import { template } from '@/state';
 import ShotEditor from './ShotEditor.vue';
 import { nextTick } from 'process';
 

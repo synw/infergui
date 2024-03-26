@@ -24,10 +24,10 @@
       </div>
 
       <div :class="{
-        'slide-y': true,
-        'slideup': collapseTemplate === true,
-        'slidedown': collapseTemplate === false,
-      }">
+                  'slide-y': true,
+                  'slideup': collapseTemplate === true,
+                  'slidedown': collapseTemplate === false,
+                }">
         <div v-if="activeTab == 'template'">
           <template-editor class="pr-5"></template-editor>
         </div>
@@ -103,7 +103,10 @@
             <i-line-md:downloading-loop class="text-lg mr-2"></i-line-md:downloading-loop>Ingesting prompt ...
           </div>
         </div>
-        <div v-if="formatMode == 'Html'" class="text-justify mt-3"
+        <div v-if="useGrammar">
+          <render-md :hljs="hljs" :source="grammarStream"></render-md>
+        </div>
+        <div v-else-if="formatMode == 'Html'" class="text-justify mt-3"
           v-html="stream.replaceAll('\n', '<br />').replaceAll('\t', '&nbsp;&nbsp;')">
         </div>
         <div v-else-if="formatMode == 'Text'" class="mt-3">
@@ -161,7 +164,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { watchDebounced } from '@vueuse/core';
 import OverlayPanel from 'primevue/overlaypanel';
 import { RenderMd } from '@docdundee/vue';
@@ -169,6 +172,7 @@ import SavePromptDialog from './SavePromptDialog.vue';
 import SaveTemplateDialog from './SaveTemplateDialog.vue';
 import ImageLoader from './ImageLoader.vue';
 import { confirmSuccess } from '@/services/notify';
+import { useGrammar } from '@/state/grammar';
 //import SaveTaskDialog from './SaveTaskDialog.vue';
 import {
   template,
@@ -225,6 +229,13 @@ function restartFromTurn(n: number, turn: HistoryTurn) {
     }
   )
 }
+
+const grammarStream = computed(() => {
+  if (lmState.isStreaming) {
+    return '```json\n' + stream.value + '\n```'
+  }
+  return stream.value
+});
 
 onMounted(() => {
   countPromptTokens();

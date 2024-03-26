@@ -1,5 +1,8 @@
 <template>
-  <Textarea v-model="_data" :rows="rows" :auto-resize="auto" :class="rows ? 'overflow-y-visible' : ''" @focusout="ch()" />
+  <Textarea v-if="auto" v-model="_data" :rows="rows" :auto-resize="auto"
+    class="overflow-y-visible focus:ring-0 focus:bord-lighter" @focusout="ch()" />
+  <Textarea v-else v-model="_data" :rows="rows" class="overflow-y-visible focus:ring-0 focus:bord-lighter"
+    @focusout="ch()" />
 </template>
 
 <script setup lang="ts">
@@ -14,7 +17,7 @@ const props = defineProps({
   },
   maxlines: {
     type: Number,
-    default: 3,
+    default: 6,
   }
 });
 

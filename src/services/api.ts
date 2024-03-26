@@ -3,7 +3,6 @@ import { Lm } from "@locallm/api";
 import type { InferenceParams, InferenceResult, ModelTemplate } from "@locallm/types";
 //import { Lm } from "../packages/locallm/api";
 //import type { InferenceParams, InferenceResult, ModelTemplate } from "../packages/types/interfaces";
-import { msg } from "./notify";
 import { LmBackend } from "@/interfaces";
 import { useApi } from "restmix";
 
@@ -39,7 +38,7 @@ async function probeBackend(_backend: LmBackend): Promise<{ lm: Lm, backend: LmB
   switch (_backend.providerType) {
     case "llamacpp":
       try {
-        await _lm.loadModel("");
+        await _lm.info();
         console.log(`Provider ${_backend.name} up`);
         return { lm: _lm, backend: _backend }
       } catch (e) {
@@ -48,7 +47,7 @@ async function probeBackend(_backend: LmBackend): Promise<{ lm: Lm, backend: LmB
       break;
     case "koboldcpp":
       try {
-        await _lm.loadModel("");
+        await _lm.info();
         if (_lm.model.name.length > 0) {
           console.log(`Provider ${_backend.name} up`)
           return { lm: _lm, backend: _backend }
@@ -115,7 +114,8 @@ async function infer(_prompt: string, _template: string, _params: InferenceParam
       totalTimeFormat: "",
       tokensPerSecond: 0,
       totalTokens: 0,
-    }
+    },
+    data: {},
   };
 
   const _lm = getLm();

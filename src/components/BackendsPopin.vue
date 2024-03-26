@@ -92,7 +92,7 @@ const apiKey = ref();
 const backendsTypes = ref([
   { name: "Llamacpp.cpp", provider: "llamacpp" },
   { name: "Koboldcpp", provider: "koboldcpp" },
-  //{ name: "Ollama", provider: "ollama" },
+  { name: "Ollama", provider: "ollama" },
 ]);
 const backendType = ref();
 //const backend = ref();
