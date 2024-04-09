@@ -30,7 +30,7 @@
     "koa-static": "^5.0.0",
     "llama-tokenizer-js": "^1.2.1",
     "localforage": "^1.10.0",
-    "modprompt": "0.6.0",
+    "modprompt": "0.6.1",
     "primeicons": "^6.0.1",
     "primevue": "^3.50.0",
     "restmix": "^0.4.2",
