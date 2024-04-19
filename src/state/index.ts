@@ -3,6 +3,8 @@ import { ApiResponse } from "restmix";
 import { compile, serializeGrammar } from "@intrinsicai/gbnfgen";
 import { User } from "@snowind/state";
 import { PromptTemplate, HistoryTurn } from "modprompt";
+//import { PromptTemplate } from "../../../modprompt/src/cls";
+//import { HistoryTurn } from "../../../modprompt/src/interfaces";
 import llamaTokenizer from 'llama-tokenizer-js';
 import { defaultInferenceParams } from '@/const/params';
 import { ApiState, LmBackend } from '@/interfaces';

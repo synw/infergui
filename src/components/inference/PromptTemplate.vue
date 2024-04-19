@@ -24,10 +24,10 @@
       </div>
 
       <div :class="{
-                  'slide-y': true,
-                  'slideup': collapseTemplate === true,
-                  'slidedown': collapseTemplate === false,
-                }">
+        'slide-y': true,
+        'slideup': collapseTemplate === true,
+        'slidedown': collapseTemplate === false,
+      }">
         <div v-if="activeTab == 'template'">
           <template-editor class="pr-5"></template-editor>
         </div>
@@ -47,12 +47,17 @@
                 <div class="txt-light inline-block"
                   v-html="turn.user.replaceAll('\n', '<br />').replaceAll('\t', '&nbsp;&nbsp;')">
                 </div>
-                <span>
-                  <button v-if="turn.assistant.length > 0" class="btn flex-none txt-lighter hover:txt-light"
-                    @click="restartFromTurn(i, turn)">
+                <span v-if="turn.assistant.length > 0">
+                  <RestartFromTurn class="inline-block" :i="i" :turn="turn" @restart="prompt = $event">
+                  </RestartFromTurn>
+                  <!-- button v-if="confirmRestart != (i + 1)" class="btn flex-none txt-lighter hover:txt-light"
+                    @click="confirmRestartFromTurn(i + 1)">
                     <i-icon-park-twotone:replay-music class="text-lg"></i-icon-park-twotone:replay-music>&nbsp;Restart
                     from here
                   </button>
+                  <button v-else class="btn txt-light" @click="restartFromTurn(i, turn)">
+                    <i-icon-park-twotone:replay-music class="text-lg"></i-icon-park-twotone:replay-music>&nbsp;Confirm
+                    restart</button -->
                 </span>
               </div>
               <div class="text-justify mt-5"
@@ -62,12 +67,14 @@
             <template v-else-if="formatMode == 'Text'">
               <div>
                 <pre class="txt-light inline-block">{{ turn.user }}</pre>
-                <span>
-                  <button v-if="turn.assistant.length > 0" class="btn flex-none txt-lighter hover:txt-light"
+                <span v-if="turn.assistant.length > 0">
+                  <RestartFromTurn class="inline-block" :i="i" :turn="turn" @restart="prompt = $event">
+                  </RestartFromTurn>
+                  <!-- button v-if="turn.assistant.length > 0" class="btn flex-none txt-lighter hover:txt-light"
                     @click="restartFromTurn(i, turn)">
                     <i-icon-park-twotone:replay-music class="text-lg"></i-icon-park-twotone:replay-music>&nbsp;Restart
                     from here
-                  </button>
+                  </button -->
                 </span>
               </div>
               <pre>{{ turn.assistant }}</pre>
@@ -76,11 +83,13 @@
               <div class="">
                 <div class="txt-light inline-block" v-html="turn.user"></div>
                 <span>
-                  <button v-if="turn.assistant.length > 0" class="btn flex-none txt-lighter hover:txt-light"
+                  <RestartFromTurn class="inline-block" :i="i" :turn="turn" @restart="prompt = $event">
+                  </RestartFromTurn>
+                  <!-- button v-if="turn.assistant.length > 0" class="btn flex-none txt-lighter hover:txt-light"
                     @click="restartFromTurn(i, turn)">
                     <i-icon-park-twotone:replay-music class="text-lg"></i-icon-park-twotone:replay-music>&nbsp;Restart
                     from here
-                  </button>
+                  </button -->
                 </span>
                 <div class="prosed prose">
                   <render-md :hljs="hljs" :source="turn.assistant"></render-md>
@@ -192,11 +201,13 @@ import { formatMode } from '@/state/settings';
 import AutoTextarea from '@/widgets/AutoTextarea.vue';
 import GrammarEditor from './GrammarEditor.vue';
 import { HistoryTurn } from 'modprompt';
+import RestartFromTurn from '@/widgets/RestartFromTurn.vue';
 
 const savePromptCollapse = ref();
 const saveTemplateCollapse = ref();
 const saveTaskCollapse = ref();
 const collapseTemplate = ref(false);
+const confirmRestart = ref(0);
 
 type TabType = "template" | "grammar";
 
@@ -219,15 +230,15 @@ function toggleSaveTemplate(evt) {
   saveTaskCollapse.value.toggle(evt);
 }*/
 
-function restartFromTurn(n: number, turn: HistoryTurn) {
-  confirmSuccess(
-    `Restart from turn ${n + 1} ?`,
-    "This will delete later conversation history",
-    async () => {
-      cutHistoryAfterTurn(n);
-      prompt.value = turn.user;
-    }
-  )
+function confirmRestartFromTurn(n: number) {
+  console.log("CONFIRM RESTART", n);
+  confirmRestart.value = n;
+}
+
+async function restartFromTurn(n: number, turn: HistoryTurn) {
+  cutHistoryAfterTurn(n);
+  prompt.value = turn.user;
+  confirmRestart.value = 0;
 }
 
 const grammarStream = computed(() => {

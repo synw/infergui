@@ -2,6 +2,8 @@ import localForage from "localforage";
 import type { InferenceParams } from "@locallm/types";
 import { defaultInferenceParams, minPInferenceParams } from "@/const/params";
 import { LmTemplate, PromptTemplate } from "modprompt";
+//import { PromptTemplate } from "../../../modprompt/src/cls";
+//import { LmTemplate } from "../../../modprompt/src/interfaces";
 import { GbnfGrammar, LmBackend } from "@/interfaces";
 
 const useDb = () => {

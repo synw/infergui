@@ -53,6 +53,8 @@
 <script setup lang="ts">
 import { onBeforeMount } from 'vue';
 import { templates as _genericTemplates, PromptTemplate } from "modprompt";
+//import { templates as _genericTemplates } from "../../../modprompt/src/db";
+//import { PromptTemplate } from "../../../modprompt/src/cls";
 import ConfirmDelete from '@/widgets/ConfirmDelete.vue';
 import { db, loadTemplates, templates, loadCustomTemplate, loadGenericTemplate, cloneToGenericTemplate } from '@/state';
 import { cloneTemplateMode, templateSidebarShowCustom, templateSidebarShowGeneric } from "@/state/settings";

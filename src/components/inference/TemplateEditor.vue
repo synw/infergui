@@ -22,10 +22,11 @@
               <AutoTextarea class="w-full" :data="template.system.schema" @update="template.system.schema = $event" />
             </div>
           </div>
-          <div v-if="template.system?.message" class="flex flex-row">
+          <div class="flex flex-row">
             <div class="flex w-32 flex-row items-center justify-center text-sm">Message:</div>
             <div class="w-full">
-              <AutoTextarea class="w-full" :data="template.system.message" @update="template.system.message = $event" />
+              <AutoTextarea class="w-full" :data="template.system.message ?? ''"
+                @update="template.system.message = $event" />
             </div>
           </div>
         </template>
