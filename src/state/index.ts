@@ -115,7 +115,7 @@ function clearInferResults() {
 
 function clearHistory() {
   history.splice(0, history.length);
-  inferParams.image_data = undefined;
+  inferParams.images = undefined;
 }
 
 function _pushToHistory() {
@@ -124,7 +124,7 @@ function _pushToHistory() {
     respData = '```json\n' + respData + '\n```'
   }
   const turn: HistoryTurn = { user: prompt.value, assistant: respData };
-  if (inferParams.image_data) {
+  if (inferParams.images) {
     turn.images = [{
       id: _currentImgId.value,
       data: currentImgData.value
@@ -154,10 +154,10 @@ async function processInfer() {
     });
   }
   //let imgOri: ImgData = { id: 0, data: "" };
-  if (inferParams.image_data) {
-    const nImg = inferParams.image_data.length - 1;
+  if (inferParams.images) {
+    const nImg = inferParams.images.length - 1;
     //imgOri = Object.assign({}, inferParams.image_data[nImg]);
-    inferParams.image_data[nImg].data = inferParams.image_data[nImg].data.replace(/^data:image\/[a-z]+;base64,/, "");
+    inferParams.images[nImg] = inferParams.images[nImg].replace(/^data:image\/[a-z]+;base64,/, "");
   }
   const _inferParams: InferenceParams = {
     stream: true
@@ -190,7 +190,7 @@ async function processInfer() {
   }
   console.log(template.value.prompt(prompt.value));
   //console.log("PK", Object.keys(_inferParams));
-  console.log("PARAMS", JSON.stringify(_inferParams, null, "  "));
+  //console.log("MPARAMS", JSON.stringify(_inferParams, null, "  "));
   const res = await infer(prompt.value, template.value.render(), _inferParams);
   // path for emitted stop tokens
   if (template.value.stop) {
@@ -229,15 +229,10 @@ function setStop() {
 
 function setImageData(imgData: string, id: number) {
   //console.log("SET IMG ID", id);
-  if (!inferParams.image_data) {
-    inferParams.image_data = [];
+  if (!inferParams.images) {
+    inferParams.images = [];
   }
-  inferParams.image_data.push(
-    {
-      id: id,
-      data: imgData,
-    }
-  );
+  inferParams.images.push(imgData);
   currentImgData.value = imgData;
   _currentImgId.value = id;
   //console.log("IMG DATA", inferParams.image_data)
