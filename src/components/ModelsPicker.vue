@@ -11,8 +11,10 @@
       <div class="text-xl">Context window size</div>
       <div class="flex flex-row items-center space-x-2 text-xs">
         <div>Presets:</div>
-        <chip-text class="cursor-pointer" :class="ctx == 256 ? 'success' : 'lighter'" @click="preset(256)">256</chip-text>
-        <chip-text class="cursor-pointer" :class="ctx == 512 ? 'success' : 'lighter'" @click="preset(512)">512</chip-text>
+        <chip-text class="cursor-pointer" :class="ctx == 256 ? 'success' : 'lighter'"
+          @click="preset(256)">256</chip-text>
+        <chip-text class="cursor-pointer" :class="ctx == 512 ? 'success' : 'lighter'"
+          @click="preset(512)">512</chip-text>
         <chip-text class="cursor-pointer" :class="ctx == 1024 ? 'success' : 'lighter'"
           @click="preset(1024)">1024</chip-text>
         <chip-text class="cursor-pointer" :class="ctx == 2048 ? 'success' : 'lighter'"
@@ -23,12 +25,16 @@
           @click="preset(8192)">8192</chip-text>
         <chip-text class="cursor-pointer" :class="ctx == 16384 ? 'success' : 'lighter'"
           @click="preset(16384)">16384</chip-text>
+        <chip-text class="cursor-pointer" :class="ctx == 32768 ? 'success' : 'lighter'"
+          @click="preset(32768)">32768</chip-text>
+        <chip-text class="cursor-pointer" :class="ctx == 65536 ? 'success' : 'lighter'"
+          @click="preset(65536)">65536</chip-text>
       </div>
       <div>
         <InputNumber v-model="ctx" class="w-64" :useGrouping="false" suffix=" tokens" />
       </div>
       <div>
-        <Slider v-model="ctx" class="w-full" :min="32" :max="16384" :step="64" />
+        <Slider v-model="ctx" class="w-full" :min="32" :max="65536" :step="256" />
       </div>
       <div class="text-xl">GPU layers</div>
       <div class="flex flex-row items-center">
@@ -69,7 +75,7 @@ import Slider from 'primevue/slider';
 import ChipText from "@/widgets/ChipText.vue";
 import { selectModelModelsServer } from '@/services/api';
 import { PromptTemplate, templates as _genericTemplates } from "modprompt";
-import { activeBackend, getLm, hasModelsServer, lmState, loadBackend, models, mutateModel, stream, loadGenericTemplate } from '@/state';
+import { activeBackend, getLm, hasModelsServer, lmState, loadBackend, models, mutateModel, stream, loadGenericTemplate, tfm } from '@/state';
 import { ModelConf } from '@locallm/types';
 import { defaultGpuLayers, defaultThreads } from "@/state/settings";
 import { defaultBackends } from '@/const/backends';
@@ -105,6 +111,15 @@ async function pickModel(m: string, t: ModelConf) {
     if (lm.model?.threads) {
       threads.value = lm.model.threads;
     }
+    let tn = "none";
+    try {
+      tn = await tfm.get(m);
+    } catch (e) { }
+    if (tn == "none") {
+      tn = tfm.guess(m)
+    }
+    console.log("TN", tn);
+    selectedTemplate.value = tn;
   } else {
     selectedModel.value = m;
     ctx.value = t.ctx;

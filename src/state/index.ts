@@ -19,7 +19,7 @@ import { selectedPreset } from "./settings";
 import { loadPreset } from "./presets";
 import { defaultBackends } from "@/const/backends";
 import { grammar, useGrammar } from "./grammar";
-import { useTemplateForModel } from "@/services/tfm";
+import { useTemplateForModel } from "@agent-smith/tfm";
 
 let timer = ref<ReturnType<typeof setInterval>>();
 const user = new User();
@@ -51,7 +51,6 @@ const templates = reactive<Array<PromptTemplate>>([]);
 const tasks = reactive<Array<Record<string, any>>>([]);
 const presets = reactive<Array<string>>([]);
 const hasModelsServer = ref(false);
-
 const template = ref<PromptTemplate>(new PromptTemplate("none"));
 const stop = ref("");
 const prompt = ref("");
@@ -513,6 +512,7 @@ export {
   totalContext,
   activeBackend,
   hasModelsServer,
+  tfm,
   setAutomaxContext,
   setFreeContext,
   loadCustomTemplate,

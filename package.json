@@ -1,6 +1,6 @@
 {
   "name": "infergui",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "scripts": {
     "dev": "vite",
     "local": "vite preview --port 5173",
@@ -12,6 +12,7 @@
     "build": "run-s build:compile build:compress build:server"
   },
   "dependencies": {
+    "@agent-smith/tfm": "^0.0.1",
     "@agent-smith/tmem": "^0.0.3",
     "@docdundee/vue": "^0.0.21",
     "@intrinsicai/gbnfgen": "^0.12.0",

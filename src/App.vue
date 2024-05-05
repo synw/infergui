@@ -1,7 +1,7 @@
 <template>
   <div class="h-screen background">
     <the-header class="fixed top-0 left-0 h-16 border-b bord-lighter"></the-header>
-    <div class="w-full h-main">
+    <div class="w-full h-main fixed left-0 top-16">
       <router-view></router-view>
     </div>
   </div>
@@ -40,7 +40,3 @@ onMounted(() => initNotifyService())
 .p-confirm-dialog-reject
   @apply txt-danger p-3
 </style>
-
-
-
-

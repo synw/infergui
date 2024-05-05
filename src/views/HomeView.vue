@@ -1,5 +1,5 @@
 <template>
-  <div class="fixed left-0 top-16 flex h-full w-full flex-row">
+  <div class="flex h-full w-full flex-row">
     <div class="w-72 flex-shrink-0">
       <side-bars></side-bars>
     </div>
