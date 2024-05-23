@@ -5,7 +5,6 @@ import { User } from "@snowind/state";
 import { PromptTemplate, HistoryTurn } from "modprompt";
 //import { PromptTemplate } from "../../../modprompt/src/cls";
 //import { HistoryTurn } from "../../../modprompt/src/interfaces";
-import llamaTokenizer from 'llama-tokenizer-js';
 import { defaultInferenceParams } from '@/const/params';
 import { ApiState, LmBackend } from '@/interfaces';
 import { Lm } from "@locallm/api";
@@ -20,6 +19,8 @@ import { loadPreset } from "./presets";
 import { defaultBackends } from "@/const/backends";
 import { grammar, useGrammar } from "./grammar";
 import { useTemplateForModel } from "@agent-smith/tfm";
+import { tokenizerForModel } from "./tokenizer";
+import llamaTokenizer from "llama-tokenizer-js";
 
 let timer = ref<ReturnType<typeof setInterval>>();
 const user = new User();
@@ -66,6 +67,7 @@ const promptTokensCount = ref(0);
 const templateTokensCount = ref(0);
 const freeContext = ref(0);
 const totalContext = ref(0);
+let tokenizer = llamaTokenizer;
 
 function getLm(): Lm {
   return lm
@@ -89,12 +91,12 @@ function setFreeContext() {
 
 function countPromptTokens() {
   let v = prompt.value;
-  promptTokensCount.value = llamaTokenizer.encode(v).length;
+  promptTokensCount.value = tokenizer.encode(v).length;
   setFreeContext();
 }
 
 function countTemplateTokens() {
-  templateTokensCount.value = llamaTokenizer.encode(template.value.render()).length;
+  templateTokensCount.value = tokenizer.encode(template.value.render()).length;
   setFreeContext();
 }
 
@@ -442,6 +444,7 @@ async function mutateModel(model: ModelConf) {
     }
   }*/
   lmState.model = model;
+  tokenizer = tokenizerForModel(model.name);
   await loadTemplate(model);
   lmState.isModelLoaded = true;
   lmState.isLoadingModel = false;

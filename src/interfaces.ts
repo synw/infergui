@@ -1,5 +1,8 @@
-//import { LmProviderType } from "@locallm/types";
-import { LmProviderType, ModelConf } from "./packages/types/interfaces";
+import { LmProviderType, ModelConf } from "@locallm/types";
+import { LlamaTokenizer } from "llama-tokenizer-js";
+import { Llama3Tokenizer } from "llama3-tokenizer-js";
+import mistralTokenizer from 'mistral-tokenizer-js';
+//import { LmProviderType, ModelConf } from "./packages/types/interfaces";
 
 
 interface ApiState {
@@ -35,6 +38,7 @@ type FormatMode = "Html" | "Text" | "Markdown" | "Json";
 
 type TabType = "prompts" | "templates" | "grammars";
 
+type LmTokenizer = LlamaTokenizer | Llama3Tokenizer | typeof mistralTokenizer;
 
 export {
   FormatMode,
@@ -42,4 +46,5 @@ export {
   TabType,
   LmBackend,
   GbnfGrammar,
+  LmTokenizer,
 }
