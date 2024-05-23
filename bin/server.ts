@@ -6,37 +6,10 @@ import serve from 'koa-static';
 import bodyParser from "koa-bodyparser";
 import cors from '@koa/cors';
 import { useLmRouter } from './router.js';
-import { modelsDir, execPath, dirpath, koboldCmd } from './state.js';
-import { argv } from 'process';
+import { dirpath } from './state.js';
 import { killLm } from './cmds/execute.js';
 
 let env = "production";
-
-if (argv.length > 2) {
-  for (const arg of argv.slice(2, argv.length)) {
-    if (arg.startsWith("-m=")) {
-      const _path = arg.split("=")[1];
-      if (_path.startsWith("/")) {
-        modelsDir.value = _path
-      } else {
-        modelsDir.value = path.join(execPath, _path);
-      }
-    } else if (arg.startsWith("-k=")) {
-      koboldCmd.value = arg.split("=")[1];
-    }
-    else if (arg == "-d") {
-      env = "dev"
-    }
-  }
-}
-
-if (koboldCmd.value != "") {
-  if (modelsDir.value == "") {
-    throw new Error("Provide a models directory path as argument: -m=/my/models/dir");
-  }
-}
-
-//console.log("Cmd", koboldCmd.value);
 
 const app = new Koa();
 
