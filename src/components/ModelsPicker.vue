@@ -1,11 +1,8 @@
 <template>
   <div>
     <div class="ml-3">{{ selectedModel }}</div>
-    <div class="flex flex-col" v-if="!selectCtx">
-      <div v-for="(model, i) in Object.keys(models)" class="cursor-pointer px-8 py-4 bord-lighter"
-        :class="i == Object.keys(models).length - 1 ? '' : 'border-b'" @click="pickModel(model, models[model])">
-        {{ model }}
-      </div>
+    <div v-if="!selectCtx">
+      <ModelsList :lm="getLm()" @end="pickModel($event.name, $event)" @close="$emit('close')"></ModelsList>
     </div>
     <div v-else class="flex flex-col space-y-3 p-3">
       <div class="text-xl">Context window size</div>
@@ -75,13 +72,12 @@ import Dropdown from 'primevue/dropdown';
 import InputNumber from 'primevue/inputnumber';
 import Slider from 'primevue/slider';
 import ChipText from "@/widgets/ChipText.vue";
-import { selectModelModelsServer } from '@/services/api';
 import { PromptTemplate, templates as _genericTemplates } from "modprompt";
-import { activeBackend, getLm, hasModelsServer, lmState, loadBackend, models, mutateModel, stream, loadGenericTemplate, tfm } from '@/state';
+import { getLm, lmState, mutateModel, loadGenericTemplate, tfm } from '@/state';
 import { ModelConf } from '@locallm/types';
 import { defaultGpuLayers, defaultThreads } from "@/state/settings";
-import { defaultBackends } from '@/const/backends';
-import { Lm } from '@locallm/api';
+//import { models } from '@/state/models';
+import ModelsList from './ModelsList.vue';
 
 const emit = defineEmits(["close"]);
 
@@ -120,7 +116,6 @@ async function pickModel(m: string, t: ModelConf) {
     if (tn == "none") {
       tn = tfm.guess(m)
     }
-    console.log("TN", tn);
     selectedTemplate.value = tn;
   } else {
     selectedModel.value = m;
@@ -152,24 +147,7 @@ async function post() {
   emit("close");
   selectCtx.value = false;
   lmState.isLoadingModel = true;
-  const lm = lmState.model;
-  if (hasModelsServer.value) {
-    await selectModelModelsServer(selectedModel.value, ctx.value, threads.value, gpuLayers.value);
-    //console.log("Load", selectedModel.value, ctx.value);
-    if (!activeBackend.value) {
-      await new Promise(resolve => setTimeout(resolve, 3000));
-      const _lm = new Lm({
-        providerType: defaultBackends[1].providerType,
-        serverUrl: defaultBackends[1].serverUrl,
-        apiKey: defaultBackends[1].apiKey,
-        onToken: (t) => stream.value += t,
-      });
-      _lm.model = { name: selectedModel.value, ctx: ctx.value };
-      await loadBackend(_lm, defaultBackends[1]);
-    }
-  } else if (getLm().providerType == "ollama") {
-    //await lm.loadModel(selectedModel.value, ctx.value, threads.value, gpuLayers.value)
-  } else {
+  if (!(getLm().providerType == "ollama")) {
     throw new Error(`The provider ${getLm().providerType} can not load models`)
   }
   mutateModel({ name: selectedModel.value, ctx: ctx.value, threads: threads.value, gpu_layers: gpuLayers.value });

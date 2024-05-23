@@ -1,6 +1,6 @@
-import { getLm, mutateModel, stream, inferResults, updateModels, lmState, hasModelsServer, models } from "@/state";
+import { getLm, mutateModel, stream, inferResults, updateModels, lmState } from "@/state";
 import { Lm } from "@locallm/api";
-import type { InferenceParams, InferenceResult, ModelTemplate } from "@locallm/types";
+import type { InferenceParams, InferenceResult, ModelConf } from "@locallm/types";
 //import { Lm } from "../packages/locallm/api";
 //import type { InferenceParams, InferenceResult, ModelTemplate } from "../packages/types/interfaces";
 import { LmBackend } from "@/interfaces";
@@ -8,22 +8,7 @@ import { useApi } from "restmix";
 
 const api = useApi({
   serverUrl: "http://localhost:5183"
-})
-
-async function probeModelsServer(): Promise<boolean> {
-  let isUp = false;
-  const res = await api.get<{ models: Array<string> }>("/models");
-  if (res.ok) {
-    isUp = true;
-    hasModelsServer.value = true;
-    res.data.models.forEach((m) => models[m] = { name: "unknown", ctx: 2048 });
-    //console.log("MODELS:", res.data);
-  } else {
-    console.log("No models server found")
-  }
-  return isUp
-}
-
+});
 
 async function probeBackend(_backend: LmBackend): Promise<{ lm: Lm, backend: LmBackend } | null> {
   const _lm = new Lm({
@@ -151,7 +136,7 @@ async function abort() {
 async function loadModels() {
   const lm = getLm();
   await lm.modelsInfo();
-  const mt: Record<string, ModelTemplate> = {};
+  const mt: Record<string, ModelConf> = {};
   // update state
   updateModels(mt);
   if (lm.model.name.length > 0) {
@@ -191,28 +176,12 @@ async function loadTask(path: string): Promise<void> {
   return task*/
 }
 
-async function selectModelModelsServer(name: string, ctx: number, threads?: number, gpu_layers?: number) {
-  const res = await api.post<Record<string, any>>(
-    "/loadmodel",
-    { name: name, ctx: ctx, threads: threads, gpu_layers: gpu_layers }
-  );
-  if (res.ok) {
-    console.log("Model", name, "loaded", `(ctx: ${ctx})`);
-  }
-  else {
-    console.error("Error loading the model", res.data)
-    throw new Error(`Error loading model ${res.data}`)
-  }
-}
-
 export {
   infer,
   abort,
   loadModels,
-  selectModelModelsServer,
   loadTasks,
   loadTask,
   probeLocalBackends,
   probeBackend,
-  probeModelsServer
 }

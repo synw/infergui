@@ -7,6 +7,7 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    AgentConf: typeof import('./src/components/modelconf/AgentConf.vue')['default']
     BackendsPopin: typeof import('./src/components/BackendsPopin.vue')['default']
     FormatBar: typeof import('./src/components/inference/FormatBar.vue')['default']
     GrammarEditor: typeof import('./src/components/inference/GrammarEditor.vue')['default']
@@ -24,6 +25,7 @@ declare module 'vue' {
     'IFaSolid:sun': typeof import('~icons/fa-solid/sun')['default']
     'IFluent:settings32Regular': typeof import('~icons/fluent/settings32-regular')['default']
     'IFluentMdl2:columnOptions': typeof import('~icons/fluent-mdl2/column-options')['default']
+    'IGg:closeR': typeof import('~icons/gg/close-r')['default']
     'IIcomoonFree:stop': typeof import('~icons/icomoon-free/stop')['default']
     'IIconoir:networkAlt': typeof import('~icons/iconoir/network-alt')['default']
     'IIconoir:play': typeof import('~icons/iconoir/play')['default']
@@ -39,7 +41,9 @@ declare module 'vue' {
     InferStats: typeof import('./src/components/inference/InferStats.vue')['default']
     'ITabler:prompt': typeof import('~icons/tabler/prompt')['default']
     'IUil:server': typeof import('~icons/uil/server')['default']
+    ModelsList: typeof import('./src/components/ModelsList.vue')['default']
     ModelsPicker: typeof import('./src/components/ModelsPicker.vue')['default']
+    ModelState: typeof import('./src/components/modelconf/ModelState.vue')['default']
     ParamsEditor: typeof import('./src/components/ParamsEditor.vue')['default']
     PresetsPicker: typeof import('./src/components/PresetsPicker.vue')['default']
     PromptsBar: typeof import('./src/components/PromptsBar.vue')['default']

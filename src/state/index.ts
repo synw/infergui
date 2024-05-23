@@ -8,10 +8,10 @@ import { PromptTemplate, HistoryTurn } from "modprompt";
 import { defaultInferenceParams } from '@/const/params';
 import { ApiState, LmBackend } from '@/interfaces';
 import { Lm } from "@locallm/api";
-import { InferenceParams, ModelConf, ModelTemplate } from '@locallm/types';
+import { InferenceParams, ModelConf } from '@locallm/types';
 //import { Lm } from "../packages/locallm/api";
 //import { InferenceParams, ModelConf, ModelTemplate } from '../packages/types/interfaces';
-import { loadModels, loadTasks as _loadTasks, infer, abort, probeLocalBackends, probeModelsServer } from "@/services/api";
+import { loadModels, loadTasks as _loadTasks, infer, abort, probeLocalBackends } from "@/services/api";
 import { msg } from "../services/notify";
 import { useDb } from "../services/db";
 import { selectedPreset } from "./settings";
@@ -21,6 +21,7 @@ import { grammar, useGrammar } from "./grammar";
 import { useTemplateForModel } from "@agent-smith/tfm";
 import { tokenizerForModel } from "../services/tokenizer";
 import llamaTokenizer from "llama-tokenizer-js";
+import { updateModels } from "./models";
 
 let timer = ref<ReturnType<typeof setInterval>>();
 const user = new User();
@@ -46,12 +47,10 @@ const backends = reactive<Record<string, LmBackend>>({});
 const activeBackend = ref<LmBackend | null>(null);
 const stream = ref("");
 const history = reactive<Array<HistoryTurn>>([]);
-const models = reactive<Record<string, ModelConf>>({});
 const prompts = reactive<Array<string>>([]);
 const templates = reactive<Array<PromptTemplate>>([]);
 const tasks = reactive<Array<Record<string, any>>>([]);
 const presets = reactive<Array<string>>([]);
-const hasModelsServer = ref(false);
 const template = ref<PromptTemplate>(new PromptTemplate("none"));
 const stop = ref("");
 const prompt = ref("");
@@ -192,8 +191,8 @@ async function processInfer() {
   console.log(template.value.prompt(prompt.value));
   //console.log("PK", Object.keys(_inferParams));
   //console.log("MPARAMS", JSON.stringify(_inferParams, null, "  "));
-  const res = await infer(prompt.value, template.value.render(), _inferParams);
-  // path for emitted stop tokens
+  await infer(prompt.value, template.value.render(), _inferParams);
+  // patch for emitted stop tokens
   if (template.value.stop) {
     template.value.stop.forEach((s) => {
       if (stream.value.endsWith(s)) {
@@ -317,15 +316,6 @@ async function loadBackends() {
   });
 }
 
-function updateModels(_models: Record<string, ModelTemplate>) {
-  for (const m in models) {
-    delete models[m]
-  }
-  for (const [k, v] of Object.entries(_models)) {
-    models[k] = v
-  }
-}
-
 /*function checkMaxTokens(ctx: number) {
   if ((inferParams.max_tokens ?? 0) > ctx) {
     inferParams.max_tokens = ctx - 64;
@@ -345,7 +335,7 @@ async function loadBackend(_lm: Lm, _b: LmBackend) {
   if (lm.providerType == "ollama") {
     await loadModels();
     //console.log("Models", lm.models);
-    lm.models.forEach((m) => models[m.name] = m);
+    updateModels(lm.models, lm.providerType == "ollama");
     //models.value = lm.models;
   } else if (["koboldcpp", "llamacpp"].includes(lm.providerType)) {
     //console.log("API", JSON.stringify(lm.apiKey, null, "  "));
@@ -379,7 +369,6 @@ async function probeAndLoadLocalBackends() {
 }
 
 async function initState() {
-  probeModelsServer().then((isUp) => { hasModelsServer.value = isUp });
   //console.log("KEY", import.meta.env.VITE_API_KEY);
   lm.api.onResponse(async <T>(res: ApiResponse<T>): Promise<ApiResponse<T>> => {
     if (!res.ok) {
@@ -468,10 +457,10 @@ async function loadTemplates() {
   templates.splice(0, templates.length, ...tpls);
 }
 
-async function loadTasks() {
+/*async function loadTasks() {
   const t = await _loadTasks();
   tasks.splice(0, tasks.length, ...t);
-}
+}*/
 
 async function loadPresets() {
   const p = await db.listPresetsNames();
@@ -484,7 +473,6 @@ export {
   lmState,
   stream,
   history,
-  models,
   db,
   prompts,
   templates,
@@ -502,7 +490,6 @@ export {
   freeContext,
   totalContext,
   activeBackend,
-  hasModelsServer,
   tfm,
   setAutomaxContext,
   setFreeContext,

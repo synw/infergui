@@ -31,18 +31,12 @@
               Loading model ..
             </template>
             <div>
-              <template v-if="!hasModelsServer">
-                <template v-if="lmState.isModelLoaded">
-                  <span class="cursor-pointer" @click="toggleModelCollapse">{{ lmState.model.name }}</span>
-                  <span class="txt-light"> ctx: {{ lmState.model.ctx }}</span>
-                </template>
-                <template v-else>
-                  <span class="cursor-pointer" @click="toggleModelCollapse">Pick a model</span>
-                </template>
-              </template>
-              <template v-else>
+              <template v-if="lmState.isModelLoaded">
                 <span class="cursor-pointer" @click="toggleModelCollapse">{{ lmState.model.name }}</span>
                 <span class="txt-light"> ctx: {{ lmState.model.ctx }}</span>
+              </template>
+              <template v-else>
+                <span class="cursor-pointer" @click="toggleModelCollapse">Pick a model</span>
               </template>
             </div>
             <div v-if="template.id != 'none'" class="pl-2">
@@ -61,24 +55,8 @@
           </div>
         </template>
         <div class="flex flex-row items-center" v-else>
-          <div class="text-lg" v-if="!hasModelsServer">No backend</div>
-          <div class="text-lg" v-else>
-            <button class="btn mr-5 border-none" @click="toggleModelCollapse">
-              <template v-if="lmState.isLoadingModel">
-                Loading model ..
-              </template>
-              <template v-else-if="lmState.isModelLoaded">
-                <span class="cursor-pointer" @click="toggleModelCollapse">{{ lmState.model.name }}</span>
-              </template>
-              <template v-else>
-                Pick a model&nbsp;<i-carbon:network-4></i-carbon:network-4>
-              </template>
-            </button>
-            <OverlayPanel ref="modelCollapse">
-              <models-picker @close="toggleModelCollapse($event)"></models-picker>
-            </OverlayPanel>
-          </div>
-          <div class="ml-3" v-if="!hasModelsServer">
+          <div class="text-lg">No backend</div>
+          <div class="ml-3">
             <button class="btn bord-semilight txt-light py-0 text-sm rounded-md"
               @click="probeAndLoadLocalBackends()">Retry</button>
           </div>
@@ -87,7 +65,6 @@
     </template>
     <template #menu>
       <div class="flex h-full w-full flex-row items-center justify-end space-x-2">
-
         <button v-if="lmState.isRunning == true || lmState.isStreaming == true"
           class="btn flex w-48 flex-row items-center justify-center txt-light bord-light block-lighter"
           @click="stopInfer()">
@@ -164,7 +141,6 @@ import {
   clearInferResults,
   clearHistory,
   probeAndLoadLocalBackends,
-  hasModelsServer,
 } from "@/state";
 import { useGrammar } from '@/state/grammar';
 import { useRouter } from 'vue-router';
