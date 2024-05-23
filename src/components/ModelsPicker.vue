@@ -16,25 +16,27 @@
         <chip-text class="cursor-pointer" :class="ctx == 512 ? 'success' : 'lighter'"
           @click="preset(512)">512</chip-text>
         <chip-text class="cursor-pointer" :class="ctx == 1024 ? 'success' : 'lighter'"
-          @click="preset(1024)">1024</chip-text>
+          @click="preset(1024)">1k</chip-text>
         <chip-text class="cursor-pointer" :class="ctx == 2048 ? 'success' : 'lighter'"
-          @click="preset(2048)">2048</chip-text>
+          @click="preset(2048)">2k</chip-text>
         <chip-text class="cursor-pointer" :class="ctx == 4096 ? 'success' : 'lighter'"
-          @click="preset(4096)">4096</chip-text>
+          @click="preset(4096)">4k</chip-text>
         <chip-text class="cursor-pointer" :class="ctx == 8192 ? 'success' : 'lighter'"
-          @click="preset(8192)">8192</chip-text>
+          @click="preset(8192)">8k</chip-text>
         <chip-text class="cursor-pointer" :class="ctx == 16384 ? 'success' : 'lighter'"
-          @click="preset(16384)">16384</chip-text>
+          @click="preset(16384)">16k</chip-text>
         <chip-text class="cursor-pointer" :class="ctx == 32768 ? 'success' : 'lighter'"
-          @click="preset(32768)">32768</chip-text>
+          @click="preset(32768)">32k</chip-text>
         <chip-text class="cursor-pointer" :class="ctx == 65536 ? 'success' : 'lighter'"
-          @click="preset(65536)">65536</chip-text>
+          @click="preset(65536)">64k</chip-text>
+        <chip-text class="cursor-pointer" :class="ctx == 131072 ? 'success' : 'lighter'"
+          @click="preset(131072)">128k</chip-text>
       </div>
       <div>
         <InputNumber v-model="ctx" class="w-64" :useGrouping="false" suffix=" tokens" />
       </div>
       <div>
-        <Slider v-model="ctx" class="w-full" :min="32" :max="65536" :step="256" />
+        <Slider v-model="ctx" class="w-full" :min="32" :max="131072" :step="256" />
       </div>
       <div class="text-xl">GPU layers</div>
       <div class="flex flex-row items-center">
@@ -85,7 +87,7 @@ const emit = defineEmits(["close"]);
 
 const selectCtx = ref(false);
 const selectedModel = ref("");
-const ctx = ref<number>(2048);
+const ctx = ref<number>(4096);
 const templateName = ref("unknown");
 const loadTemplate = ref(true);
 const gpuLayers = ref(defaultGpuLayers);

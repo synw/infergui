@@ -19,7 +19,7 @@ import { loadPreset } from "./presets";
 import { defaultBackends } from "@/const/backends";
 import { grammar, useGrammar } from "./grammar";
 import { useTemplateForModel } from "@agent-smith/tfm";
-import { tokenizerForModel } from "./tokenizer";
+import { tokenizerForModel } from "../services/tokenizer";
 import llamaTokenizer from "llama-tokenizer-js";
 
 let timer = ref<ReturnType<typeof setInterval>>();
@@ -433,25 +433,13 @@ async function loadTemplate(model: ModelConf) {
 
 async function mutateModel(model: ModelConf) {
   lmState.isLoadingModel = true;
-  //console.log("Mutate model", model);
-  /*if (model.name in models) {
-    const modelTemplate = models[model.name];
-    if (modelTemplate.name != "unknown") {
-      // the model has a generic template
-      if (loadTemplate) {
-        loadGenericTemplate(modelTemplate.name);
-      }
-    }
-  }*/
   lmState.model = model;
   tokenizer = tokenizerForModel(model.name);
   await loadTemplate(model);
   lmState.isModelLoaded = true;
   lmState.isLoadingModel = false;
-  //checkMaxTokens(lmState.model.ctx);
   setFreeContext();
   clearInferResults();
-  //console.log("State", lmState);
 }
 
 function mutateInferParams(_params: InferenceParams) {
