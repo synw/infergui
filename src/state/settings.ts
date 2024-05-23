@@ -9,8 +9,6 @@ const formatMode = useStorage<FormatMode>("formatMode", "Text");
 const cloneTemplateMode = useStorage<boolean>("cloneTemplateMode", false);
 const templateSidebarShowGeneric = useStorage<boolean>("templateSidebarShowGeneric", false);
 const templateSidebarShowCustom = useStorage<boolean>("templateSidebarShowCustom", false);
-const defaultGpuLayers = useStorage<number>("default_gpu_layers", 0);
-const defaultThreads = useStorage<number>("default_threads", 3);
 
 export {
   autoMaxContext,
@@ -20,6 +18,4 @@ export {
   cloneTemplateMode,
   templateSidebarShowCustom,
   templateSidebarShowGeneric,
-  defaultGpuLayers,
-  defaultThreads,
 }

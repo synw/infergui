@@ -2,7 +2,8 @@
   <div>
     <div class="ml-3">{{ selectedModel }}</div>
     <div v-if="!selectCtx">
-      <ModelsList :lm="getLm()" @end="pickModel($event.name, $event)" @close="$emit('close')"></ModelsList>
+      <ModelsList v-if="getLm().providerType == 'ollama'" :lm="getLm()" @end="pickModel($event.name, $event)"
+        @close="$emit('close')"></ModelsList>
     </div>
     <div v-else class="flex flex-col space-y-3 p-3">
       <div class="text-xl">Context window size</div>
@@ -35,14 +36,6 @@
       <div>
         <Slider v-model="ctx" class="w-full" :min="32" :max="131072" :step="256" />
       </div>
-      <div class="text-xl">GPU layers</div>
-      <div class="flex flex-row items-center">
-        <InputNumber v-model="gpuLayers" class="w-64" :useGrouping="false" suffix=" layers" />
-      </div>
-      <div class="text-xl">Threads</div>
-      <div class="flex flex-row items-center">
-        <InputNumber v-model="threads" class="w-64" :useGrouping="false" suffix=" threads" />
-      </div>
       <div class="text-xl">Template</div>
       <div class="flex flex-row items-center" v-if="templateName != 'unknown'">
         <sw-switch v-model:value="loadTemplate" class="switch-success">
@@ -66,7 +59,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import SwSwitch from "@snowind/switch";
 import Dropdown from 'primevue/dropdown';
 import InputNumber from 'primevue/inputnumber';
@@ -75,8 +68,6 @@ import ChipText from "@/widgets/ChipText.vue";
 import { PromptTemplate, templates as _genericTemplates } from "modprompt";
 import { getLm, lmState, mutateModel, loadGenericTemplate, tfm } from '@/state';
 import { ModelConf } from '@locallm/types';
-import { defaultGpuLayers, defaultThreads } from "@/state/settings";
-//import { models } from '@/state/models';
 import ModelsList from './ModelsList.vue';
 
 const emit = defineEmits(["close"]);
@@ -86,8 +77,6 @@ const selectedModel = ref("");
 const ctx = ref<number>(4096);
 const templateName = ref("unknown");
 const loadTemplate = ref(true);
-const gpuLayers = ref(defaultGpuLayers);
-const threads = ref(defaultThreads);
 const selectedTemplate = ref();
 const templates = ref(genTemplates());
 
@@ -103,12 +92,6 @@ async function pickModel(m: string, t: ModelConf) {
     //console.log(lm.model);
     selectedModel.value = lm.model.name;
     ctx.value = lm.model.ctx;
-    if (lm.model?.gpu_layers) {
-      gpuLayers.value = lm.model.gpu_layers;
-    }
-    if (lm.model?.threads) {
-      threads.value = lm.model.threads;
-    }
     let tn = "none";
     try {
       tn = await tfm.get(m);
@@ -123,14 +106,6 @@ async function pickModel(m: string, t: ModelConf) {
     templateName.value = t.name;
     selectedTemplate.value = t.name;
   }
-
-  // the model has a generic template
-  /*if (settings.autoLoadTemplates) {
-    //const tpl = new PromptTemplate(t.name)
-    //loadGenericTemplate(tpl);
-    ctx.value = t.ctx;
-    await post();
-  }*/
   selectCtx.value = true;
 }
 
@@ -140,7 +115,7 @@ function genTemplates(): Array<PromptTemplate> {
     const _tpl = new PromptTemplate(name);
     tpls.push(_tpl)
   }
-  return tpls
+  return tpls.sort()
 }
 
 async function post() {
@@ -150,7 +125,7 @@ async function post() {
   if (!(getLm().providerType == "ollama")) {
     throw new Error(`The provider ${getLm().providerType} can not load models`)
   }
-  mutateModel({ name: selectedModel.value, ctx: ctx.value, threads: threads.value, gpu_layers: gpuLayers.value });
+  mutateModel({ name: selectedModel.value, ctx: ctx.value });
   //console.log("T", selectedTemplate.value);
   if (selectedTemplate.value) {
     loadGenericTemplate(selectedTemplate.value);
@@ -159,4 +134,10 @@ async function post() {
   lmState.isModelLoaded = true;
   //console.log("Model loaded");
 }
+
+onMounted(() => {
+  if (getLm().providerType != 'ollama') {
+    selectCtx.value = true
+  }
+})
 </script>

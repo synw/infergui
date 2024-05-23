@@ -284,20 +284,6 @@ async function loadPrompt(name: string) {
   countPromptTokens();
 }
 
-/*async function loadTask(t: Record<string, any>) {
-  let ctx = t?.modelConf?.ctx ?? lmState.model.ctx;
-  //let gpu_layers = t?.modelConf.gpu_layers ?? lmState.model.gpu_layers;
-  if (t?.modelConf?.name != lmState.model.name) {
-    await selectModel(t?.modelConf?.name ?? "", ctx, 0, true);
-  }
-  template.value = new PromptTemplate(t.template);
-  countTemplateTokens();
-  const ip = t.inferParams ?? {};
-  Object.keys(ip).forEach((p) => {
-    inferParams[p] = ip[p]
-  });
-}*/
-
 async function loadBackends() {
   const _backends = await db.listBackends();
   if (_backends.length == 0) {
@@ -343,6 +329,9 @@ async function loadBackend(_lm: Lm, _b: LmBackend) {
       name: _lm.model.name,
       ctx: _lm.model.ctx,
     }
+    if (lm.providerType == "koboldcpp") {
+      model.name = model.name.replace("koboldcpp/", "")
+    }
     console.log("Loading model", model.name, "for", lm.providerType);
     mutateModel(model);
     lm.model = model;
@@ -353,7 +342,6 @@ async function loadBackend(_lm: Lm, _b: LmBackend) {
       };
     }
     //lmState.isModelMultimodal = true;
-
   }
   backends[_b.name].enabled = true;
   activeBackend.value = _b;

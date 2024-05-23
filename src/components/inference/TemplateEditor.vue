@@ -19,14 +19,15 @@
           <div v-if="template.system?.schema" class="flex flex-row">
             <div class="flex w-32 flex-row items-center justify-center text-sm">Schema:</div>
             <div class="w-full">
-              <AutoTextarea class="w-full" :data="template.system.schema" @update="template.system.schema = $event" />
+              <AutoTextarea class="w-full" :data="template.system.schema"
+                @update="template?.system ? template.system.schema = $event : () => null" />
             </div>
           </div>
           <div class="flex flex-row">
             <div class="flex w-32 flex-row items-center justify-center text-sm">Message:</div>
             <div class="w-full">
               <AutoTextarea class="w-full" :data="template.system.message ?? ''"
-                @update="template.system.message = $event" />
+                @update="template?.system ? template.system.message = $event : () => null" />
             </div>
           </div>
         </template>
@@ -109,9 +110,17 @@
     <div class="flex flex-row text-sm">
       <div class="flex flex-grow flex-row items-center justify-end">
         <div>
+          <button class="btn text-xs txt-light" :v-show="template.id != 'none'" @click=" toggleSaveTemplate($event)">
+            Save template
+          </button>
+          <OverlayPanel ref="saveTplCollapse">
+            <save-template-dialog class="p-3" @pick="toggleSaveTemplate($event)"></save-template-dialog>
+          </OverlayPanel -->
           <button v-if="tmode == 'edit'" class="btn text-xs txt-light" @click="toggleCloneTemplate($event)">
             Clone template</button>
-          <OverlayPanel ref="cloneTemplateCollapse">
+          <!-- button v-if="tmode == 'edit'" class="btn text-xs txt-light" @click="toggleCloneTemplate($event)">
+            Clone template</button -->
+          <!-- OverlayPanel ref="cloneTemplateCollapse">
             <div class="text-lg">Clone to:</div>
             <div class="mt-2 flex flex-col space-y-1">
               <template v-for="_template in Object.values(_genericTemplates).slice(1)">
@@ -120,7 +129,7 @@
                 </div>
               </template>
             </div>
-          </OverlayPanel>
+          </OverlayPanel -->
         </div>
         <div>
           <button v-if="tmode == 'edit' && !editShot" class="btn text-xs txt-light" @click="editShot = true">
@@ -145,6 +154,7 @@
 <script setup lang="ts">
 import { computed, reactive, ref, watchEffect } from 'vue';
 import OverlayPanel from 'primevue/overlaypanel';
+import SaveTemplateDialog from './SaveTemplateDialog.vue';
 import Textarea from 'primevue/textarea';
 import InputNumber from 'primevue/inputnumber';
 import { TurnBlock, templates as _genericTemplates } from 'modprompt';
@@ -153,7 +163,7 @@ import { template } from '@/state';
 import ShotEditor from './ShotEditor.vue';
 import { nextTick } from 'process';
 
-
+const saveTplCollapse = ref();
 const renderedTemplate = ref("{prompt}");
 const cloneTemplateCollapse = ref();
 const tmode = ref<"edit" | "render">("edit");
@@ -169,6 +179,10 @@ const currentEditedShot = reactive({
 
 function toggleCloneTemplate(evt) {
   cloneTemplateCollapse.value.toggle(evt);
+}
+
+function toggleSaveTemplate(evt) {
+  saveTplCollapse.value.toggle(evt);
 }
 
 function _resetShotsState() {

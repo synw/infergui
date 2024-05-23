@@ -35,7 +35,6 @@
           <GrammarEditor class="mx-5 mt-3"></GrammarEditor>
         </div>
       </div>
-
       <div v-if="history.length > 0" class="flex flex-col space-y-3 mt-5 mx-5">
         <template v-for="(turn, i) in history">
           <div v-if="turn.images">
@@ -145,12 +144,7 @@
           <OverlayPanel ref="saveTaskCollapse">
             <save-task-dialog class="p-3" @save="toggleSaveTask($event)"></save-task-dialog>
           </OverlayPanel -->
-            <button class="btn px-2" v-show="template.id != 'none'" @click="toggleSaveTemplate($event)">
-              <i-bi:menu-up class="text-xl"></i-bi:menu-up>
-            </button>
-            <OverlayPanel ref="saveTemplateCollapse" @hide="console.log($event)">
-              <save-template-dialog class="p-3" @pick="toggleSaveTemplate($event)"></save-template-dialog>
-            </OverlayPanel>
+
             <button class="btn px-2" v-show="prompt.length > 0" @click="toggleSavePrompt($event)">
               <i-tabler:prompt class="text-3xl"></i-tabler:prompt>
             </button>
@@ -178,9 +172,7 @@ import { watchDebounced } from '@vueuse/core';
 import OverlayPanel from 'primevue/overlaypanel';
 import { RenderMd } from '@docdundee/vue';
 import SavePromptDialog from './SavePromptDialog.vue';
-import SaveTemplateDialog from './SaveTemplateDialog.vue';
 import ImageLoader from './ImageLoader.vue';
-import { confirmSuccess } from '@/services/notify';
 import { useGrammar } from '@/state/grammar';
 //import SaveTaskDialog from './SaveTaskDialog.vue';
 import {
@@ -193,19 +185,16 @@ import {
   stream,
   lmState,
   history,
-  cutHistoryAfterTurn,
 } from '@/state';
 import { hljs } from "@/conf";
 import TemplateEditor from './TemplateEditor.vue';
 import { formatMode } from '@/state/settings';
 import AutoTextarea from '@/widgets/AutoTextarea.vue';
 import GrammarEditor from './GrammarEditor.vue';
-import { HistoryTurn } from 'modprompt';
 import RestartFromTurn from '@/widgets/RestartFromTurn.vue';
 
 const savePromptCollapse = ref();
-const saveTemplateCollapse = ref();
-const saveTaskCollapse = ref();
+//const saveTaskCollapse = ref();
 const collapseTemplate = ref(false);
 const confirmRestart = ref(0);
 
@@ -222,24 +211,9 @@ function toggleSavePrompt(evt) {
   savePromptCollapse.value.toggle(evt);
 }
 
-function toggleSaveTemplate(evt) {
-  saveTemplateCollapse.value.toggle(evt);
-}
-
 /*function toggleSaveTask(evt) {
   saveTaskCollapse.value.toggle(evt);
 }*/
-
-function confirmRestartFromTurn(n: number) {
-  console.log("CONFIRM RESTART", n);
-  confirmRestart.value = n;
-}
-
-async function restartFromTurn(n: number, turn: HistoryTurn) {
-  cutHistoryAfterTurn(n);
-  prompt.value = turn.user;
-  confirmRestart.value = 0;
-}
 
 const grammarStream = computed(() => {
   if (lmState.isStreaming) {

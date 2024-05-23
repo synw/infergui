@@ -1,12 +1,13 @@
 <template>
   <div class="flex flex-col overflow-y-auto">
-    <div v-for="prompt in prompts" class="flex flex-row group">
+    <div v-for="prompt in prompts" class="flex flex-row items-center group">
       <div class="justify-start w-2/3 ml-2 truncate">
         <button class="btn py-0" @click="loadPrompt(prompt)">
           {{ prompt }}
         </button>
       </div>
-      <div class="flex flex-row justify-end w-1/3 mr-1 transition-opacity duration-200 opacity-0 group-hover:opacity-100">
+      <div
+        class="flex flex-row justify-end w-1/3 mr-1 transition-opacity duration-200 opacity-0 group-hover:opacity-100">
         <confirm-delete @delete="db.delPrompt(prompt); loadPrompts()"></confirm-delete>
       </div>
     </div>

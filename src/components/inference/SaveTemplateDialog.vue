@@ -12,11 +12,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, toRaw, unref } from 'vue';
+import { ref, toRaw } from 'vue';
 import { deepUnref } from '@ow3/deep-unref-vue';
 import InputText from 'primevue/inputtext';
-import { db, loadTemplates } from '@/state';
-import { template } from "@/state";
+import { db, loadTemplates, template } from '@/state';
 
 const emit = defineEmits(["pick"]);
 const tname = ref("");
