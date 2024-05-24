@@ -34,6 +34,16 @@ infergui
 
 Run a local backend and open `localhost:5183` in a browser
 
+### With Python
+
+```
+git clone https://github.com/synw/infergui
+cd infergui/dist
+python3 -m http.server
+```
+
+Run a local backend and open `localhost:8000` in a browser
+
 ## Screenshots
 
 ### Templates editor
@@ -51,20 +61,6 @@ Run a local backend and open `localhost:5183` in a browser
 ## Model picker (Ollama only)
 
 ![Screenshot](/docs/model_picker.png)
-
-## Model and template config
-
-![Screenshot](/docs/pick_model.png)
-
-### With Python
-
-```
-git clone https://github.com/synw/infergui
-cd infergui/dist
-python3 -m http.server
-```
-
-Run a local backend and open `localhost:8000` in a browser
 
 ## Dev mode
 
