@@ -1,8 +1,9 @@
 <template>
   <Textarea v-if="auto" v-model="_data" :rows="rows" :auto-resize="auto"
-    class="overflow-y-visible focus:ring-0 focus:bord-lighter" @focusout="ch()" />
-  <Textarea v-else v-model="_data" :rows="rows" class="overflow-y-visible focus:ring-0 focus:bord-lighter"
+    class="w-full overflow-y-visible focus:ring-0 focus:bord-lighter" @focusout="ch()" />
+  <Textarea v-else v-model="_data" :rows="rows" class="w-full overflow-y-visible focus:ring-0 focus:bord-lighter"
     @focusout="ch()" />
+  <span></span>
 </template>
 
 <script setup lang="ts">
@@ -17,7 +18,7 @@ const props = defineProps({
   },
   maxlines: {
     type: Number,
-    default: 6,
+    default: 8,
   }
 });
 
@@ -25,10 +26,15 @@ const emit = defineEmits(["update"]);
 
 const _data = ref(props.data);
 
+function ch() {
+  emit("update", _data.value);
+}
+
 const auto = computed(() => {
   const nlines = _data.value.split("\n").length;
   return (nlines <= props.maxlines) ? true : false
 });
+
 const rows = computed(() => {
   const nlines = _data.value.split("\n").length;
   if (nlines > props.maxlines) {
@@ -36,10 +42,6 @@ const rows = computed(() => {
   }
   return 1
 });
-
-function ch() {
-  emit("update", _data.value);
-}
 
 watchDebounced(
   _data,

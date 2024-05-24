@@ -115,12 +115,10 @@
           </button>
           <OverlayPanel ref="saveTplCollapse">
             <save-template-dialog class="p-3" @pick="toggleSaveTemplate($event)"></save-template-dialog>
-          </OverlayPanel -->
+          </OverlayPanel>
           <button v-if="tmode == 'edit'" class="btn text-xs txt-light" @click="toggleCloneTemplate($event)">
             Clone template</button>
-          <!-- button v-if="tmode == 'edit'" class="btn text-xs txt-light" @click="toggleCloneTemplate($event)">
-            Clone template</button -->
-          <!-- OverlayPanel ref="cloneTemplateCollapse">
+          <OverlayPanel ref="cloneTemplateCollapse">
             <div class="text-lg">Clone to:</div>
             <div class="mt-2 flex flex-col space-y-1">
               <template v-for="_template in Object.values(_genericTemplates).slice(1)">
@@ -129,7 +127,7 @@
                 </div>
               </template>
             </div>
-          </OverlayPanel -->
+          </OverlayPanel>
         </div>
         <div>
           <button v-if="tmode == 'edit' && !editShot" class="btn text-xs txt-light" @click="editShot = true">

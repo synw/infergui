@@ -14,8 +14,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import InputText from 'primevue/inputtext';
-import { db, loadPrompts } from '@/state';
-import { prompt } from "@/state";
+import { db, loadPrompts, prompt, prompts } from '@/state';
 
 const emit = defineEmits(["pick"]);
 const promptname = ref("");

@@ -39,7 +39,7 @@ const lmState = reactive<ApiState>({
   isModelLoaded: false,
   isLoadingModel: false,
   isModelMultimodal: false,
-  model: { name: "", ctx: 2048 } as ModelConf,
+  model: { name: "", ctx: 4096 } as ModelConf,
 });
 const db = useDb();
 const tfm = useTemplateForModel();
