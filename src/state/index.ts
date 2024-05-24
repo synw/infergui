@@ -6,7 +6,7 @@ import { PromptTemplate, HistoryTurn } from "modprompt";
 //import { PromptTemplate } from "../../../modprompt/src/cls";
 //import { HistoryTurn } from "../../../modprompt/src/interfaces";
 import { defaultInferenceParams } from '@/const/params';
-import { ApiState, LmBackend } from '@/interfaces';
+import { ApiState, LmBackend, LmTokenizerType } from '@/interfaces';
 import { Lm } from "@locallm/api";
 import { InferenceParams, ModelConf } from '@locallm/types';
 //import { Lm } from "../packages/locallm/api";
@@ -19,9 +19,10 @@ import { loadPreset } from "./presets";
 import { defaultBackends } from "@/const/backends";
 import { grammar, useGrammar } from "./grammar";
 import { useTemplateForModel } from "@agent-smith/tfm";
-import { tokenizerForModel } from "../services/tokenizer";
-import llamaTokenizer from "llama-tokenizer-js";
+import { guessTokenizerForModel } from "../services/tokenizer";
+import llamaTokenizer, { LlamaTokenizer } from "llama-tokenizer-js";
 import { updateModels } from "./models";
+import { tokenizers } from "@/const/tokenizers";
 
 let timer = ref<ReturnType<typeof setInterval>>();
 const user = new User();
@@ -67,6 +68,7 @@ const templateTokensCount = ref(0);
 const freeContext = ref(0);
 const totalContext = ref(0);
 let tokenizer = llamaTokenizer;
+const tokenizerType = ref<LmTokenizerType>("Llama 2");
 
 function getLm(): Lm {
   return lm
@@ -250,7 +252,7 @@ async function cloneToGenericTemplate(name: string) {
 }
 
 async function saveTemplate(modelName: string, templateName: string) {
-  await tfm.set(modelName, templateName);
+  await tfm.set(templateName, modelName);
 }
 
 async function loadCustomTemplate(name: string) {
@@ -263,7 +265,7 @@ async function loadCustomTemplate(name: string) {
   }
   setStop();
   countTemplateTokens();
-  await saveTemplate(lm.model.name, name);
+  //await saveTemplate(lm.model.name, name);
 }
 
 async function loadGenericTemplate(name: string) {
@@ -395,7 +397,8 @@ async function loadTemplate(model: ModelConf) {
     templ = await tfm.get(model.name);
   } catch (e) { }
   if (templ == "none") {
-    templ = tfm.guess(model.name);
+    templ = tfm.guess(model.name.toLowerCase());
+    //console.log("GUESSED", templ);
     if (templ != "none") {
       template.value = new PromptTemplate(templ);
       console.log("Guessed template", templ, "for", model.name);
@@ -405,13 +408,34 @@ async function loadTemplate(model: ModelConf) {
     console.log("Found template", templ, "for", model.name)
     template.value = new PromptTemplate(templ);
   }
+  if (template.value.stop) {
+    inferParams.stop = template.value.stop
+  } else {
+    inferParams.stop = []
+  }
+  setStop();
   //console.log("Template:", templ)
+  /*if ("stop" in template.value) {
+    inferParams.stop = template.value.stop
+  }*/
+}
+
+function setTokenizerFromModel(model: ModelConf) {
+  const { name, tok } = guessTokenizerForModel(model.name);
+  tokenizer = tok;
+  tokenizerType.value = name;
+}
+
+function setTokenizer(name: LmTokenizerType) {
+  const tok = tokenizers[name];
+  tokenizer = tok;
+  tokenizerType.value = name;
 }
 
 async function mutateModel(model: ModelConf) {
   lmState.isLoadingModel = true;
   lmState.model = model;
-  tokenizer = tokenizerForModel(model.name);
+  setTokenizerFromModel(model);
   await loadTemplate(model);
   lmState.isModelLoaded = true;
   lmState.isLoadingModel = false;
@@ -479,6 +503,8 @@ export {
   totalContext,
   activeBackend,
   tfm,
+  // tokenizer,
+  tokenizerType,
   setAutomaxContext,
   setFreeContext,
   loadCustomTemplate,
@@ -507,4 +533,5 @@ export {
   setImageData,
   probeAndLoadLocalBackends,
   cutHistoryAfterTurn,
+  setTokenizer,
 }

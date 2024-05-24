@@ -221,8 +221,8 @@ const grammarStream = computed(() => {
 onMounted(() => {
   countPromptTokens();
   countTemplateTokens();
-  watchDebounced(template, countTemplateTokens, { debounce: 1000, maxWait: 5000 });
-  watchDebounced(prompt, countPromptTokens, { debounce: 1000, maxWait: 5000 });
+  watchDebounced(template, countTemplateTokens, { debounce: 800, maxWait: 5000 });
+  watchDebounced(prompt, countPromptTokens, { debounce: 800, maxWait: 5000 });
 })
 </script>
 

@@ -1,11 +1,11 @@
-import { LmTokenizer } from '@/interfaces';
+import { LmTokenizer, LmTokenizerType } from '@/interfaces';
 import llamaTokenizer from 'llama-tokenizer-js';
 import llama3Tokenizer from 'llama3-tokenizer-js';
 import mistralTokenizer from 'mistral-tokenizer-js';
 
-function tokenizerForModel(modelName: string): LmTokenizer {
+function guessTokenizerForModel(modelName: string): { name: LmTokenizerType, tok: LmTokenizer } {
     let tok: LmTokenizer = llamaTokenizer;
-    let tokName = "Llama 2";
+    let tokName: LmTokenizerType = "Llama 2";
     const name = modelName.toLowerCase();
     if (name.includes("llama3") || name.includes("llama-3")) {
         tok = llama3Tokenizer;
@@ -15,7 +15,7 @@ function tokenizerForModel(modelName: string): LmTokenizer {
         tokName = "Mistral"
     }
     console.log("Setting tokenizer to", tokName);
-    return tok
+    return { name: tokName, tok: tok }
 }
 
-export { tokenizerForModel }
+export { guessTokenizerForModel }

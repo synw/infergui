@@ -53,7 +53,7 @@ async function save() {
   if (data.stop) {
     data.stop = toRaw(data.stop)
   }
-  console.log("SAVING DATA", data);
+  //console.log("SAVING DATA", data);
   await db.setTemplate(template.value.id, data);
   await loadTemplates();
   emit("pick")
@@ -62,7 +62,7 @@ async function save() {
 watchDebounced(
   tname,
   () => {
-    console.log("T", tname.value);
+    //console.log("T", tname.value);
     const tl = new Array<string>();
     const tn = tname.value.toLowerCase();
     for (const t of templates) {

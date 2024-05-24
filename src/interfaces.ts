@@ -39,6 +39,7 @@ type FormatMode = "Html" | "Text" | "Markdown" | "Json";
 type TabType = "prompts" | "templates" | "grammars";
 
 type LmTokenizer = LlamaTokenizer | Llama3Tokenizer | typeof mistralTokenizer;
+type LmTokenizerType = "Llama 2" | "Llama 3" | "Mistral";
 
 export {
   FormatMode,
@@ -47,4 +48,5 @@ export {
   LmBackend,
   GbnfGrammar,
   LmTokenizer,
+  LmTokenizerType,
 }

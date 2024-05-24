@@ -45,6 +45,7 @@ declare module 'vue' {
     ModelsPicker: typeof import('./src/components/ModelsPicker.vue')['default']
     ModelState: typeof import('./src/components/modelconf/ModelState.vue')['default']
     ParamsEditor: typeof import('./src/components/ParamsEditor.vue')['default']
+    PickTokenizer: typeof import('./src/components/inference/PickTokenizer.vue')['default']
     PresetsPicker: typeof import('./src/components/PresetsPicker.vue')['default']
     PromptsBar: typeof import('./src/components/PromptsBar.vue')['default']
     PromptTemplate: typeof import('./src/components/inference/PromptTemplate.vue')['default']

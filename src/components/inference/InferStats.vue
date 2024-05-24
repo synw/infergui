@@ -9,11 +9,17 @@
       <div class="primary" :style="`width:${currentPercent}%`"></div>
       <div class="lighter" :style="`width:${remainingPercent}%`"></div>
     </div>
-    <OverlayPanel ref="op">
-      <div class="flex flex-col">
+    <OverlayPanel ref="op" @hide="pickTokenizer = false">
+      <div class="flex flex-col" v-if="!pickTokenizer">
         <div><span class="txt-light">Template:</span> {{ templateTokensCount }}</div>
         <div><span class="txt-light">Prompt:</span> {{ promptTokensCount }}</div>
         <div><span class="txt-light">Free context:</span> {{ freeContext }}</div>
+        <hr class="my-2" />
+        <div class="txt-semilight text-sm mt-2">Tokenizer: {{ tokenizerType }}</div>
+        <button class="btn txt-semilight text-sm underline py-1 pl-0" @click="pickTokenizer = true">Change</button>
+      </div>
+      <div v-else>
+        <pick-tokenizer @pick="pickTokenizer = false"></pick-tokenizer>
       </div>
     </OverlayPanel>
   </div>
@@ -22,12 +28,14 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import OverlayPanel from 'primevue/overlaypanel';
-import { freeContext, promptTokensCount, templateTokensCount, inferResults, totalContext } from '@/state';
+import PickTokenizer from './PickTokenizer.vue';
+import { freeContext, promptTokensCount, templateTokensCount, inferResults, totalContext, tokenizerType } from '@/state';
 
 const op = ref();
+const pickTokenizer = ref(false);
 
 const toggle = (event) => {
-    op.value.toggle(event);
+  op.value.toggle(event);
 }
 
 const promptPercent = computed(() => {
