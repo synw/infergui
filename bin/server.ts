@@ -7,7 +7,6 @@ import bodyParser from "koa-bodyparser";
 import cors from '@koa/cors';
 import { useLmRouter } from './router.js';
 import { dirpath } from './state.js';
-import { killLm } from './cmds/execute.js';
 
 let env = "production";
 
@@ -27,11 +26,9 @@ const router = useLmRouter();
 app.use(router.routes()).use(router.allowedMethods());
 
 process.on('SIGINT', async () => {
-  await killLm();
   process.exit(1)
 });
 process.on('SIGTERM', async () => {
-  await killLm();
   process.exit(1)
 });
 

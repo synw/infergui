@@ -7,14 +7,12 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
-    AgentConf: typeof import('./src/components/modelconf/AgentConf.vue')['default']
     BackendsPopin: typeof import('./src/components/BackendsPopin.vue')['default']
     FormatBar: typeof import('./src/components/inference/FormatBar.vue')['default']
     GrammarEditor: typeof import('./src/components/inference/GrammarEditor.vue')['default']
     GrammarsBar: typeof import('./src/components/GrammarsBar.vue')['default']
     'IAkarIcons:cross': typeof import('~icons/akar-icons/cross')['default']
     'IAntDesign:fileMarkdownOutlined': typeof import('~icons/ant-design/file-markdown-outlined')['default']
-    'IBi:menuUp': typeof import('~icons/bi/menu-up')['default']
     'ICarbon:network4': typeof import('~icons/carbon/network4')['default']
     'ICil:save': typeof import('~icons/cil/save')['default']
     'ICil:text': typeof import('~icons/cil/text')['default']
@@ -39,11 +37,9 @@ declare module 'vue' {
     InferParams: typeof import('./src/components/inference/InferParams.vue')['default']
     InferResult: typeof import('./src/components/inference/InferResult.vue')['default']
     InferStats: typeof import('./src/components/inference/InferStats.vue')['default']
-    'ITabler:prompt': typeof import('~icons/tabler/prompt')['default']
     'IUil:server': typeof import('~icons/uil/server')['default']
     ModelsList: typeof import('./src/components/ModelsList.vue')['default']
     ModelsPicker: typeof import('./src/components/ModelsPicker.vue')['default']
-    ModelState: typeof import('./src/components/modelconf/ModelState.vue')['default']
     ParamsEditor: typeof import('./src/components/ParamsEditor.vue')['default']
     PickTokenizer: typeof import('./src/components/inference/PickTokenizer.vue')['default']
     PresetsPicker: typeof import('./src/components/PresetsPicker.vue')['default']
